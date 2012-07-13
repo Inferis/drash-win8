@@ -333,8 +333,10 @@
 }
 
 - (void)startOperation {
-    if (_operations++)
-        return;
+    @synchronized(self) {
+        if (_operations++)
+            return;
+    }
 
     [UIView animateWithDuration:0.3 animations:^{
         [self.smallSpinner startAnimating];
@@ -343,10 +345,12 @@
 }
 
 - (void)endOperation {
-    if (--_operations > 0)
-        return;
-    
-    _operations = 0;
+    @synchronized(self) {
+        if (--_operations > 0)
+            return;
+        
+        _operations = 0;
+    }
 
     [UIView animateWithDuration:0.3 animations:^{
         self.smallSpinner.alpha = 0;
