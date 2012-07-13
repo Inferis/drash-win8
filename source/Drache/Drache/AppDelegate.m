@@ -7,18 +7,29 @@
 //
 
 #import "AppDelegate.h"
-
 #import "ViewController.h"
 
 @implementation AppDelegate
 
+
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    _network = [Reachability reachabilityForInternetConnection];
+    [_network startNotifier];
+
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+
     // Override point for customization after application launch.
     self.viewController = [[ViewController alloc] initWithNibName:@"ViewController" bundle:nil];
     self.window.rootViewController = self.viewController;
     [self.window makeKeyAndVisible];
+    
+    
+    for (int i=0; i<100; i++) {
+        double i6 = (i-14)/40.0*16.0;
+        NSLog(@"%d => %d", i, (int)round(1/(1 + pow(M_E, -i6))*100));
+    }
+    
     return YES;
 }
 
@@ -26,6 +37,7 @@
 {
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
     // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
+    [_network stopNotifier];
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application
@@ -42,6 +54,7 @@
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+    [_network startNotifier];
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application
