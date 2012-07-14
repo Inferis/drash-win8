@@ -68,10 +68,13 @@
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 						<nil key="IBUIHighlightedColor"/>
 						<int key="IBUIBaselineAdjustment">0</int>
-						<string key="IBUIText">Drache</string>
-						<object class="NSColor" key="IBUITextColor" id="349114034">
+						<string key="IBUIText">Drash</string>
+						<object class="NSColor" key="IBUITextColor">
 							<int key="NSColorSpace">3</int>
-							<bytes key="NSWhite">MC4zMzMzMzMzMzMzAA</bytes>
+							<bytes key="NSWhite">MC43NQA</bytes>
+							<object class="NSColorSpace" key="NSCustomColorSpace" id="43363439">
+								<int key="NSID">2</int>
+							</object>
 						</object>
 						<object class="IBUIFontDescription" key="IBUIFontDescription">
 							<string key="name">HelveticaNeue-UltraLight</string>
@@ -103,7 +106,10 @@
 						<nil key="IBUIHighlightedColor"/>
 						<int key="IBUIBaselineAdjustment">0</int>
 						<string key="IBUIText">Acknowledgments</string>
-						<reference key="IBUITextColor" ref="349114034"/>
+						<object class="NSColor" key="IBUITextColor" id="349114034">
+							<int key="NSColorSpace">3</int>
+							<bytes key="NSWhite">MC4zMzMzMzMzMzMzAA</bytes>
+						</object>
 						<object class="IBUIFontDescription" key="IBUIFontDescription" id="406050268">
 							<string key="name">HelveticaNeue-Light</string>
 							<string key="family">Helvetica Neue</string>
@@ -146,6 +152,7 @@
 						<string key="NSFrame">{{273, 413}, {36, 36}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -199,6 +206,10 @@
 						</object>
 						<int key="IBUIDataDetectorTypes">2</int>
 						<string key="IBUIText"/>
+						<object class="NSColor" key="IBUITextColor">
+							<int key="NSColorSpace">3</int>
+							<bytes key="NSWhite">MAA</bytes>
+						</object>
 						<object class="IBUIFontDescription" key="IBUIFontDescription" id="132545367">
 							<string key="name">HelveticaNeue-Light</string>
 							<string key="family">Helvetica Neue</string>
@@ -233,6 +244,7 @@ V29ya3Mgb25seSBpbiBCZWxnaXVtIGFuZCB0aGUgTmV0aGVybGFuZHMuIFVwZGF0ZXMgYXV0b21hdGlj
 YWxseSBldmVyeSA1IG1pbnV0ZXMgb3Igd2hlbiB5b3UgbW92ZSBmYXIgZW5vdWdoIGZyb20geW91ciBv
 cmlnaW5hbCBsb2NhdGlvbi4KClByZXNzIGFueXdoZXJlIG9uIHRoZSBzY3JlZW4gZm9yIGEgZmV3IHNl
 Y29uZHMgdG8gdXBkYXRlIG1hbnVhbGx5Lgo</string>
+						<reference key="IBUITextColor" ref="349114034"/>
 						<reference key="IBUIFontDescription" ref="132545367"/>
 						<reference key="IBUIFont" ref="724021373"/>
 					</object>
@@ -244,9 +256,7 @@ Y29uZHMgdG8gdXBkYXRlIG1hbnVhbGx5Lgo</string>
 				<object class="NSColor" key="IBUIBackgroundColor">
 					<int key="NSColorSpace">3</int>
 					<bytes key="NSWhite">MQA</bytes>
-					<object class="NSColorSpace" key="NSCustomColorSpace">
-						<int key="NSID">2</int>
-					</object>
+					<reference key="NSCustomColorSpace" ref="43363439"/>
 				</object>
 				<object class="IBUISimulatedStatusBarMetrics" key="IBUISimulatedStatusBarMetrics"/>
 				<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -376,17 +386,6 @@ Y29uZHMgdG8gdXBkYXRlIG1hbnVhbGx5Lgo</string>
 				<object class="IBPartialClassDescription">
 					<string key="className">InfoViewController</string>
 					<string key="superclassName">ViewController</string>
-					<object class="NSMutableDictionary" key="actions">
-						<string key="NS.key.0">closeTapped:</string>
-						<string key="NS.object.0">id</string>
-					</object>
-					<object class="NSMutableDictionary" key="actionInfosByName">
-						<string key="NS.key.0">closeTapped:</string>
-						<object class="IBActionInfo" key="NS.object.0">
-							<string key="name">closeTapped:</string>
-							<string key="candidateClassName">id</string>
-						</object>
-					</object>
 					<object class="NSMutableDictionary" key="outlets">
 						<string key="NS.key.0">acknowledgmentsTextView</string>
 						<string key="NS.object.0">UITextView</string>
