@@ -29,12 +29,6 @@
     self.window.rootViewController = self.viewController;
     [self.window makeKeyAndVisible];
     
-    
-    for (int i=0; i<100; i++) {
-        double i6 = (i-14)/40.0*16.0;
-        NSLog(@"%d => %d", i, (int)round(1/(1 + pow(M_E, -i6))*100));
-    }
-    
     return YES;
 }
 
