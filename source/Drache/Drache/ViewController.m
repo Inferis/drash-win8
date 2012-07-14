@@ -135,11 +135,12 @@
 - (void)updateLocation:(CLLocation*)location {
     _location = location;
     [self updateState];
-
+    
     if (!_location) {
         _locationName = nil;
     }
     else {
+        [self fetchRain];
         [_locationTimer invalidate];
         _locationTimer = [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(lookupLocation) userInfo:nil repeats:NO];
     }
