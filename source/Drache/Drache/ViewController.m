@@ -93,8 +93,8 @@
             splash.transform = CGAffineTransformMakeScale(1.5, 1.5);
             splash.alpha = 0;
         } completion:^(BOOL finished) {
-            [self fetchRain];
             [splash removeFromSuperview];
+            [self fetchRain];
         }];
     }
     else if (!_infoPresenting)
