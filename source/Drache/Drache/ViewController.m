@@ -138,6 +138,8 @@
     
     if (!_location) {
         _locationName = nil;
+        [_locationTimer invalidate];
+        _locationTimer = nil;
     }
     else {
         [self fetchRain];
@@ -173,6 +175,7 @@
         }
         
         _locationName = location;
+        _locationTimer = nil;
         [self updateState];
     }];
 }
@@ -252,23 +255,36 @@
 
 - (void)visualizeErrorWithImage:(UIImage*)errorImage {
     if (self.dataView.alpha != 0) {
+        self.dataView.transform = CGAffineTransformIdentity;
         [UIView animateWithDuration:0.30 animations:^{
             self.dataView.alpha = 0;
+            self.dataView.transform = CGAffineTransformMakeScale(0.9, 0.9);
         } completion:^(BOOL finished) {
+            self.dataView.transform = CGAffineTransformIdentity;
             [self visualizeErrorWithImage:errorImage];
+        }];
+    }
+    else if (self.errorImageView.alpha == 0) {
+        self.errorImageView.transform = CGAffineTransformMakeScale(0.9, 0.9);
+        self.errorImageView.image = errorImage;
+        [UIView animateWithDuration:0.15 animations:^{
+            self.errorImageView.alpha = 1;
+            self.errorImageView.transform = CGAffineTransformIdentity;
         }];
     }
     else if (![self.errorImageView.image isEqual:errorImage]) {
         [UIView animateWithDuration:0.15 animations:^{
+            self.errorImageView.transform = CGAffineTransformMakeScale(0.9, 0.9);
             self.errorImageView.alpha = 0;
         } completion:^(BOOL finished) {
             self.errorImageView.image = errorImage;
             [UIView animateWithDuration:0.15 animations:^{
                 self.errorImageView.alpha = 1;
+                self.errorImageView.transform = CGAffineTransformIdentity;
             }];
         }];
     }
-}
+    }
 
 - (void)visualizeLocation:(NSString*)location {
     if ([self.locationLabel.text isEqualToString:location])
@@ -345,7 +361,7 @@
     [_timer invalidate];
     _timer = nil;
     
-    if (_fetchingRain)
+    if (_error || _fetchingRain)
         return;
     
     _fetchingRain = YES;
