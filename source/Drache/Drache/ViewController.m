@@ -135,11 +135,12 @@
 - (void)updateLocation:(CLLocation*)location {
     _location = location;
     [self updateState];
-
+    
     if (!_location) {
         _locationName = nil;
     }
     else {
+        [self fetchRain];
         [_locationTimer invalidate];
         _locationTimer = [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(lookupLocation) userInfo:nil repeats:NO];
     }
@@ -211,6 +212,14 @@
 - (void)updateVisuals {
     if (_error) {
         [self visualizeErrorWithImage:[UIImage imageNamed:[_error stringByAppendingPathExtension:@"png"]]];
+        return;
+    }
+    else if (self.errorImageView.alpha > 0) {
+        [UIView animateWithDuration:0.3 animations:^{
+            self.errorImageView.alpha = 0;
+        } completion:^(BOOL finished) {
+            [self updateVisuals];
+        }];
         return;
     }
     
