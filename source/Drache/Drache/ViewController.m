@@ -17,8 +17,11 @@
 
 @property (nonatomic, strong) IBOutlet UILabel* locationLabel;
 @property (nonatomic, strong) IBOutlet UILabel* chanceLabel;
-@property (nonatomic, strong) IBOutlet UILabel* lastUpdateLabel;
+@property (nonatomic, strong) IBOutlet UIImageView* intensityImageView;
+@property (nonatomic, strong) IBOutlet UILabel* intensityLabel;
+@property (nonatomic, strong) IBOutlet UILabel* mmLabel;
 @property (nonatomic, strong) IBOutlet UIView* dataView;
+@property (nonatomic, strong) IBOutlet UIView* intensityView;
 @property (nonatomic, strong) IBOutlet UIActivityIndicatorView* smallSpinner;
 @property (nonatomic, strong) IBOutlet UIImageView* errorImageView;
 
@@ -31,13 +34,16 @@
     BOOL _fetchingRain;
     NSTimer* _timer;
     NSTimer* _locationTimer;
+    NSTimer* _geolocationTimer;
     int _operations;
     BOOL _infoPresenting;
-    int _chance;
+    int _chance, _intensity;
+    CGFloat _mm;
     BOOL _chanceUpdated;
     NSString* _locationName;
     NSString* _error;
     BOOL _reachable;
+    BOOL _firstFetch;
 }
 
 - (void)viewDidLoad
@@ -45,6 +51,7 @@
     [super viewDidLoad];
     
     _chance = -1;
+    _intensity = 0;
     _locationName = @"";
     _error = nil;
     _reachable = [Drache.network isReachable];
@@ -54,6 +61,14 @@
     self.smallSpinner.alpha = 0;
     self.chanceLabel.text = @"";
     self.locationLabel.text = @"";
+    
+    self.intensityView.alpha = 0;
+    self.intensityImageView.alpha = 1;
+    self.intensityLabel.alpha = 0;
+    self.mmLabel.alpha = 0;
+    self.intensityView.frame = (CGRect) { CGRectGetMaxX(self.chanceLabel.frame), CGRectGetMinY(self.chanceLabel.frame), self.intensityView.frame.size };
+    [self.dataView addSubview:self.intensityView];
+    [self.intensityView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(toggleIntensity:)]];
     
     UILongPressGestureRecognizer* longTapper = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(forcedRefresh:)];
     longTapper.minimumPressDuration = 1.5;
@@ -66,12 +81,11 @@
     [_locationManager startUpdatingLocation];
     _location = _locationManager.location;
     
+    _firstFetch = _location != nil;
     _geocoder = [CLGeocoder new];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reachabilityChanged:) name:kReachabilityChangedNotification object:nil];
     
-    [self updateState];
-
     UIImageView* splash = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"Default.png"]];
     splash.frame = (CGRect) { 0, -[UIApplication sharedApplication].statusBarFrame.size.height, splash.frame.size };
     splash.tag = 998811;
@@ -94,11 +108,14 @@
             splash.alpha = 0;
         } completion:^(BOOL finished) {
             [splash removeFromSuperview];
-            [self fetchRain];
+            if (_location) {
+                [self updateLocation:_location];
+                [self fetchRain];
+            }
+            else
+                [self updateState];
         }];
     }
-    else if (!_infoPresenting)
-        [self fetchRain];
 
     _infoPresenting = NO;
 }
@@ -121,6 +138,23 @@
     _infoPresenting = YES;
 }
 
+- (void)toggleIntensity:(UITapGestureRecognizer*)tapper {
+    if (tapper.state == UIGestureRecognizerStateEnded) {
+        [UIView animateWithDuration:0.15 animations:^{
+            self.intensityView.alpha = 0;
+            self.intensityView.transform = CGAffineTransformMakeScale(0.9, 0.9);
+        } completion:^(BOOL finished) {
+            self.intensityImageView.alpha = 1-self.intensityImageView.alpha;
+            self.intensityLabel.alpha = 1-self.intensityLabel.alpha;
+            self.mmLabel.alpha = self.intensityLabel.alpha;
+            [UIView animateWithDuration:0.15 animations:^{
+                self.intensityView.alpha = 1;
+                self.intensityView.transform = CGAffineTransformIdentity;
+            }];
+        }];
+    }
+}
+
 #pragma mark - network
 
 - (void)reachabilityChanged:(NSNotification*)notification {
@@ -133,23 +167,43 @@
 #pragma mark - Location Manager Delegate
 
 - (void)updateLocation:(CLLocation*)location {
-    _location = location;
+    if (!location) {
+        _location = nil;
+        _locationName = nil;
+        [_geolocationTimer invalidate];
+        _geolocationTimer = nil;
+        [_locationTimer invalidate];
+        _locationTimer = nil;
+        [self updateState];
+        return;
+    }
+    
+    [_locationTimer invalidate];
+    _locationTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(updateLocation2:) userInfo:location repeats:NO];
+}
+
+- (void)updateLocation2:(NSTimer*)timer {
+    _locationTimer = nil;
+    
+    _location = (CLLocation*)timer.userInfo;
     [self updateState];
     
     if (!_location) {
         _locationName = nil;
+        [_geolocationTimer invalidate];
+        _geolocationTimer = nil;
     }
     else {
         [self fetchRain];
-        [_locationTimer invalidate];
-        _locationTimer = [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(lookupLocation) userInfo:nil repeats:NO];
+        [_geolocationTimer invalidate];
+        _geolocationTimer = [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(lookupLocation) userInfo:nil repeats:NO];
     }
 }
     
 - (void)lookupLocation {
     if (_geocoder.geocoding) {
-        [_locationTimer invalidate];
-        _locationTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(lookupLocation) userInfo:nil repeats:NO];
+        [_geolocationTimer invalidate];
+        _geolocationTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(lookupLocation) userInfo:nil repeats:NO];
         return;
     }
     
@@ -173,15 +227,19 @@
         }
         
         _locationName = location;
+        _geolocationTimer = nil;
         [self updateState];
     }];
 }
 
 - (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
+    if (_firstFetch) return;
     [self updateLocation:manager.location];
 }
 
 - (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation {
+    if (_firstFetch) return;
+
     if (_location && [_location distanceFromLocation:newLocation] < 20)
         return;
     
@@ -235,7 +293,7 @@
 
     // first case: data view invisible, just set the data and show it
     if (self.dataView.alpha == 0) {
-        [self visualizeChance:_chance animated:NO];
+        [self visualizeChance:_chance intensity:_intensity mm:_mm animated:NO];
         self.locationLabel.alpha = 1;
         [self visualizeLocation:_locationName];
         [UIView animateWithDuration:0.30 animations:^{
@@ -245,30 +303,41 @@
     }
 
     [self visualizeLocation:_locationName];
-    [self visualizeChance:_chance animated:_chanceUpdated];
-    
-    _chanceUpdated = NO;
+    [self visualizeChance:_chance intensity:_intensity mm:_mm animated:_chanceUpdated];
 }
 
 - (void)visualizeErrorWithImage:(UIImage*)errorImage {
     if (self.dataView.alpha != 0) {
+        self.dataView.transform = CGAffineTransformIdentity;
         [UIView animateWithDuration:0.30 animations:^{
             self.dataView.alpha = 0;
+            self.dataView.transform = CGAffineTransformMakeScale(0.9, 0.9);
         } completion:^(BOOL finished) {
+            self.dataView.transform = CGAffineTransformIdentity;
             [self visualizeErrorWithImage:errorImage];
+        }];
+    }
+    else if (self.errorImageView.alpha == 0) {
+        self.errorImageView.transform = CGAffineTransformMakeScale(0.9, 0.9);
+        self.errorImageView.image = errorImage;
+        [UIView animateWithDuration:0.15 animations:^{
+            self.errorImageView.alpha = 1;
+            self.errorImageView.transform = CGAffineTransformIdentity;
         }];
     }
     else if (![self.errorImageView.image isEqual:errorImage]) {
         [UIView animateWithDuration:0.15 animations:^{
+            self.errorImageView.transform = CGAffineTransformMakeScale(0.9, 0.9);
             self.errorImageView.alpha = 0;
         } completion:^(BOOL finished) {
             self.errorImageView.image = errorImage;
             [UIView animateWithDuration:0.15 animations:^{
                 self.errorImageView.alpha = 1;
+                self.errorImageView.transform = CGAffineTransformIdentity;
             }];
         }];
     }
-}
+    }
 
 - (void)visualizeLocation:(NSString*)location {
     if ([self.locationLabel.text isEqualToString:location])
@@ -288,7 +357,7 @@
     }
     else {
         self.locationLabel.text = location;
-        self.chanceLabel.transform = CGAffineTransformMakeScale(0.9, 0.9);
+        self.locationLabel.transform = CGAffineTransformMakeScale(0.9, 0.9);
         [UIView animateWithDuration:0.30 animations:^{
             self.locationLabel.alpha = 1;
             self.locationLabel.transform = CGAffineTransformIdentity;
@@ -296,9 +365,14 @@
     }
 }
 
-- (void)visualizeChance:(int)chance animated:(BOOL)animated {
+- (void)visualizeChance:(int)chance intensity:(int)intensity mm:(CGFloat)mm animated:(BOOL)animated {
+    _chanceUpdated = NO;
+
     NSString* chanceText;
+    NSString* mmText = floorf(mm) == mm ? [NSString stringWithFormat:@"%d", (int)mm] : [NSString stringWithFormat:@"%01.2f", mm];
     UIColor* chanceColor;
+    UIImage* intensityImage = [UIImage imageNamed:[NSString stringWithFormat:@"intensity%d.png", intensity]];
+    
     if (chance < 0) {
         chanceText = @"?";
         chanceColor = [UIColor grayColor];
@@ -308,11 +382,16 @@
         chanceColor = [UIColor whiteColor];
     }
     
+    CGRect labelRect = (CGRect) { self.chanceLabel.frame.origin, self.dataView.frame.size.width - MIN(1, intensity)*self.intensityView.frame.size.width, self.chanceLabel.frame.size.height };
     if (!animated) {
         if (self.chanceLabel.alpha == 0 || ![self.chanceLabel.text isEqual:chanceText]) {
             self.chanceLabel.alpha = 1;
             self.chanceLabel.text = chanceText;
             self.chanceLabel.textColor = chanceColor;
+            self.chanceLabel.frame = labelRect;
+            self.intensityLabel.text = mmText;
+            self.intensityView.alpha = intensity > 0;
+            self.intensityImageView.image = intensityImage;
         }
         return;
     }
@@ -321,12 +400,19 @@
         [UIView animateWithDuration:0.15 animations:^{
             self.chanceLabel.alpha = 0;
             self.chanceLabel.transform = CGAffineTransformMakeScale(0.9, 0.9);
+            self.intensityView.alpha = 0;
+            self.intensityView.transform = CGAffineTransformMakeScale(0.9, 0.9);
         } completion:^(BOOL finished) {
             self.chanceLabel.textColor = chanceColor;
             self.chanceLabel.text = chanceText;
+            self.intensityLabel.text = mmText;
+            self.intensityImageView.image = intensityImage;
             [UIView animateWithDuration:0.15 animations:^{
                 self.chanceLabel.transform = CGAffineTransformIdentity;
                 self.chanceLabel.alpha = 1;
+                self.chanceLabel.frame = labelRect;
+                self.intensityView.transform = CGAffineTransformIdentity;
+                self.intensityView.alpha = intensity > 0;
             }];
         }];
     }
@@ -334,9 +420,15 @@
         self.chanceLabel.text = chanceText;
         self.chanceLabel.textColor = chanceColor;
         self.chanceLabel.transform = CGAffineTransformMakeScale(0.9, 0.9);
+        self.intensityLabel.text = mmText;
+        self.intensityImageView.image = intensityImage;
+        self.intensityView.transform = CGAffineTransformMakeScale(0.9, 0.9);
         [UIView animateWithDuration:0.3 animations:^{
             self.chanceLabel.transform = CGAffineTransformIdentity;
             self.chanceLabel.alpha = 1;
+            self.chanceLabel.frame = labelRect;
+            self.intensityView.transform = CGAffineTransformIdentity;
+            self.intensityView.alpha = intensity > 0;
         }];
     }
 }
@@ -345,9 +437,10 @@
     [_timer invalidate];
     _timer = nil;
     
-    if (_fetchingRain)
+    if (_error || _fetchingRain)
         return;
     
+    _firstFetch = NO;
     _fetchingRain = YES;
     [self startOperation];
     dispatch_async_bg(^{
@@ -356,10 +449,15 @@
         NSString* query = [NSString stringWithFormat:@"lat=%f&lon=%f",
                            _locationManager.location.coordinate.latitude,
                            _locationManager.location.coordinate.longitude];
-        [Tin get:@"http://gps.buienradar.nl/getrr.php" query:query success:^(TinResponse *response) {
+        Tin* tin = [Tin new];
+        [tin setTimeoutSeconds:20];
+        [tin get:@"http://gps.buienradar.nl/getrr.php" query:query success:^(TinResponse *response) {
             [self endOperation];
             
             int total = -1;
+            int totalIntensity = 0;
+            CGFloat totalmm;
+            int accounted = 0;
             if (!response.error) {
                 NSArray* lines = [response.bodyString componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\n"]];
                 if (!IsEmpty(lines)) {
@@ -369,6 +467,7 @@
                         if (line.length < 4) continue;
                         
                         int value = MAX(0, [[line substringToIndex:4] intValue]);
+                        CGFloat mm = (CGFloat)pow(10.0, ((double)value - 109.0)/32.0);
                         value = (int)(value * 100.0 / 255.0);
                         //value = arc4random() % 50;
                         
@@ -376,10 +475,14 @@
                         int logistic_intensity = (int)round(1/(1 + pow(M_E, -intensity))*100);
                         
                         CGFloat useWeight = logistic_intensity == 100 ? weight : weight/2.0;
+                        
+                        totalIntensity = totalIntensity + (int)(value*useWeight);
+                        accounted++;
                         total = MAX(0, total) + (int)(logistic_intensity*useWeight);
                         weight = weight - useWeight;
+                        totalmm += mm;
                         
-                       // NSLog(@"value = %d -> intensity %f -> %d * weight = %f -> %d", value, intensity, logistic_intensity, weight, (int)(logistic_intensity*useWeight));
+                        //NSLog(@"value = %d (%fmm) -> intensity %f -> %d * weight = %f -> %d", value, mm, intensity, logistic_intensity, weight, (int)(logistic_intensity*useWeight));
                         
                         if (weight <= 0)
                             break;
@@ -393,6 +496,9 @@
             _fetchingRain = NO;
             _timer = [NSTimer scheduledTimerWithTimeInterval:5*60 target:self selector:@selector(fetchRain) userInfo:nil repeats:NO];
             _chance = MIN(total, 99);
+            _intensity = totalIntensity > 0 ? MIN(1 + (int)((CGFloat)totalIntensity / (CGFloat)accounted / 25.0), 4) : 0; // 100 -> 4
+            //NSLog(@"t = %d -> %d", totalIntensity, _intensity);
+            _mm = totalmm;
             _chanceUpdated = YES;
             [self updateState];
         }];
