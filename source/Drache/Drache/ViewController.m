@@ -167,6 +167,17 @@
 #pragma mark - Location Manager Delegate
 
 - (void)updateLocation:(CLLocation*)location {
+    if (!location) {
+        _location = nil;
+        _locationName = nil;
+        [_geolocationTimer invalidate];
+        _geolocationTimer = nil;
+        [_locationTimer invalidate];
+        _locationTimer = nil;
+        [self updateState];
+        return;
+    }
+    
     [_locationTimer invalidate];
     _locationTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(updateLocation2:) userInfo:location repeats:NO];
 }
