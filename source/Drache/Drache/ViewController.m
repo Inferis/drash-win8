@@ -214,6 +214,14 @@
         [self visualizeErrorWithImage:[UIImage imageNamed:[_error stringByAppendingPathExtension:@"png"]]];
         return;
     }
+    else if (self.errorImageView.alpha > 0) {
+        [UIView animateWithDuration:0.3 animations:^{
+            self.errorImageView.alpha = 0;
+        } completion:^(BOOL finished) {
+            [self updateVisuals];
+        }];
+        return;
+    }
     
     if (IsEmpty(_locationName) && _chance < 0) {
         // nothing to see
