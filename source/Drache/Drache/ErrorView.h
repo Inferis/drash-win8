@@ -10,4 +10,6 @@
 
 @interface ErrorView : UIView
 
+- (void)setError:(NSString*)error animated:(BOOL)animated;
+
 @end

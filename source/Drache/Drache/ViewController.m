@@ -12,18 +12,24 @@
 #import "TinResponse.h"
 #import "Coby.h"
 #import "InfoViewController.h"
+#import "DataView.h"
+#import "ErrorView.h"
+#import "UIView+Pop.h"
 
 @interface ViewController () <CLLocationManagerDelegate>
 
-@property (nonatomic, strong) IBOutlet UILabel* locationLabel;
-@property (nonatomic, strong) IBOutlet UILabel* chanceLabel;
-@property (nonatomic, strong) IBOutlet UIImageView* intensityImageView;
-@property (nonatomic, strong) IBOutlet UILabel* intensityLabel;
-@property (nonatomic, strong) IBOutlet UILabel* mmLabel;
-@property (nonatomic, strong) IBOutlet UIView* dataView;
-@property (nonatomic, strong) IBOutlet UIView* intensityView;
+@property (nonatomic, strong) IBOutlet DataView* dataView;
+@property (nonatomic, strong) IBOutlet ErrorView* errorView;
 @property (nonatomic, strong) IBOutlet UIActivityIndicatorView* smallSpinner;
-@property (nonatomic, strong) IBOutlet UIImageView* errorImageView;
+
+//@property (nonatomic, strong) IBOutlet UILabel* locationLabel;
+//@property (nonatomic, strong) IBOutlet UILabel* chanceLabel;
+//@property (nonatomic, strong) IBOutlet UIImageView* intensityImageView;
+//@property (nonatomic, strong) IBOutlet UILabel* intensityLabel;
+//@property (nonatomic, strong) IBOutlet UILabel* mmLabel;
+//@property (nonatomic, strong) IBOutlet UIView* dataView;
+//@property (nonatomic, strong) IBOutlet UIView* intensityView;
+//@property (nonatomic, strong) IBOutlet UIImageView* errorImageView;
 
 @end
 
@@ -56,19 +62,22 @@
     _error = nil;
     _reachable = [Drache.network isReachable];
     
-    self.errorImageView.alpha = 0;
+    self.errorView.alpha = 0;
     self.dataView.alpha = 0;
     self.smallSpinner.alpha = 0;
-    self.chanceLabel.text = @"";
-    self.locationLabel.text = @"";
     
-    self.intensityView.alpha = 0;
-    self.intensityImageView.alpha = 1;
-    self.intensityLabel.alpha = 0;
-    self.mmLabel.alpha = 0;
-    self.intensityView.frame = (CGRect) { CGRectGetMaxX(self.chanceLabel.frame), CGRectGetMinY(self.chanceLabel.frame), self.intensityView.frame.size };
-    [self.dataView addSubview:self.intensityView];
-    [self.intensityView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(toggleIntensity:)]];
+//    self.errorImageView.alpha = 0;
+//    self.dataView.alpha = 0;
+//    self.chanceLabel.text = @"";
+//    self.locationLabel.text = @"";
+//    
+//    self.intensityView.alpha = 0;
+//    self.intensityImageView.alpha = 1;
+//    self.intensityLabel.alpha = 0;
+//    self.mmLabel.alpha = 0;
+//    self.intensityView.frame = (CGRect) { CGRectGetMaxX(self.chanceLabel.frame), CGRectGetMinY(self.chanceLabel.frame), self.intensityView.frame.size };
+//    [self.dataView addSubview:self.intensityView];
+//    [self.intensityView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(toggleIntensity:)]];
     
     UILongPressGestureRecognizer* longTapper = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(forcedRefresh:)];
     longTapper.minimumPressDuration = 1.5;
@@ -138,22 +147,22 @@
     _infoPresenting = YES;
 }
 
-- (void)toggleIntensity:(UITapGestureRecognizer*)tapper {
-    if (tapper.state == UIGestureRecognizerStateEnded) {
-        [UIView animateWithDuration:0.15 animations:^{
-            self.intensityView.alpha = 0;
-            self.intensityView.transform = CGAffineTransformMakeScale(0.9, 0.9);
-        } completion:^(BOOL finished) {
-            self.intensityImageView.alpha = 1-self.intensityImageView.alpha;
-            self.intensityLabel.alpha = 1-self.intensityLabel.alpha;
-            self.mmLabel.alpha = self.intensityLabel.alpha;
-            [UIView animateWithDuration:0.15 animations:^{
-                self.intensityView.alpha = 1;
-                self.intensityView.transform = CGAffineTransformIdentity;
-            }];
-        }];
-    }
-}
+//- (void)toggleIntensity:(UITapGestureRecognizer*)tapper {
+//    if (tapper.state == UIGestureRecognizerStateEnded) {
+//        [UIView animateWithDuration:0.15 animations:^{
+//            self.intensityView.alpha = 0;
+//            self.intensityView.transform = CGAffineTransformMakeScale(0.9, 0.9);
+//        } completion:^(BOOL finished) {
+//            self.intensityImageView.alpha = 1-self.intensityImageView.alpha;
+//            self.intensityLabel.alpha = 1-self.intensityLabel.alpha;
+//            self.mmLabel.alpha = self.intensityLabel.alpha;
+//            [UIView animateWithDuration:0.15 animations:^{
+//                self.intensityView.alpha = 1;
+//                self.intensityView.transform = CGAffineTransformIdentity;
+//            }];
+//        }];
+//    }
+//}
 
 #pragma mark - network
 
@@ -269,12 +278,12 @@
 
 - (void)updateVisuals {
     if (_error) {
-        [self visualizeErrorWithImage:[UIImage imageNamed:[_error stringByAppendingPathExtension:@"png"]]];
+        [self visualizeError:_error];
         return;
     }
-    else if (self.errorImageView.alpha > 0) {
+    else if (self.errorView.alpha > 0) {
         [UIView animateWithDuration:0.3 animations:^{
-            self.errorImageView.alpha = 0;
+            self.errorView.alpha = 0;
         } completion:^(BOOL finished) {
             [self updateVisuals];
         }];
@@ -283,154 +292,163 @@
     
     if (IsEmpty(_locationName) && _chance < 0) {
         // nothing to see
-        [UIView animateWithDuration:0.30 animations:^{
-            self.dataView.alpha = 0;
-        }];
+        [self.dataView popOutCompletion:nil];
         return;
     }
 
     // location and/or chance visible
 
     // first case: data view invisible, just set the data and show it
-    if (self.dataView.alpha == 0) {
-        [self visualizeChance:_chance intensity:_intensity mm:_mm animated:NO];
-        self.locationLabel.alpha = 1;
-        [self visualizeLocation:_locationName];
-        [UIView animateWithDuration:0.30 animations:^{
-            self.dataView.alpha = 1;
+    [self visualizeChance:_chance intensity:_intensity mm:_mm];
+    [self visualizeLocation:_locationName];
+}
+
+- (void)visualizeError:(NSString*)error {
+    if (self.dataView.alpha != 0) {
+        // data view displayed: hide it first
+        [self.dataView popOutCompletion:^{
+            [self visualizeError:error];
         }];
         return;
     }
 
-    [self visualizeLocation:_locationName];
-    [self visualizeChance:_chance intensity:_intensity mm:_mm animated:_chanceUpdated];
+    // data view hidden. Now: error view hidden? --> YES
+    // just fade it in.
+    if (self.errorView.alpha == 0) {
+        [self.errorView setError:error animated:NO];
+        [self.errorView popInCompletion:nil];
+        return;
+    }
+
+    // error view displayed. if error is different, set it
+    [self.errorView setError:error animated:YES];
 }
 
-- (void)visualizeErrorWithImage:(UIImage*)errorImage {
-    if (self.dataView.alpha != 0) {
-        self.dataView.transform = CGAffineTransformIdentity;
-        [UIView animateWithDuration:0.30 animations:^{
-            self.dataView.alpha = 0;
-            self.dataView.transform = CGAffineTransformMakeScale(0.9, 0.9);
-        } completion:^(BOOL finished) {
-            self.dataView.transform = CGAffineTransformIdentity;
-            [self visualizeErrorWithImage:errorImage];
+
+- (void)showData:(void(^)(BOOL animated))action {
+    if (self.errorView.alpha != 0) {
+        // error view displayed: hide it first
+        [self.errorView popOutCompletion:^{
+            [self showData:action];
         }];
+        return;
     }
-    else if (self.errorImageView.alpha == 0) {
-        self.errorImageView.transform = CGAffineTransformMakeScale(0.9, 0.9);
-        self.errorImageView.image = errorImage;
-        [UIView animateWithDuration:0.15 animations:^{
-            self.errorImageView.alpha = 1;
-            self.errorImageView.transform = CGAffineTransformIdentity;
-        }];
+    
+    // error view hidden. Now: data view hidden? --> YES
+    // just fade it in.
+    if (self.dataView.alpha == 0) {
+        if (action) action(NO);
+        [self.dataView popInCompletion:nil];
+        return;
     }
-    else if (![self.errorImageView.image isEqual:errorImage]) {
-        [UIView animateWithDuration:0.15 animations:^{
-            self.errorImageView.transform = CGAffineTransformMakeScale(0.9, 0.9);
-            self.errorImageView.alpha = 0;
-        } completion:^(BOOL finished) {
-            self.errorImageView.image = errorImage;
-            [UIView animateWithDuration:0.15 animations:^{
-                self.errorImageView.alpha = 1;
-                self.errorImageView.transform = CGAffineTransformIdentity;
-            }];
-        }];
-    }
-    }
+    
+    if (action) action(YES);
+}
 
 - (void)visualizeLocation:(NSString*)location {
-    if ([self.locationLabel.text isEqualToString:location])
-        return;
-
-    if (self.locationLabel.alpha != 0) {
-        [UIView animateWithDuration:0.15 animations:^{
-            self.locationLabel.alpha = 0;
-            self.locationLabel.transform = CGAffineTransformMakeScale(0.9, 0.9);
-        } completion:^(BOOL finished) {
-            self.locationLabel.text = location;
-            [UIView animateWithDuration:0.15 animations:^{
-                self.locationLabel.alpha = 1;
-                self.locationLabel.transform = CGAffineTransformIdentity;
-            }];
-        }];
-    }
-    else {
-        self.locationLabel.text = location;
-        self.locationLabel.transform = CGAffineTransformMakeScale(0.9, 0.9);
-        [UIView animateWithDuration:0.30 animations:^{
-            self.locationLabel.alpha = 1;
-            self.locationLabel.transform = CGAffineTransformIdentity;
-        }];
-    }
+    [self showData:^(BOOL animated) {
+        [self.dataView setLocation:location animated:animated];
+    }];
+//    if ([self.locationLabel.text isEqualToString:location])
+//        return;
+//
+//    if (self.locationLabel.alpha != 0) {
+//        [UIView animateWithDuration:0.15 animations:^{
+//            self.locationLabel.alpha = 0;
+//            self.locationLabel.transform = CGAffineTransformMakeScale(0.9, 0.9);
+//        } completion:^(BOOL finished) {
+//            self.locationLabel.text = location;
+//            [UIView animateWithDuration:0.15 animations:^{
+//                self.locationLabel.alpha = 1;
+//                self.locationLabel.transform = CGAffineTransformIdentity;
+//            }];
+//        }];
+//    }
+//    else {
+//        self.locationLabel.text = location;
+//        self.locationLabel.transform = CGAffineTransformMakeScale(0.9, 0.9);
+//        [UIView animateWithDuration:0.30 animations:^{
+//            self.locationLabel.alpha = 1;
+//            self.locationLabel.transform = CGAffineTransformIdentity;
+//        }];
+//    }
 }
 
-- (void)visualizeChance:(int)chance intensity:(int)intensity mm:(CGFloat)mm animated:(BOOL)animated {
+- (void)visualizeChance:(int)chance intensity:(int)intensity mm:(CGFloat)mm {
+    BOOL updateAnimated = _chanceUpdated;
     _chanceUpdated = NO;
-
-    NSString* chanceText;
-    NSString* mmText = floorf(mm) == mm ? [NSString stringWithFormat:@"%d", (int)mm] : [NSString stringWithFormat:@"%01.2f", mm];
-    UIColor* chanceColor;
-    UIImage* intensityImage = [UIImage imageNamed:[NSString stringWithFormat:@"intensity%d.png", intensity]];
-    
-    if (chance < 0) {
-        chanceText = @"?";
-        chanceColor = [UIColor grayColor];
-    }
-    else {
-        chanceText = [NSString stringWithFormat:@"%d%%", chance];
-        chanceColor = [UIColor whiteColor];
-    }
-    
-    CGRect labelRect = (CGRect) { self.chanceLabel.frame.origin, self.dataView.frame.size.width - MIN(1, intensity)*self.intensityView.frame.size.width, self.chanceLabel.frame.size.height };
-    if (!animated) {
-        if (self.chanceLabel.alpha == 0 || ![self.chanceLabel.text isEqual:chanceText]) {
-            self.chanceLabel.alpha = 1;
-            self.chanceLabel.text = chanceText;
-            self.chanceLabel.textColor = chanceColor;
-            self.chanceLabel.frame = labelRect;
-            self.intensityLabel.text = mmText;
-            self.intensityView.alpha = intensity > 0;
-            self.intensityImageView.image = intensityImage;
+    [self showData:^(BOOL animated) {
+        if (chance < 0) {
+            [self.dataView setInvalidPercentageAnimated:updateAnimated && animated];
         }
-        return;
-    }
-    
-    if (self.chanceLabel.alpha != 0) {
-        [UIView animateWithDuration:0.15 animations:^{
-            self.chanceLabel.alpha = 0;
-            self.chanceLabel.transform = CGAffineTransformMakeScale(0.9, 0.9);
-            self.intensityView.alpha = 0;
-            self.intensityView.transform = CGAffineTransformMakeScale(0.9, 0.9);
-        } completion:^(BOOL finished) {
-            self.chanceLabel.textColor = chanceColor;
-            self.chanceLabel.text = chanceText;
-            self.intensityLabel.text = mmText;
-            self.intensityImageView.image = intensityImage;
-            [UIView animateWithDuration:0.15 animations:^{
-                self.chanceLabel.transform = CGAffineTransformIdentity;
-                self.chanceLabel.alpha = 1;
-                self.chanceLabel.frame = labelRect;
-                self.intensityView.transform = CGAffineTransformIdentity;
-                self.intensityView.alpha = intensity > 0;
-            }];
-        }];
-    }
-    else {
-        self.chanceLabel.text = chanceText;
-        self.chanceLabel.textColor = chanceColor;
-        self.chanceLabel.transform = CGAffineTransformMakeScale(0.9, 0.9);
-        self.intensityLabel.text = mmText;
-        self.intensityImageView.image = intensityImage;
-        self.intensityView.transform = CGAffineTransformMakeScale(0.9, 0.9);
-        [UIView animateWithDuration:0.3 animations:^{
-            self.chanceLabel.transform = CGAffineTransformIdentity;
-            self.chanceLabel.alpha = 1;
-            self.chanceLabel.frame = labelRect;
-            self.intensityView.transform = CGAffineTransformIdentity;
-            self.intensityView.alpha = intensity > 0;
-        }];
-    }
+        else {
+            [self.dataView setPercentage:chance precipitation:mm intensity:intensity animated:updateAnimated && animated];
+        }
+    }];
+
+//    NSString* chanceText;
+//    NSString* mmText = floorf(mm) == mm ? [NSString stringWithFormat:@"%d", (int)mm] : [NSString stringWithFormat:@"%01.2f", mm];
+//    UIColor* chanceColor;
+//    UIImage* intensityImage = [UIImage imageNamed:[NSString stringWithFormat:@"intensity%d.png", intensity]];
+//    
+//    if (chance < 0) {
+//        chanceText = @"?";
+//        chanceColor = [UIColor grayColor];
+//    }
+//    else {
+//        chanceText = [NSString stringWithFormat:@"%d%%", chance];
+//        chanceColor = [UIColor whiteColor];
+//    }
+//    
+//    CGRect labelRect = (CGRect) { self.chanceLabel.frame.origin, self.dataView.frame.size.width - MIN(1, intensity)*self.intensityView.frame.size.width, self.chanceLabel.frame.size.height };
+//    if (!animated) {
+//        if (self.chanceLabel.alpha == 0 || ![self.chanceLabel.text isEqual:chanceText]) {
+//            self.chanceLabel.alpha = 1;
+//            self.chanceLabel.text = chanceText;
+//            self.chanceLabel.textColor = chanceColor;
+//            self.chanceLabel.frame = labelRect;
+//            self.intensityLabel.text = mmText;
+//            self.intensityView.alpha = intensity > 0;
+//            self.intensityImageView.image = intensityImage;
+//        }
+//        return;
+//    }
+//    
+//    if (self.chanceLabel.alpha != 0) {
+//        [UIView animateWithDuration:0.15 animations:^{
+//            self.chanceLabel.alpha = 0;
+//            self.chanceLabel.transform = CGAffineTransformMakeScale(0.9, 0.9);
+//            self.intensityView.alpha = 0;
+//            self.intensityView.transform = CGAffineTransformMakeScale(0.9, 0.9);
+//        } completion:^(BOOL finished) {
+//            self.chanceLabel.textColor = chanceColor;
+//            self.chanceLabel.text = chanceText;
+//            self.intensityLabel.text = mmText;
+//            self.intensityImageView.image = intensityImage;
+//            [UIView animateWithDuration:0.15 animations:^{
+//                self.chanceLabel.transform = CGAffineTransformIdentity;
+//                self.chanceLabel.alpha = 1;
+//                self.chanceLabel.frame = labelRect;
+//                self.intensityView.transform = CGAffineTransformIdentity;
+//                self.intensityView.alpha = intensity > 0;
+//            }];
+//        }];
+//    }
+//    else {
+//        self.chanceLabel.text = chanceText;
+//        self.chanceLabel.textColor = chanceColor;
+//        self.chanceLabel.transform = CGAffineTransformMakeScale(0.9, 0.9);
+//        self.intensityLabel.text = mmText;
+//        self.intensityImageView.image = intensityImage;
+//        self.intensityView.transform = CGAffineTransformMakeScale(0.9, 0.9);
+//        [UIView animateWithDuration:0.3 animations:^{
+//            self.chanceLabel.transform = CGAffineTransformIdentity;
+//            self.chanceLabel.alpha = 1;
+//            self.chanceLabel.frame = labelRect;
+//            self.intensityView.transform = CGAffineTransformIdentity;
+//            self.intensityView.alpha = intensity > 0;
+//        }];
+//    }
 }
 
 - (void)fetchRain {
@@ -469,7 +487,7 @@
                         int value = MAX(0, [[line substringToIndex:4] intValue]);
                         CGFloat mm = (CGFloat)pow(10.0, ((double)value - 109.0)/32.0);
                         value = (int)(value * 100.0 / 255.0);
-                        //value = arc4random() % 50;
+                        value = arc4random() % 75;
                         
                         double intensity = (value-14)/40.0*12.0;
                         int logistic_intensity = (int)round(1/(1 + pow(M_E, -intensity))*100);

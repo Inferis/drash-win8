@@ -19,13 +19,17 @@
     return self;
 }
 
-/*
-// Only override drawRect: if you perform custom drawing.
-// An empty implementation adversely affects performance during animation.
-- (void)drawRect:(CGRect)rect
-{
-    // Drawing code
+- (void)setPercentage:(int)percentage precipitation:(float)precipitation intensity:(int)intensity animated:(BOOL)animated {
+    
 }
-*/
+
+- (void)setInvalidPercentageAnimated:(BOOL)animated {
+    
+}
+
+- (void)setLocation:(NSString*)location animated:(BOOL)animated {
+    
+}
+
 
 @end

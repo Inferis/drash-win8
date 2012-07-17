@@ -7,6 +7,7 @@
 //
 
 #import "ErrorView.h"
+#import "UIView+Pop.h"
 
 @implementation ErrorView {
     UIImageView* _imageView;
@@ -17,8 +18,15 @@
     self = [super initWithFrame:frame];
     if (self) {
         _imageView = [[UIImageView alloc] initWithFrame:(CGRect) { 0, 0, 180, 180 }];
+        [self addSubview:_imageView];
     }
     return self;
+}
+
+-(void)awakeFromNib {
+    [super awakeFromNib];
+    _imageView = [[UIImageView alloc] initWithFrame:(CGRect) { 0, 0, 180, 180 }];
+    [self addSubview:_imageView];
 }
 
 - (void)layoutSubviews {
@@ -30,4 +38,20 @@
         _imageView.frame.size };
 }
 
+- (void)setError:(NSString *)error animated:(BOOL)animated {
+    UIImage* image = [UIImage imageNamed:[NSString stringWithFormat:@"%@.png", error]];
+    
+    // if image is the same, don't bother
+    if ([_imageView.image isEqual:image])
+        return;
+    
+    if (animated) {
+        [_imageView popOutThen:^(UIView *view) {
+            _imageView.image = image;
+        } popInCompletion:nil];
+    }
+    else {
+        _imageView.image = image;
+    }
+}
 @end
