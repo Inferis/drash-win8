@@ -19,7 +19,7 @@
     return self;
 }
 
-- (void)setPercentage:(int)percentage precipitation:(float)precipitation intensity:(int)intensity animated:(BOOL)animated {
+- (void)setRain:(RainData*)rain animated:(BOOL)animated {
     
 }
 

@@ -15,6 +15,7 @@
 #import "DataView.h"
 #import "ErrorView.h"
 #import "UIView+Pop.h"
+#import "RainData.h"
 
 @interface ViewController () <CLLocationManagerDelegate>
 
@@ -37,15 +38,13 @@
     CLLocationManager* _locationManager;
     CLLocation* _location;
     CLGeocoder* _geocoder;
-    BOOL _fetchingRain;
     NSTimer* _timer;
     NSTimer* _locationTimer;
     NSTimer* _geolocationTimer;
     int _operations;
-    BOOL _infoPresenting;
-    int _chance, _intensity;
-    CGFloat _mm;
-    BOOL _chanceUpdated;
+    BOOL _fetchingRain;
+    BOOL _rainUpdated;
+    RainData* _rain;
     NSString* _locationName;
     NSString* _error;
     BOOL _reachable;
@@ -56,8 +55,7 @@
 {
     [super viewDidLoad];
     
-    _chance = -1;
-    _intensity = 0;
+    _rain = nil;
     _locationName = @"";
     _error = nil;
     _reachable = [Drache.network isReachable];
@@ -125,8 +123,6 @@
                 [self updateState];
         }];
     }
-
-    _infoPresenting = NO;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -142,9 +138,7 @@
 - (IBAction)infoTapped:(id)sender {
     InfoViewController* infoViewController = [[InfoViewController alloc] initWithNibName:nil bundle:nil];
     infoViewController.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
-    [self presentViewController:infoViewController animated:YES completion:^{
-    }];
-    _infoPresenting = YES;
+    [self presentViewController:infoViewController animated:YES completion:nil];
 }
 
 //- (void)toggleIntensity:(UITapGestureRecognizer*)tapper {
@@ -290,7 +284,7 @@
         return;
     }
     
-    if (IsEmpty(_locationName) && _chance < 0) {
+    if (IsEmpty(_locationName) && !_rain) {
         // nothing to see
         [self.dataView popOutCompletion:nil];
         return;
@@ -299,7 +293,7 @@
     // location and/or chance visible
 
     // first case: data view invisible, just set the data and show it
-    [self visualizeChance:_chance intensity:_intensity mm:_mm];
+    [self visualizeRain:_rain];
     [self visualizeLocation:_locationName];
 }
 
@@ -374,16 +368,12 @@
 //    }
 }
 
-- (void)visualizeChance:(int)chance intensity:(int)intensity mm:(CGFloat)mm {
-    BOOL updateAnimated = _chanceUpdated;
-    _chanceUpdated = NO;
+- (void)visualizeRain:(RainData*)rain {
+    BOOL updateAnimated = _rainUpdated;
+    _rainUpdated = NO;
     [self showData:^(BOOL animated) {
-        if (chance < 0) {
-            [self.dataView setInvalidPercentageAnimated:updateAnimated && animated];
-        }
-        else {
-            [self.dataView setPercentage:chance precipitation:mm intensity:intensity animated:updateAnimated && animated];
-        }
+        [self.dataView setRain:rain
+                      animated:updateAnimated && animated];
     }];
 
 //    NSString* chanceText;
@@ -472,54 +462,14 @@
         [tin get:@"http://gps.buienradar.nl/getrr.php" query:query success:^(TinResponse *response) {
             [self endOperation];
             
-            int total = -1;
-            int totalIntensity = 0;
-            CGFloat totalmm;
-            int accounted = 0;
-            if (!response.error) {
-                NSArray* lines = [response.bodyString componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\n"]];
-                if (!IsEmpty(lines)) {
-                    CGFloat weight = 1;
-                    int count = 6;
-                    for (NSString* line in lines) {
-                        if (line.length < 4) continue;
-                        
-                        int value = MAX(0, [[line substringToIndex:4] intValue]);
-                        CGFloat mm = (CGFloat)pow(10.0, ((double)value - 109.0)/32.0);
-                        value = (int)(value * 100.0 / 255.0);
-                        value = arc4random() % 75;
-                        
-                        double intensity = (value-14)/40.0*12.0;
-                        int logistic_intensity = (int)round(1/(1 + pow(M_E, -intensity))*100);
-                        
-                        CGFloat useWeight = logistic_intensity == 100 ? weight : weight/2.0;
-                        
-                        int value2 = (int)(MIN(value, 70)/70.0*100.0);
-                        NSLog(@"v = %d -> %d", value, value2);
-                        totalIntensity = totalIntensity + (int)(value2*useWeight);
-                        accounted++;
-                        total = MAX(0, total) + (int)(logistic_intensity*useWeight);
-                        weight = weight - useWeight;
-                        totalmm += mm;
-                        
-                        //NSLog(@"value = %d (%fmm) -> intensity %f -> %d * weight = %f -> %d", value, mm, intensity, logistic_intensity, weight, (int)(logistic_intensity*useWeight));
-                        
-                        if (weight <= 0)
-                            break;
-                        if (--count <= 0)
-                            break;
-                    }
-                }
-                
-            }
+            RainData* result = nil;
+            if (!response.error)
+                result = [RainData rainDataFromString:response.bodyString];
             
             _fetchingRain = NO;
             _timer = [NSTimer scheduledTimerWithTimeInterval:5*60 target:self selector:@selector(fetchRain) userInfo:nil repeats:NO];
-            _chance = MIN(total, 99);
-            _intensity = totalIntensity > 0 ? MIN(1 + (int)((CGFloat)totalIntensity / (CGFloat)accounted / 25.0), 4) : 0; // 100 -> 4
-            //NSLog(@"t = %d -> %d", totalIntensity, _intensity);
-            _mm = totalmm;
-            _chanceUpdated = YES;
+            _rain = result;
+            _rainUpdated = YES;
             [self updateState];
         }];
     });
