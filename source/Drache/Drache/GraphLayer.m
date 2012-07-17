@@ -65,7 +65,7 @@
     CGFloat x = 0;
     if (_points) {
         for (RainPoint* point in _points) {
-            CGFloat y = ((100 - MAX(point.adjustedIntensity, 7)) / 100.0) * (height-bottom);
+            CGFloat y = ((100 - MAX(point.adjustedValue, 7)) / 100.0) * (height-bottom);
             minY = MIN(minY, y);
             [path addLineToPoint:(CGPoint) { x, y }];
             x += width/(_points.count-2);
@@ -76,6 +76,7 @@
             [path addLineToPoint:(CGPoint) { x, height }];
             x += width/5;
         }
+        minY = (height-bottom)/2.0;
     }
 
     [path addLineToPoint:(CGPoint) { width, height } ];
@@ -94,7 +95,17 @@
     _mask.path = path.CGPath;
 
     _gradientLayer.frame = self.bounds;
-    _gradientLayer.startPoint = (CGPoint) { 0, minY/(height-bottom) };
+    NSLog(@"%f", minY/(height-bottom));
+    CGPoint newStartPoint = (CGPoint) { 0, minY/(height) };
+    if (animated) {
+        CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"startPoint"];
+        animation.duration = 0.3;
+        animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+        animation.fromValue = [NSValue valueWithCGPoint:_gradientLayer.startPoint];
+        animation.toValue = [NSValue valueWithCGPoint:newStartPoint];
+        [_borderLayer addAnimation:animation forKey:@"animateStartPoint"];
+    }
+    _gradientLayer.startPoint = newStartPoint;
     _gradientLayer.endPoint = (CGPoint) { 0, 1 };
     
     _borderLayer.frame = self.bounds;

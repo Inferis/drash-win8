@@ -12,7 +12,7 @@
 
 @property (nonatomic, assign, readonly) NSInteger value;
 @property (nonatomic, assign, readonly) NSInteger intensity;
-@property (nonatomic, assign, readonly) NSInteger adjustedIntensity;
+@property (nonatomic, assign, readonly) NSInteger adjustedValue;
 @property (nonatomic, assign, readonly) CGFloat precipitation;
 
 @end

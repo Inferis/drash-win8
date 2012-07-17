@@ -92,14 +92,17 @@
 
 - (void)setRain:(RainData*)rain animated:(BOOL)animated {
     NSString* mmText;
-    UIImage* cloudImage = [UIImage imageNamed:[NSString stringWithFormat:@"intensity%d.png", MIN(MAX(0, rain.intensity), 4)]];
-
+    UIImage* cloudImage;
+    
     if (rain) {
         CGFloat mm = MAX(rain.precipitation, 0);
         mmText = floorf(mm) == mm ? [NSString stringWithFormat:@"%d", (int)mm] : [NSString stringWithFormat:@"%01.2f", mm];
+        int intensity = (int)MAX(1, MIN(1 + (rain.intensity / 25.0), 4));
+        cloudImage = [UIImage imageNamed:[NSString stringWithFormat:@"intensity%d.png", intensity]];
     }
     else {
         mmText = @"0";
+        cloudImage = [UIImage imageNamed:@"intensity0.png"];
     }
     
     void(^setValues)() = ^{
