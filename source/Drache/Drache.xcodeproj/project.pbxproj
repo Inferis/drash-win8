@@ -643,6 +643,7 @@
 		E209A00015B04B1B00C3B56C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Tom Adriaenssen";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Drache/Drache-Prefix.pch";
 				INFOPLIST_FILE = "Drache/Drache-Info.plist";
@@ -652,6 +653,7 @@
 					"\"$(SRCROOT)/Drache/vendor/TestFlightSDK\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "918E28AA-1433-425B-893B-2CC2BC4C0CC2";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
@@ -679,7 +681,7 @@
 		E216851615B0E444007216BF /* Adhoc */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Tom Adriaenssen";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Drache/Drache-Prefix.pch";
 				INFOPLIST_FILE = "Drache/Drache-Info.plist";
@@ -689,7 +691,7 @@
 					"\"$(SRCROOT)/Drache/vendor/TestFlightSDK\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "B1D39AA0-7608-45BA-878E-C2238B041CA3";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Adhoc;

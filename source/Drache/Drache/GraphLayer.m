@@ -63,26 +63,38 @@
 
     CGFloat minY = height-bottom;
     CGFloat x = 0;
+    BOOL allZero = YES;
     if (_points) {
         for (RainPoint* point in _points) {
-            CGFloat y = ((100 - MAX(point.adjustedValue, 7)) / 100.0) * (height-bottom);
-            minY = MIN(minY, y);
-            [path addLineToPoint:(CGPoint) { x, y }];
-            x += width/(_points.count-2);
+            if (point.adjustedValue > 0) allZero = NO;
+        }
+
+        if (!allZero) {
+            for (RainPoint* point in _points) {
+                CGFloat y = ((100 - MAX(point.adjustedValue, 7)) / 100.0) * (height-bottom);
+                minY = MIN(minY, y);
+                [path addLineToPoint:(CGPoint) { x, y }];
+                x += width/(_points.count-2);
+            }
         }
     }
-    else {
+    
+    NSArray* newColors;
+    if (allZero) {
         for (int i=0; i<7; ++i) {
-            [path addLineToPoint:(CGPoint) { x, height }];
+            [path addLineToPoint:(CGPoint) { x, 0 }];
             x += width/5;
         }
         minY = (height-bottom)/2.0;
+        newColors = [NSArray arrayWithObjects:(id)[UIColor clearColor].CGColor, [UIColor colorWithHex:0x991e4c67].CGColor, nil];
     }
+    else
+        newColors = [NSArray arrayWithObjects:(id)[UIColor colorWithHex:0x9980ccff].CGColor, [UIColor colorWithHex:0x991e4c67].CGColor, nil];
 
     [path addLineToPoint:(CGPoint) { width, height } ];
     [path closePath];
     
-
+    _borderLayer.opacity = allZero ? 0 : 1;
     if (animated) {
         CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"path"];
         animation.duration = 0.3;
@@ -95,7 +107,6 @@
     _mask.path = path.CGPath;
 
     _gradientLayer.frame = self.bounds;
-    NSLog(@"%f", minY/(height-bottom));
     CGPoint newStartPoint = (CGPoint) { 0, minY/(height) };
     if (animated) {
         CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"startPoint"];
@@ -103,10 +114,18 @@
         animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
         animation.fromValue = [NSValue valueWithCGPoint:_gradientLayer.startPoint];
         animation.toValue = [NSValue valueWithCGPoint:newStartPoint];
-        [_borderLayer addAnimation:animation forKey:@"animateStartPoint"];
+        [_gradientLayer addAnimation:animation forKey:@"animateStartPoint"];
+
+        animation = [CABasicAnimation animationWithKeyPath:@"colors"];
+        animation.duration = 0.3;
+        animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+        animation.fromValue = _gradientLayer.colors;
+        animation.toValue = newColors;
+        [_gradientLayer addAnimation:animation forKey:@"animateColors"];
     }
     _gradientLayer.startPoint = newStartPoint;
     _gradientLayer.endPoint = (CGPoint) { 0, 1 };
+    _gradientLayer.colors = newColors;
     
     _borderLayer.frame = self.bounds;
     if (animated) {

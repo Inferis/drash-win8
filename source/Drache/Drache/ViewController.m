@@ -148,10 +148,11 @@
 #pragma mark - network
 
 - (void)reachabilityChanged:(NSNotification*)notification {
-    if (_reachable != [Drache.network isReachable])
-        [self fetchRain];
-
-    [self updateState];
+    dispatch_delayed(1, ^{
+        BOOL shouldFetch = _reachable != [Drache.network isReachable] && [Drache.network isReachable];
+        [self updateState];
+        if (shouldFetch) [self fetchRain];
+    });
 }
 
 #pragma mark - Location Manager Delegate
@@ -342,29 +343,6 @@
     [self showData:^(BOOL animated) {
         [self.dataView setLocation:location animated:animated];
     }];
-//    if ([self.locationLabel.text isEqualToString:location])
-//        return;
-//
-//    if (self.locationLabel.alpha != 0) {
-//        [UIView animateWithDuration:0.15 animations:^{
-//            self.locationLabel.alpha = 0;
-//            self.locationLabel.transform = CGAffineTransformMakeScale(0.9, 0.9);
-//        } completion:^(BOOL finished) {
-//            self.locationLabel.text = location;
-//            [UIView animateWithDuration:0.15 animations:^{
-//                self.locationLabel.alpha = 1;
-//                self.locationLabel.transform = CGAffineTransformIdentity;
-//            }];
-//        }];
-//    }
-//    else {
-//        self.locationLabel.text = location;
-//        self.locationLabel.transform = CGAffineTransformMakeScale(0.9, 0.9);
-//        [UIView animateWithDuration:0.30 animations:^{
-//            self.locationLabel.alpha = 1;
-//            self.locationLabel.transform = CGAffineTransformIdentity;
-//        }];
-//    }
 }
 
 - (void)visualizeRain:(RainData*)rain {

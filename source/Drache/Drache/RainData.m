@@ -63,7 +63,7 @@
             continue;
 
         int value = MAX(0, [[parts objectAtIndex:0] intValue]);
-        //value = count*(arc4random() % 20) + arc4random() % 40;
+        //value = 130 + arc4random() % 50; // count*(arc4random() % 20) + arc4random() % 40;
         NSDate* time = [self scanDate:[parts objectAtIndex:1]];
 
         if ([time timeIntervalSinceDate:now] > -300) {
@@ -82,16 +82,15 @@
     for (RainPoint* point in points) {
         CGFloat useWeight = point.intensity == 100 ? weight : weight/2.0;
 
-        totalIntensity = totalIntensity + (int)(point.adjustedValue*useWeight*2);
+        totalIntensity = totalIntensity + point.adjustedValue;
         accounted++;
-        total = MAX(0, total) + (int)(point.intensity*useWeight);
-        weight = weight - useWeight;
-        totalPrecipitation += point.precipitation;
+        if (weight > 0) {
+            total = MAX(0, total) + (int)(point.intensity*useWeight);
+            weight = weight - useWeight;
+        }
+        totalPrecipitation += point.precipitation/60*5;
 
-        //NSLog(@"%d -> %fmm, intensity %d -> %d (%d * %f)", point.value, point.precipitation, point.adjustedValue, (int)(point.intensity*useWeight), point.intensity, useWeight);
-        
-        if (weight <= 0)
-            break;
+        NSLog(@"%d -> %fmm/u = %fmm, intensity %d -> %d (%d * %f)", point.value, point.precipitation, point.precipitation/60*5, point.adjustedValue, (int)(point.intensity*useWeight), point.intensity, useWeight);
     }
     
     _chance = MIN(total, 99);
