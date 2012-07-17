@@ -56,7 +56,7 @@
 					<object class="IBUILabel" id="100804918">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">303</int>
-						<string key="NSFrame">{{10, 352}, {285, 128}}</string>
+						<string key="NSFrame">{{35, 357}, {285, 128}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="519836255"/>
@@ -66,7 +66,7 @@
 						<int key="IBUIContentMode">7</int>
 						<bool key="IBUIUserInteractionEnabled">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-						<string key="IBUIText">Drash</string>
+						<string key="IBUIText">Dra  sh</string>
 						<object class="NSColor" key="IBUITextColor">
 							<int key="NSColorSpace">3</int>
 							<bytes key="NSWhite">MC43NQA</bytes>
@@ -146,9 +146,10 @@
 					<object class="IBUIButton" id="519836255">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">265</int>
-						<string key="NSFrame">{{273, 413}, {36, 36}}</string>
+						<string key="NSFrame">{{142, 424}, {36, 36}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -300,11 +301,11 @@ Y29uZHMgdG8gdXBkYXRlIG1hbnVhbGx5Lgo</string>
 						<array class="NSMutableArray" key="children">
 							<reference ref="563159511"/>
 							<reference ref="519836255"/>
-							<reference ref="100804918"/>
 							<reference ref="813537125"/>
 							<reference ref="674891144"/>
 							<reference ref="650797949"/>
 							<reference ref="182781566"/>
+							<reference ref="100804918"/>
 						</array>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -381,7 +382,7 @@ Y29uZHMgdG8gdXBkYXRlIG1hbnVhbGx5Lgo</string>
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
 				<object class="IBPartialClassDescription">
 					<string key="className">InfoViewController</string>
-					<string key="superclassName">ViewController</string>
+					<string key="superclassName">UIViewController</string>
 					<object class="NSMutableDictionary" key="actions">
 						<string key="NS.key.0">closeTapped:</string>
 						<string key="NS.object.0">id</string>
