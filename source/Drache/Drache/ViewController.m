@@ -130,6 +130,27 @@
     }
 }
 
+- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
+    [super willRotateToInterfaceOrientation:toInterfaceOrientation duration:duration];
+    
+    if (UIInterfaceOrientationIsLandscape(toInterfaceOrientation) == UIInterfaceOrientationIsLandscape(self.interfaceOrientation))
+        return;
+    
+    if (UIInterfaceOrientationIsLandscape(toInterfaceOrientation)) {
+        self.smallSpinner.frame = CGRectOffset(self.smallSpinner.frame, 0, 5);
+        self.infoButton.frame = CGRectOffset(self.infoButton.frame, 0, 5);
+    }
+    else {
+        self.smallSpinner.frame = CGRectOffset(self.smallSpinner.frame, 0, -5);
+        self.infoButton.frame = CGRectOffset(self.infoButton.frame, 0, -5);
+    }
+}
+
+- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
+    [super willAnimateRotationToInterfaceOrientation:toInterfaceOrientation duration:duration];
+    
+}
+
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
     return (interfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);

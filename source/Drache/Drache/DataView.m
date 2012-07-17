@@ -67,6 +67,8 @@
     _chanceLabel.frame = (CGRect) { 0, height, floorf(width/1.7777777), height };
     CGFloat x = CGRectGetMaxX(_chanceLabel.frame);
     _mmView.frame = (CGRect) { x, height, width-x, height };
+    
+    [self setNeedsDisplay];
 }
 
 - (void)setRain:(RainData*)rain animated:(BOOL)animated {
