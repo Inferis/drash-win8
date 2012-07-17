@@ -17,14 +17,20 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
-        _imageView = [[UIImageView alloc] initWithFrame:(CGRect) { 0, 0, 180, 180 }];
-        [self addSubview:_imageView];
+        [self setupViews];
     }
     return self;
 }
 
 -(void)awakeFromNib {
     [super awakeFromNib];
+    [self setupViews];
+}
+
+- (void)setupViews {
+    self.backgroundColor = [UIColor clearColor];
+    self.opaque = NO;
+
     _imageView = [[UIImageView alloc] initWithFrame:(CGRect) { 0, 0, 180, 180 }];
     [self addSubview:_imageView];
 }

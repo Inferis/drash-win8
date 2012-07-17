@@ -312,7 +312,8 @@
     
     if (IsEmpty(_locationName) && !_rain) {
         // nothing to see
-        [self.dataView popOutCompletion:nil];
+        if (self.dataView.alpha > 0)
+            [self.dataView popOutCompletion:nil];
         return;
     }
 
@@ -358,7 +359,10 @@
     // just fade it in.
     if (self.dataView.alpha == 0) {
         if (action) action(NO);
-        [self.dataView popInCompletion:nil];
+        [UIView animateWithDuration:0.3 animations:^{
+            self.dataView.alpha = 1;
+        }];
+//        [self.dataView popInCompletion:nil];
         return;
     }
     

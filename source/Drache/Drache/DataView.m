@@ -9,11 +9,14 @@
 #import "DataView.h"
 #import "UIView+Pop.h"
 #import "RainData.h"
+#import "PrecipitationView.h"
 
 @implementation DataView {
     UILabel* _locationLabel;
     UILabel* _chanceLabel;
-    UIView* _mmView;
+    PrecipitationView* _mmView;
+    UIView* _dataView;
+    BOOL _setting;
 }
 
 - (id)initWithFrame:(CGRect)frame
@@ -21,7 +24,6 @@
     self = [super initWithFrame:frame];
     if (self) {
         [self setupViews];
-        // Initialization code
     }
     return self;
 }
@@ -32,6 +34,10 @@
 }
 
 - (void)setupViews {
+    self.backgroundColor = [UIColor clearColor];
+    self.opaque = NO;
+    
+    
     // build location label
     _locationLabel = [[UILabel alloc] init];
     _locationLabel.alpha = 0;
@@ -41,32 +47,43 @@
     _locationLabel.textAlignment = UITextAlignmentCenter;
     _locationLabel.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:20];
     [self addSubview:_locationLabel];
+    
+    // data container view for animation purposes
+    _dataView = [UIView new];
+    _dataView.opaque = NO;
+    _dataView.backgroundColor = [UIColor redColor];
+    [self addSubview:_dataView];
 
     _chanceLabel = [[UILabel alloc] init];
-    _chanceLabel.alpha = 0;
     _chanceLabel.opaque = NO;
+    _chanceLabel.text = @"?";
     _chanceLabel.textColor = [UIColor whiteColor];
     _chanceLabel.backgroundColor = [UIColor clearColor];
     _chanceLabel.textAlignment = UITextAlignmentCenter;
     _chanceLabel.font = [UIFont fontWithName:@"HelveticaNeue-UltraLight" size:90];
-    [self addSubview:_chanceLabel];
+    [_dataView addSubview:_chanceLabel];
     
-    _mmView = [UIView new];
-    _mmView.backgroundColor = [UIColor redColor];
-    [self addSubview:_mmView];
+    _mmView = [PrecipitationView new];
+    [_dataView addSubview:_mmView];
+    
+    [self setRain:nil animated:NO];
 }
 
 - (void)layoutSubviews {
     [super layoutSubviews];
 
+    if (_setting)
+        return;
+    
     CGFloat bottom = self.bounds.size.height > self.bounds.size.width ? 40 : 30;
     CGFloat height = (self.bounds.size.height - bottom) / 3;
     CGFloat width = self.bounds.size.width;
     
     _locationLabel.frame = (CGRect) { 0, 0, width, height };
-    _chanceLabel.frame = (CGRect) { 0, height, floorf(width/1.7777777), height };
+    _dataView.frame = (CGRect) { 0, height, width, height };
+    _chanceLabel.frame = (CGRect) { 0, 0, floorf(width/1.7777777), height };
     CGFloat x = CGRectGetMaxX(_chanceLabel.frame);
-    _mmView.frame = (CGRect) { x, height, width-x, height };
+    _mmView.frame = (CGRect) { x, 0, width-x, height };
     
     [self setNeedsDisplay];
 }
@@ -87,23 +104,20 @@
     void(^setValues)() = ^{
         _chanceLabel.text = chanceText;
         _chanceLabel.textColor = chanceColor;
+        [_mmView setRain:rain animated:NO];
     };
 
-    if (self.alpha == 0) {
-        _chanceLabel.alpha = 1;
+    if (self.alpha == 0 || !animated) {
         setValues();
         return;
     }
 
-    if (_chanceLabel.alpha == 0) {
+    _setting = YES;
+    [_dataView popOutThen:^(UIView *view) {
         setValues();
-        [_chanceLabel popInCompletion:nil];
-        return;
-    }
-    
-    [_chanceLabel popOutThen:^(UIView *view) {
-        setValues();
-    } popInCompletion:nil];
+    } popInCompletion:^{
+        _setting = NO;
+    }];
 }
 
 
@@ -119,6 +133,10 @@
         [_locationLabel popInCompletion:nil];
         return;
     }
+    
+    // dont set if the same
+    if ([_locationLabel.text isEqualToString:location])
+        return;
     
     [_locationLabel popOutThen:^(UIView *view) {
         _locationLabel.text = location;

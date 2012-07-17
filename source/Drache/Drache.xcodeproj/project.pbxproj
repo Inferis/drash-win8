@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E205018415B5B2FA007CD3C9 /* PrecipitationView.m in Sources */ = {isa = PBXBuildFile; fileRef = E205018315B5B2FA007CD3C9 /* PrecipitationView.m */; };
+		E205018715B5BB32007CD3C9 /* intensity0@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E205018615B5BB32007CD3C9 /* intensity0@2x.png */; };
 		E2099FE515B04B1B00C3B56C /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E2099FE415B04B1B00C3B56C /* UIKit.framework */; };
 		E2099FE715B04B1B00C3B56C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E2099FE615B04B1B00C3B56C /* Foundation.framework */; };
 		E2099FE915B04B1B00C3B56C /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E2099FE815B04B1B00C3B56C /* CoreGraphics.framework */; };
@@ -70,6 +72,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		E205018215B5B2FA007CD3C9 /* PrecipitationView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrecipitationView.h; sourceTree = "<group>"; };
+		E205018315B5B2FA007CD3C9 /* PrecipitationView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PrecipitationView.m; sourceTree = "<group>"; };
+		E205018615B5BB32007CD3C9 /* intensity0@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "intensity0@2x.png"; sourceTree = "<group>"; };
 		E2099FE015B04B1B00C3B56C /* Drache.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Drache.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E2099FE415B04B1B00C3B56C /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		E2099FE615B04B1B00C3B56C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -373,6 +378,7 @@
 		E209A05F15B0603300C3B56C /* assets */ = {
 			isa = PBXGroup;
 			children = (
+				E205018615B5BB32007CD3C9 /* intensity0@2x.png */,
 				E2CA041E15B3757D006827A3 /* intensity1@2x.png */,
 				E2CA041F15B3757D006827A3 /* intensity2@2x.png */,
 				E2CA042015B3757D006827A3 /* intensity3@2x.png */,
@@ -396,6 +402,8 @@
 				E2494F1015B56B8000D18128 /* DataView.m */,
 				E2494F1415B56B9500D18128 /* ErrorView.h */,
 				E2494F1515B56B9500D18128 /* ErrorView.m */,
+				E205018215B5B2FA007CD3C9 /* PrecipitationView.h */,
+				E205018315B5B2FA007CD3C9 /* PrecipitationView.m */,
 			);
 			name = views;
 			sourceTree = "<group>";
@@ -479,6 +487,7 @@
 				E2CA042315B3757D006827A3 /* intensity2@2x.png in Resources */,
 				E2CA042415B3757D006827A3 /* intensity3@2x.png in Resources */,
 				E2CA042515B3757D006827A3 /* intensity4@2x.png in Resources */,
+				E205018715B5BB32007CD3C9 /* intensity0@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -522,6 +531,7 @@
 				E2494F1615B56B9500D18128 /* ErrorView.m in Sources */,
 				E2494F1A15B571AE00D18128 /* UIView+Pop.m in Sources */,
 				E2494F1D15B57B8900D18128 /* RainData.m in Sources */,
+				E205018415B5B2FA007CD3C9 /* PrecipitationView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
