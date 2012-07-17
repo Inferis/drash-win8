@@ -23,7 +23,7 @@
     CGFloat height = (self.bounds.size.height - bottom) / 3;
     
     // white color
-    UIColor* color = [UIColor colorWithWhite:0.6 alpha:1];
+    UIColor* color = [UIColor colorWithWhite:0.85 alpha:1];
     CGContextSetStrokeColorWithColor(context, color.CGColor);
     // dotted
     CGFloat dash[2] = { 1, 3 };
