@@ -207,8 +207,11 @@
         return;
     }
     
+    int delay = (_firstFetch || !_location || [_location distanceFromLocation:location] > 500) ? 0 : 2;
+    NSLog(@"delay = %d", delay);
+    
     [_locationTimer invalidate];
-    _locationTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(updateLocation2:) userInfo:location repeats:NO];
+    _locationTimer = [NSTimer scheduledTimerWithTimeInterval:delay target:self selector:@selector(updateLocation2:) userInfo:location repeats:NO];
 }
 
 - (void)updateLocation2:(NSTimer*)timer {
@@ -487,13 +490,13 @@
     _fetchingRain = YES;
     [self startOperation];
     dispatch_async_bg(^{
-        [NSThread sleepForTimeInterval:1]; // to avoid flickering :)
+        [NSThread sleepForTimeInterval:2]; // to avoid flickering :)
         
         NSString* query = [NSString stringWithFormat:@"lat=%f&lon=%f",
                            _locationManager.location.coordinate.latitude,
                            _locationManager.location.coordinate.longitude];
         Tin* tin = [Tin new];
-        [tin setTimeoutSeconds:20];
+        [tin setTimeoutSeconds:1];
         [tin get:@"http://gps.buienradar.nl/getrr.php" query:query success:^(TinResponse *response) {
             [self endOperation];
             
