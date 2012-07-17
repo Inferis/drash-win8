@@ -16,7 +16,7 @@
         _precipitation = value == 0 ? 0.0 : (CGFloat)pow(10.0, ((double)value - 109.0)/32.0);
         _value = (int)(value * 100.0 / 255.0);
         
-        double logistic_intensity = (value-14)/40.0*12.0;
+        double logistic_intensity = (_value-14)/40.0*12.0;
         _intensity = (int)round(1/(1 + pow(M_E, -logistic_intensity))*100);
         
         _adjustedIntensity = (int)(MIN(_value, 70)/70.0*100.0);
@@ -63,7 +63,7 @@
             continue;
 
         int value = MAX(0, [[parts objectAtIndex:0] intValue]);
-        value = count*(arc4random() % 20) + arc4random() % 40;
+        //value = count*(arc4random() % 20) + arc4random() % 40;
         NSDate* time = [self scanDate:[parts objectAtIndex:1]];
 
         if ([time timeIntervalSinceDate:now] > -300) {
