@@ -24,15 +24,6 @@
 @property (nonatomic, strong) IBOutlet UIActivityIndicatorView* smallSpinner;
 @property (nonatomic, strong) IBOutlet UIButton* infoButton;
 
-//@property (nonatomic, strong) IBOutlet UILabel* locationLabel;
-//@property (nonatomic, strong) IBOutlet UILabel* chanceLabel;
-//@property (nonatomic, strong) IBOutlet UIImageView* intensityImageView;
-//@property (nonatomic, strong) IBOutlet UILabel* intensityLabel;
-//@property (nonatomic, strong) IBOutlet UILabel* mmLabel;
-//@property (nonatomic, strong) IBOutlet UIView* dataView;
-//@property (nonatomic, strong) IBOutlet UIView* intensityView;
-//@property (nonatomic, strong) IBOutlet UIImageView* errorImageView;
-
 @end
 
 @implementation ViewController {
@@ -68,20 +59,7 @@
     CGRect bottomRect = CGRectOffsetTopAndShrink(self.view.bounds, self.view.bounds.size.height-40);
     self.smallSpinner.frame = CGRectCenterIn(self.smallSpinner.frame, bottomRect);
     self.infoButton.frame = CGRectCenterIn(self.infoButton.frame, bottomRect);
-
-    //    self.errorImageView.alpha = 0;
-//    self.dataView.alpha = 0;
-//    self.chanceLabel.text = @"";
-//    self.locationLabel.text = @"";
-//    
-//    self.intensityView.alpha = 0;
-//    self.intensityImageView.alpha = 1;
-//    self.intensityLabel.alpha = 0;
-//    self.mmLabel.alpha = 0;
-//    self.intensityView.frame = (CGRect) { CGRectGetMaxX(self.chanceLabel.frame), CGRectGetMinY(self.chanceLabel.frame), self.intensityView.frame.size };
-//    [self.dataView addSubview:self.intensityView];
-//    [self.intensityView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(toggleIntensity:)]];
-    
+  
     UILongPressGestureRecognizer* longTapper = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(forcedRefresh:)];
     longTapper.minimumPressDuration = 1.5;
     [self.view addGestureRecognizer:longTapper];
@@ -166,23 +144,6 @@
     infoViewController.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
     [self presentViewController:infoViewController animated:YES completion:nil];
 }
-
-//- (void)toggleIntensity:(UITapGestureRecognizer*)tapper {
-//    if (tapper.state == UIGestureRecognizerStateEnded) {
-//        [UIView animateWithDuration:0.15 animations:^{
-//            self.intensityView.alpha = 0;
-//            self.intensityView.transform = CGAffineTransformMakeScale(0.9, 0.9);
-//        } completion:^(BOOL finished) {
-//            self.intensityImageView.alpha = 1-self.intensityImageView.alpha;
-//            self.intensityLabel.alpha = 1-self.intensityLabel.alpha;
-//            self.mmLabel.alpha = self.intensityLabel.alpha;
-//            [UIView animateWithDuration:0.15 animations:^{
-//                self.intensityView.alpha = 1;
-//                self.intensityView.transform = CGAffineTransformIdentity;
-//            }];
-//        }];
-//    }
-//}
 
 #pragma mark - network
 
@@ -413,70 +374,6 @@
         [self.dataView setRain:rain
                       animated:updateAnimated && animated];
     }];
-
-//    NSString* chanceText;
-//    NSString* mmText = floorf(mm) == mm ? [NSString stringWithFormat:@"%d", (int)mm] : [NSString stringWithFormat:@"%01.2f", mm];
-//    UIColor* chanceColor;
-//    UIImage* intensityImage = [UIImage imageNamed:[NSString stringWithFormat:@"intensity%d.png", intensity]];
-//    
-//    if (chance < 0) {
-//        chanceText = @"?";
-//        chanceColor = [UIColor grayColor];
-//    }
-//    else {
-//        chanceText = [NSString stringWithFormat:@"%d%%", chance];
-//        chanceColor = [UIColor whiteColor];
-//    }
-//    
-//    CGRect labelRect = (CGRect) { self.chanceLabel.frame.origin, self.dataView.frame.size.width - MIN(1, intensity)*self.intensityView.frame.size.width, self.chanceLabel.frame.size.height };
-//    if (!animated) {
-//        if (self.chanceLabel.alpha == 0 || ![self.chanceLabel.text isEqual:chanceText]) {
-//            self.chanceLabel.alpha = 1;
-//            self.chanceLabel.text = chanceText;
-//            self.chanceLabel.textColor = chanceColor;
-//            self.chanceLabel.frame = labelRect;
-//            self.intensityLabel.text = mmText;
-//            self.intensityView.alpha = intensity > 0;
-//            self.intensityImageView.image = intensityImage;
-//        }
-//        return;
-//    }
-//    
-//    if (self.chanceLabel.alpha != 0) {
-//        [UIView animateWithDuration:0.15 animations:^{
-//            self.chanceLabel.alpha = 0;
-//            self.chanceLabel.transform = CGAffineTransformMakeScale(0.9, 0.9);
-//            self.intensityView.alpha = 0;
-//            self.intensityView.transform = CGAffineTransformMakeScale(0.9, 0.9);
-//        } completion:^(BOOL finished) {
-//            self.chanceLabel.textColor = chanceColor;
-//            self.chanceLabel.text = chanceText;
-//            self.intensityLabel.text = mmText;
-//            self.intensityImageView.image = intensityImage;
-//            [UIView animateWithDuration:0.15 animations:^{
-//                self.chanceLabel.transform = CGAffineTransformIdentity;
-//                self.chanceLabel.alpha = 1;
-//                self.chanceLabel.frame = labelRect;
-//                self.intensityView.transform = CGAffineTransformIdentity;
-//                self.intensityView.alpha = intensity > 0;
-//            }];
-//        }];
-//    }
-//    else {
-//        self.chanceLabel.text = chanceText;
-//        self.chanceLabel.textColor = chanceColor;
-//        self.chanceLabel.transform = CGAffineTransformMakeScale(0.9, 0.9);
-//        self.intensityLabel.text = mmText;
-//        self.intensityImageView.image = intensityImage;
-//        self.intensityView.transform = CGAffineTransformMakeScale(0.9, 0.9);
-//        [UIView animateWithDuration:0.3 animations:^{
-//            self.chanceLabel.transform = CGAffineTransformIdentity;
-//            self.chanceLabel.alpha = 1;
-//            self.chanceLabel.frame = labelRect;
-//            self.intensityView.transform = CGAffineTransformIdentity;
-//            self.intensityView.alpha = intensity > 0;
-//        }];
-//    }
 }
 
 - (void)fetchRain {
