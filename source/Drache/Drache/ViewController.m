@@ -262,6 +262,11 @@
 }
 
 - (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
+    if (status != kCLAuthorizationStatusDenied)
+        [manager startUpdatingLocation];
+    else
+        [manager stopUpdatingLocation];
+
     if (_firstFetch) return;
     [self updateLocation:manager.location];
 }

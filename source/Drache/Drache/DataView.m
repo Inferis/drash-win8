@@ -10,6 +10,9 @@
 #import "UIView+Pop.h"
 #import "RainData.h"
 #import "PrecipitationView.h"
+#import "GraphLayer.h"
+#import <QuartzCore/QuartzCore.h>
+#import "DotsLayer.h"
 
 @implementation DataView {
     UILabel* _locationLabel;
@@ -17,6 +20,8 @@
     PrecipitationView* _mmView;
     UIView* _dataView;
     BOOL _setting;
+    GraphLayer* _graphLayer;
+    DotsLayer* _dotsLayer;
 }
 
 - (id)initWithFrame:(CGRect)frame
@@ -47,7 +52,7 @@
     _locationLabel.textAlignment = UITextAlignmentCenter;
     _locationLabel.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:20];
     [self addSubview:_locationLabel];
-    
+
     // data container view for animation purposes
     _dataView = [UIView new];
     _dataView.opaque = NO;
@@ -65,6 +70,12 @@
     
     _mmView = [PrecipitationView new];
     [_dataView addSubview:_mmView];
+    
+    _graphLayer = [GraphLayer new];
+    [self.layer addSublayer:_graphLayer];
+    
+    _dotsLayer = [DotsLayer new];
+    [self.layer addSublayer:_dotsLayer];
     
     [self setRain:nil animated:NO];
 }
@@ -85,7 +96,10 @@
     CGFloat x = CGRectGetMaxX(_chanceLabel.frame);
     _mmView.frame = (CGRect) { x, 0, 320-x, height };
     
-    [self setNeedsDisplay];
+    _graphLayer.frame = (CGRect) { -1, height*2, width+2, height + bottom+1 };
+
+    _dotsLayer.frame = self.bounds;
+    [_dotsLayer setNeedsDisplay];
 }
 
 - (void)setRain:(RainData*)rain animated:(BOOL)animated {
@@ -105,6 +119,7 @@
         _chanceLabel.text = chanceText;
         _chanceLabel.textColor = chanceColor;
         [_mmView setRain:rain animated:NO];
+        [_graphLayer setRain:rain animated:animated];
     };
 
     if (self.alpha == 0 || !animated) {
@@ -143,29 +158,7 @@
     } popInCompletion:nil];
 }
 
-- (void)drawRect:(CGRect)rect {
-    CGFloat bottom = self.bounds.size.height > self.bounds.size.width ? 40 : 30;
-    CGFloat height = (self.bounds.size.height - bottom) / 3;
-    
-    CGContextRef context = UIGraphicsGetCurrentContext();
-    
-    // white color
-    CGContextSetStrokeColorWithColor(context, [UIColor colorWithWhite:1 alpha:0.8].CGColor);
-    // dotted
-    CGFloat dash[2] = { 1, 4 };
-    CGContextSetLineDash(context, 0, dash, 2);
-    // 1px
-    CGContextSetLineWidth(context, 1.0);
-    
-    CGContextMoveToPoint(context, 0, height);
-    CGContextAddLineToPoint(context, self.bounds.size.width, height);
-    CGContextMoveToPoint(context, 0, height*2);
-    CGContextAddLineToPoint(context, self.bounds.size.width, height*2);
-    CGContextMoveToPoint(context, 0, height*3);
-    CGContextAddLineToPoint(context, self.bounds.size.width, height*3);
-    
-    // and now draw the Path!
-    CGContextStrokePath(context);}
+
 
 
 @end

@@ -48,10 +48,14 @@
 		E209A06215B0603300C3B56C /* nolocation@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E209A06015B0603300C3B56C /* nolocation@2x.png */; };
 		E209A06315B0603300C3B56C /* nonetwork@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E209A06115B0603300C3B56C /* nonetwork@2x.png */; };
 		E216851415B0E2A7007216BF /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E216851315B0E2A7007216BF /* libz.dylib */; };
+		E2288E7F15B5F298000598A6 /* DotsLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = E2288E7E15B5F298000598A6 /* DotsLayer.m */; };
 		E2494F1115B56B8000D18128 /* DataView.m in Sources */ = {isa = PBXBuildFile; fileRef = E2494F1015B56B8000D18128 /* DataView.m */; };
 		E2494F1615B56B9500D18128 /* ErrorView.m in Sources */ = {isa = PBXBuildFile; fileRef = E2494F1515B56B9500D18128 /* ErrorView.m */; };
 		E2494F1A15B571AE00D18128 /* UIView+Pop.m in Sources */ = {isa = PBXBuildFile; fileRef = E2494F1915B571AE00D18128 /* UIView+Pop.m */; };
 		E2494F1D15B57B8900D18128 /* RainData.m in Sources */ = {isa = PBXBuildFile; fileRef = E2494F1C15B57B8900D18128 /* RainData.m */; };
+		E256798C15B5DF600027F9DD /* GraphLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = E256798B15B5DF600027F9DD /* GraphLayer.m */; };
+		E256798F15B5E1E20027F9DD /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E256798E15B5E1E20027F9DD /* QuartzCore.framework */; };
+		E256799215B5E7B30027F9DD /* UIColor+Hex.m in Sources */ = {isa = PBXBuildFile; fileRef = E256799115B5E7B30027F9DD /* UIColor+Hex.m */; };
 		E2C20FD515B0C25700EBCA26 /* InfoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E2C20FD315B0C25700EBCA26 /* InfoViewController.m */; };
 		E2C20FD615B0C25700EBCA26 /* InfoViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E2C20FD415B0C25700EBCA26 /* InfoViewController.xib */; };
 		E2C20FD915B0C37F00EBCA26 /* infobg.png in Resources */ = {isa = PBXBuildFile; fileRef = E2C20FD715B0C37F00EBCA26 /* infobg.png */; };
@@ -149,6 +153,8 @@
 		E209A06015B0603300C3B56C /* nolocation@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "nolocation@2x.png"; sourceTree = "<group>"; };
 		E209A06115B0603300C3B56C /* nonetwork@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "nonetwork@2x.png"; sourceTree = "<group>"; };
 		E216851315B0E2A7007216BF /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
+		E2288E7D15B5F298000598A6 /* DotsLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DotsLayer.h; sourceTree = "<group>"; };
+		E2288E7E15B5F298000598A6 /* DotsLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DotsLayer.m; sourceTree = "<group>"; };
 		E2494F0F15B56B8000D18128 /* DataView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataView.h; sourceTree = "<group>"; };
 		E2494F1015B56B8000D18128 /* DataView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataView.m; sourceTree = "<group>"; };
 		E2494F1415B56B9500D18128 /* ErrorView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ErrorView.h; sourceTree = "<group>"; };
@@ -157,6 +163,11 @@
 		E2494F1915B571AE00D18128 /* UIView+Pop.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+Pop.m"; sourceTree = "<group>"; };
 		E2494F1B15B57B8900D18128 /* RainData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RainData.h; sourceTree = "<group>"; };
 		E2494F1C15B57B8900D18128 /* RainData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RainData.m; sourceTree = "<group>"; };
+		E256798A15B5DF600027F9DD /* GraphLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GraphLayer.h; sourceTree = "<group>"; };
+		E256798B15B5DF600027F9DD /* GraphLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GraphLayer.m; sourceTree = "<group>"; };
+		E256798E15B5E1E20027F9DD /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		E256799015B5E7B30027F9DD /* UIColor+Hex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIColor+Hex.h"; sourceTree = "<group>"; };
+		E256799115B5E7B30027F9DD /* UIColor+Hex.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIColor+Hex.m"; sourceTree = "<group>"; };
 		E2C20FD215B0C25700EBCA26 /* InfoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InfoViewController.h; sourceTree = "<group>"; };
 		E2C20FD315B0C25700EBCA26 /* InfoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InfoViewController.m; sourceTree = "<group>"; };
 		E2C20FD415B0C25700EBCA26 /* InfoViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = InfoViewController.xib; sourceTree = "<group>"; };
@@ -182,6 +193,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E256798F15B5E1E20027F9DD /* QuartzCore.framework in Frameworks */,
 				E216851415B0E2A7007216BF /* libz.dylib in Frameworks */,
 				E2C20FE315B0C95700EBCA26 /* CoreText.framework in Frameworks */,
 				E209A05D15B0548000C3B56C /* SystemConfiguration.framework in Frameworks */,
@@ -220,6 +232,7 @@
 		E2099FE315B04B1B00C3B56C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				E256798E15B5E1E20027F9DD /* QuartzCore.framework */,
 				E216851315B0E2A7007216BF /* libz.dylib */,
 				E2C20FE215B0C95600EBCA26 /* CoreText.framework */,
 				E209A05C15B0548000C3B56C /* SystemConfiguration.framework */,
@@ -404,6 +417,10 @@
 				E2494F1515B56B9500D18128 /* ErrorView.m */,
 				E205018215B5B2FA007CD3C9 /* PrecipitationView.h */,
 				E205018315B5B2FA007CD3C9 /* PrecipitationView.m */,
+				E256798A15B5DF600027F9DD /* GraphLayer.h */,
+				E256798B15B5DF600027F9DD /* GraphLayer.m */,
+				E2288E7D15B5F298000598A6 /* DotsLayer.h */,
+				E2288E7E15B5F298000598A6 /* DotsLayer.m */,
 			);
 			name = views;
 			sourceTree = "<group>";
@@ -411,6 +428,8 @@
 		E2494F1715B5719500D18128 /* extensions */ = {
 			isa = PBXGroup;
 			children = (
+				E256799015B5E7B30027F9DD /* UIColor+Hex.h */,
+				E256799115B5E7B30027F9DD /* UIColor+Hex.m */,
 				E2494F1815B571AE00D18128 /* UIView+Pop.h */,
 				E2494F1915B571AE00D18128 /* UIView+Pop.m */,
 			);
@@ -532,6 +551,9 @@
 				E2494F1A15B571AE00D18128 /* UIView+Pop.m in Sources */,
 				E2494F1D15B57B8900D18128 /* RainData.m in Sources */,
 				E205018415B5B2FA007CD3C9 /* PrecipitationView.m in Sources */,
+				E256798C15B5DF600027F9DD /* GraphLayer.m in Sources */,
+				E256799215B5E7B30027F9DD /* UIColor+Hex.m in Sources */,
+				E2288E7F15B5F298000598A6 /* DotsLayer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
