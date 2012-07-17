@@ -13,7 +13,7 @@
 - (void)popInCompletion:(void(^)(void))completion {
     CGAffineTransform transform = self.transform;
     self.transform = CGAffineTransformMakeScale(0.9, 0.9);
-    [UIView animateWithDuration:0.15 animations:^{
+    [UIView animateWithDuration:0.30 animations:^{
         self.alpha = 1;
         self.transform = transform;
     } completion:^(BOOL finished) {

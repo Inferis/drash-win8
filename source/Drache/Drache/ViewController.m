@@ -22,6 +22,7 @@
 @property (nonatomic, strong) IBOutlet DataView* dataView;
 @property (nonatomic, strong) IBOutlet ErrorView* errorView;
 @property (nonatomic, strong) IBOutlet UIActivityIndicatorView* smallSpinner;
+@property (nonatomic, strong) IBOutlet UIButton* infoButton;
 
 //@property (nonatomic, strong) IBOutlet UILabel* locationLabel;
 //@property (nonatomic, strong) IBOutlet UILabel* chanceLabel;
@@ -64,7 +65,11 @@
     self.dataView.alpha = 0;
     self.smallSpinner.alpha = 0;
     
-//    self.errorImageView.alpha = 0;
+    CGRect bottomRect = CGRectOffsetTopAndShrink(self.view.bounds, self.view.bounds.size.height-40);
+    self.smallSpinner.frame = CGRectCenterIn(self.smallSpinner.frame, bottomRect);
+    self.infoButton.frame = CGRectCenterIn(self.infoButton.frame, bottomRect);
+
+    //    self.errorImageView.alpha = 0;
 //    self.dataView.alpha = 0;
 //    self.chanceLabel.text = @"";
 //    self.locationLabel.text = @"";
@@ -482,9 +487,18 @@
     }
     
     dispatch_sync_main(^{
-        [UIView animateWithDuration:0.3 animations:^{
-            [self.smallSpinner startAnimating];
-            self.smallSpinner.alpha = 1;
+        [UIView animateWithDuration:0.15 animations:^{
+            self.smallSpinner.transform = CGAffineTransformMakeScale(0.6, 0.6);
+            self.infoButton.transform = CGAffineTransformMakeScale(0.6, 0.6);
+        } completion:^(BOOL finished) {
+            [UIView animateWithDuration:0.15 animations:^{
+                self.smallSpinner.transform = CGAffineTransformIdentity;
+                self.infoButton.transform = CGAffineTransformIdentity;
+                self.smallSpinner.frame = CGRectOffset(self.smallSpinner.frame, -20, 0);
+                self.infoButton.frame = CGRectOffset(self.infoButton.frame, 20, 0);
+                [self.smallSpinner startAnimating];
+                self.smallSpinner.alpha = 1;
+            }];
         }];
     });
 }
@@ -498,10 +512,19 @@
     }
 
     dispatch_sync_main(^{
-        [UIView animateWithDuration:0.3 animations:^{
+        [UIView animateWithDuration:0.15 animations:^{
+            self.smallSpinner.frame = CGRectOffset(self.smallSpinner.frame, 20, 0);
+            self.infoButton.frame = CGRectOffset(self.infoButton.frame, -20, 0);
             self.smallSpinner.alpha = 0;
+            self.smallSpinner.transform = CGAffineTransformMakeScale(0.6, 0.6);
+            self.infoButton.transform = CGAffineTransformMakeScale(0.6, 0.6);
         } completion:^(BOOL finished) {
-            [self.smallSpinner stopAnimating];
+            [UIView animateWithDuration:0.15 animations:^{
+                self.smallSpinner.transform = CGAffineTransformIdentity;
+                self.infoButton.transform = CGAffineTransformIdentity;
+            } completion:^(BOOL finished) {
+                [self.smallSpinner stopAnimating];
+            }];
         }];
     });
 }

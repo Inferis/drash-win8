@@ -8,6 +8,15 @@
 
 #import <Foundation/Foundation.h>
 
+@interface RainPoint : NSObject
+
+@property (nonatomic, assign, readonly) NSInteger value;
+@property (nonatomic, assign, readonly) NSInteger intensity;
+@property (nonatomic, assign, readonly) NSInteger adjustedIntensity;
+@property (nonatomic, assign, readonly) CGFloat precipitation;
+
+@end
+
 @interface RainData : NSObject
 
 @property (nonatomic, assign, readonly) NSInteger intensity;
