@@ -51,7 +51,7 @@
     // data container view for animation purposes
     _dataView = [UIView new];
     _dataView.opaque = NO;
-    _dataView.backgroundColor = [UIColor redColor];
+    _dataView.backgroundColor = [UIColor clearColor];
     [self addSubview:_dataView];
 
     _chanceLabel = [[UILabel alloc] init];
@@ -80,10 +80,10 @@
     CGFloat width = self.bounds.size.width;
     
     _locationLabel.frame = (CGRect) { 0, 0, width, height };
-    _dataView.frame = (CGRect) { 0, height, width, height };
-    _chanceLabel.frame = (CGRect) { 0, 0, floorf(width/1.7777777), height };
+    _dataView.frame = (CGRect) { (width-320)/2, height, 320, height };
+    _chanceLabel.frame = (CGRect) { 10, 0, floorf(320/1.7777777), height };
     CGFloat x = CGRectGetMaxX(_chanceLabel.frame);
-    _mmView.frame = (CGRect) { x, 0, width-x, height };
+    _mmView.frame = (CGRect) { x, 0, 320-x, height };
     
     [self setNeedsDisplay];
 }
@@ -92,7 +92,7 @@
     NSString* chanceText;
     UIColor* chanceColor;
 
-    if (rain && rain.chance > 0) {
+    if (rain && rain.chance >= 0) {
         chanceText = [NSString stringWithFormat:@"%d%%", rain.chance];
         chanceColor = [UIColor whiteColor];
     }

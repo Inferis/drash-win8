@@ -95,7 +95,8 @@
     UIImage* cloudImage = [UIImage imageNamed:[NSString stringWithFormat:@"intensity%d.png", MIN(MAX(0, rain.intensity), 4)]];
 
     if (rain) {
-        mmText = floorf(rain.precipitation) == rain.precipitation ? [NSString stringWithFormat:@"%d", (int)rain.precipitation] : [NSString stringWithFormat:@"%01.2f", rain.precipitation];
+        CGFloat mm = MAX(rain.precipitation, 0);
+        mmText = floorf(mm) == mm ? [NSString stringWithFormat:@"%d", (int)mm] : [NSString stringWithFormat:@"%01.2f", mm];
     }
     else {
         mmText = @"0";
