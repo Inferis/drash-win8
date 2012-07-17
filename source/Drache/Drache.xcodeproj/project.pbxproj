@@ -46,6 +46,8 @@
 		E209A06215B0603300C3B56C /* nolocation@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E209A06015B0603300C3B56C /* nolocation@2x.png */; };
 		E209A06315B0603300C3B56C /* nonetwork@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E209A06115B0603300C3B56C /* nonetwork@2x.png */; };
 		E216851415B0E2A7007216BF /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E216851315B0E2A7007216BF /* libz.dylib */; };
+		E2494F1115B56B8000D18128 /* DataView.m in Sources */ = {isa = PBXBuildFile; fileRef = E2494F1015B56B8000D18128 /* DataView.m */; };
+		E2494F1615B56B9500D18128 /* ErrorView.m in Sources */ = {isa = PBXBuildFile; fileRef = E2494F1515B56B9500D18128 /* ErrorView.m */; };
 		E2C20FD515B0C25700EBCA26 /* InfoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E2C20FD315B0C25700EBCA26 /* InfoViewController.m */; };
 		E2C20FD615B0C25700EBCA26 /* InfoViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E2C20FD415B0C25700EBCA26 /* InfoViewController.xib */; };
 		E2C20FD915B0C37F00EBCA26 /* infobg.png in Resources */ = {isa = PBXBuildFile; fileRef = E2C20FD715B0C37F00EBCA26 /* infobg.png */; };
@@ -140,6 +142,10 @@
 		E209A06015B0603300C3B56C /* nolocation@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "nolocation@2x.png"; sourceTree = "<group>"; };
 		E209A06115B0603300C3B56C /* nonetwork@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "nonetwork@2x.png"; sourceTree = "<group>"; };
 		E216851315B0E2A7007216BF /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
+		E2494F0F15B56B8000D18128 /* DataView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataView.h; sourceTree = "<group>"; };
+		E2494F1015B56B8000D18128 /* DataView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataView.m; sourceTree = "<group>"; };
+		E2494F1415B56B9500D18128 /* ErrorView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ErrorView.h; sourceTree = "<group>"; };
+		E2494F1515B56B9500D18128 /* ErrorView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ErrorView.m; sourceTree = "<group>"; };
 		E2C20FD215B0C25700EBCA26 /* InfoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InfoViewController.h; sourceTree = "<group>"; };
 		E2C20FD315B0C25700EBCA26 /* InfoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InfoViewController.m; sourceTree = "<group>"; };
 		E2C20FD415B0C25700EBCA26 /* InfoViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = InfoViewController.xib; sourceTree = "<group>"; };
@@ -217,6 +223,7 @@
 		E2099FEA15B04B1B00C3B56C /* Drache */ = {
 			isa = PBXGroup;
 			children = (
+				E2494F1315B56B8400D18128 /* Views */,
 				E209A05F15B0603300C3B56C /* assets */,
 				E209A00115B053E000C3B56C /* vendor */,
 				E2099FF315B04B1B00C3B56C /* AppDelegate.h */,
@@ -373,6 +380,17 @@
 			path = assets;
 			sourceTree = "<group>";
 		};
+		E2494F1315B56B8400D18128 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				E2494F0F15B56B8000D18128 /* DataView.h */,
+				E2494F1015B56B8000D18128 /* DataView.m */,
+				E2494F1415B56B9500D18128 /* ErrorView.h */,
+				E2494F1515B56B9500D18128 /* ErrorView.m */,
+			);
+			name = Views;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -482,6 +500,8 @@
 				E209A05715B053E000C3B56C /* TinResponse.m in Sources */,
 				E209A05815B053E000C3B56C /* Tin.m in Sources */,
 				E2C20FD515B0C25700EBCA26 /* InfoViewController.m in Sources */,
+				E2494F1115B56B8000D18128 /* DataView.m in Sources */,
+				E2494F1615B56B9500D18128 /* ErrorView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
