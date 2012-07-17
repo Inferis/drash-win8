@@ -476,7 +476,9 @@
                         
                         CGFloat useWeight = logistic_intensity == 100 ? weight : weight/2.0;
                         
-                        totalIntensity = totalIntensity + (int)(value*useWeight);
+                        int value2 = (int)(MIN(value, 70)/70.0*100.0);
+                        NSLog(@"v = %d -> %d", value, value2);
+                        totalIntensity = totalIntensity + (int)(value2*useWeight);
                         accounted++;
                         total = MAX(0, total) + (int)(logistic_intensity*useWeight);
                         weight = weight - useWeight;
