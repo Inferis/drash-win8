@@ -393,7 +393,7 @@
                            _locationManager.location.coordinate.latitude,
                            _locationManager.location.coordinate.longitude];
         Tin* tin = [Tin new];
-        [tin setTimeoutSeconds:1];
+        [tin setTimeoutSeconds:30];
         [tin get:@"http://gps.buienradar.nl/getrr.php" query:query success:^(TinResponse *response) {
             [self endOperation];
             
@@ -402,7 +402,7 @@
                 result = [RainData rainDataFromString:response.bodyString];
             
             _fetchingRain = NO;
-            _timer = [NSTimer scheduledTimerWithTimeInterval:5*60 target:self selector:@selector(fetchRain) userInfo:nil repeats:NO];
+            _timer = [NSTimer scheduledTimerWithTimeInterval:3*60 target:self selector:@selector(fetchRain) userInfo:nil repeats:NO];
             _rain = result;
             _rainUpdated = YES;
             [self updateState];
