@@ -148,10 +148,11 @@
 #pragma mark - network
 
 - (void)reachabilityChanged:(NSNotification*)notification {
-    if (_reachable != [Drache.network isReachable])
-        [self fetchRain];
-
-    [self updateState];
+    dispatch_delayed(1, ^{
+        BOOL shouldFetch = _reachable != [Drache.network isReachable] && [Drache.network isReachable];
+        [self updateState];
+        if (shouldFetch) [self fetchRain];
+    });
 }
 
 #pragma mark - Location Manager Delegate
