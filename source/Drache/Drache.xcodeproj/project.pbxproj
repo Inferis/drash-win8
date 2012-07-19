@@ -691,7 +691,7 @@
 					"\"$(SRCROOT)/Drache/vendor/TestFlightSDK\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "B1D39AA0-7608-45BA-878E-C2238B041CA3";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "BFCC36AB-B4D2-4273-8947-594116540D17";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Adhoc;
