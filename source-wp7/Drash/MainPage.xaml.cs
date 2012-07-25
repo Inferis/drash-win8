@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Device.Location;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -48,18 +49,20 @@ namespace Drash
             graphFillFrom = ((LinearGradientBrush)Graph.Fill).GradientStops[0].Color;
             graphFillTo = ((LinearGradientBrush)Graph.Fill).GradientStops[1].Color;
 
-            this.Loaded += MainPageLoaded;
+            Loaded += MainPageLoaded;
+
+            ThreadPool.QueueUserWorkItem(o => {
+                watcher.Start();
+                firstFetch = watcher.Position != null;
+            });
         }
 
         private void MainPageLoaded(object sender, System.Windows.RoutedEventArgs e)
         {
-            SplashFadeout.Completed += (s, a) => {
-                watcher.Start();
-                firstFetch = watcher.Position != null;
-            };
-            SplashFadeout.Begin();
+            SplashFadeout.Begin(() => {
+                GestureService.GetGestureListener(this).Hold += (o, args) => FetchRain();
+            });
 
-            GestureService.GetGestureListener(this).Hold += (o, args) => FetchRain();
         }
 
         private void UpdateLocation(GeoCoordinate newLocation)
@@ -275,7 +278,7 @@ namespace Drash
 
         private void VisualizeGraph(RainData rainData, bool animated)
         {
-            
+
             List<int> pointValues;
             if (rainData == null || rainData.Points == null)
                 pointValues = new List<int>();
@@ -324,7 +327,7 @@ namespace Drash
                 storyboard.Children.Add(anim);
             }
 
-            var strokeAnim = new ColorAnimation() { Duration = ms300, FillBehavior = FillBehavior.HoldEnd, To = allZeros ? Colors.Transparent : graphStrokeColor};
+            var strokeAnim = new ColorAnimation() { Duration = ms300, FillBehavior = FillBehavior.HoldEnd, To = allZeros ? Colors.Transparent : graphStrokeColor };
             Storyboard.SetTarget(strokeAnim, Graph.Stroke);
             Storyboard.SetTargetProperty(strokeAnim, new PropertyPath(SolidColorBrush.ColorProperty));
             storyboard.Children.Add(strokeAnim);

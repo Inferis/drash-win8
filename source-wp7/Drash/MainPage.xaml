@@ -6,21 +6,21 @@
     xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="696"
+    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="768"
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
     FontSize="{StaticResource PhoneFontSizeNormal}"
-    Foreground="{StaticResource PhoneForegroundBrush}"
+    Foreground="White"
     SupportedOrientations="Portrait" Orientation="Portrait"
-    shell:SystemTray.IsVisible="True">
+    shell:SystemTray.IsVisible="True" shell:SystemTray.BackgroundColor="Black" shell:SystemTray.ForegroundColor="White" shell:SystemTray.Opacity="0.9">
     <phone:PhoneApplicationPage.Resources>
         <Storyboard x:Name="SplashFadeout">
-            <DoubleAnimation Duration="0:0:0.3" To="0" Storyboard.TargetName="Splash" Storyboard.TargetProperty="(UIElement.Opacity)" d:IsOptimized="True"/>
-            <DoubleAnimation Duration="0:0:0.3" To="76.5" Storyboard.TargetProperty="(UIElement.Projection).(PlaneProjection.RotationY)" Storyboard.TargetName="Splash" d:IsOptimized="True"/>
+            <DoubleAnimation Duration="0:0:1" To="0" Storyboard.TargetName="Splash" Storyboard.TargetProperty="(UIElement.Opacity)" d:IsOptimized="True"/>
+            <DoubleAnimation Duration="0:0:1" To="76.5" Storyboard.TargetProperty="(UIElement.Projection).(PlaneProjection.RotationY)" Storyboard.TargetName="Splash" d:IsOptimized="True"/>
         </Storyboard>
     </phone:PhoneApplicationPage.Resources>
 
     <!--LayoutRoot is the root grid where all page content is placed-->
-    <Grid x:Name="LayoutRoot" Background="Transparent">
+    <Grid x:Name="LayoutRoot" Background="Black">
         <Grid x:Name="DataRoot" Background="Transparent" Opacity="0" RenderTransformOrigin="0.5,0.5">
             <Grid.RenderTransform>
                 <CompositeTransform />
@@ -96,11 +96,12 @@
 
     <!--Sample code showing usage of ApplicationBar-->
     <phone:PhoneApplicationPage.ApplicationBar>
-        <shell:ApplicationBar IsVisible="True" Mode="Minimized" IsMenuEnabled="False">
-            <shell:ApplicationBarIconButton IconUri="/Images/appbar_button1.png" Text="Refresh" Click="RefreshButton_Click"/>
-            <shell:ApplicationBarIconButton IconUri="/Images/appbar_button2.png" Text="About" Click="InfoButton_Click"/>
+        <shell:ApplicationBar  IsVisible="True" Mode="Minimized" IsMenuEnabled="False" BackgroundColor="Transparent" ForegroundColor="White" Opacity="0.9">
+            <shell:ApplicationBarIconButton IconUri="/Resources/appbar.refresh.rest.png" Text="Refresh" Click="RefreshButton_Click"/>
+            <shell:ApplicationBarIconButton IconUri="/Resources/appbar.questionmark.rest.png" Text="About" Click="InfoButton_Click"/>
         </shell:ApplicationBar>
     </phone:PhoneApplicationPage.ApplicationBar>
+
 
     <shell:SystemTray.ProgressIndicator>
         <shell:ProgressIndicator x:Name="spinner" IsIndeterminate="True" IsVisible="false" />
