@@ -4,13 +4,13 @@ using System.Windows.Media.Animation;
 
 namespace Drash
 {
-    public static class StoryBoardExtensions
+    internal static class StoryBoardExtensions
     {
         public static void Begin(this Storyboard storyboard, Action callback)
         {
             EventHandler handler = null;
             handler = (s, e) => {
-                callback();
+                if (callback != null) callback();
                 storyboard.Completed -= handler;
             };
             storyboard.Completed += handler;
@@ -31,7 +31,7 @@ namespace Drash
         {
             EventHandler handler = null;
             handler = (s, e) => {
-                callback();
+                if (callback != null) callback();
                 storyboard.Completed -= handler;
             };
             storyboard.Completed += handler;

@@ -3,22 +3,19 @@ using System.Collections.Generic;
 using System.Device.Location;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Windows;
-using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
-using Microsoft.Phone.Net.NetworkInformation;
 using NetworkInterface = System.Net.NetworkInformation.NetworkInterface;
 
 namespace Drash
 {
     public partial class MainPage : PhoneApplicationPage
     {
-        private GeoCoordinateWatcher watcher;
+        private readonly GeoCoordinateWatcher watcher;
         private bool fetchingRain;
         private RainData rain;
         private GeoCoordinate location;
@@ -28,6 +25,9 @@ namespace Drash
         private bool firstFetch;
         private DrashError error = DrashError.None;
         private bool rainWasUpdated = false;
+        private readonly Color graphStrokeColor;
+        private readonly Color graphFillFrom;
+        private readonly Color graphFillTo;
 
         // Constructor
         public MainPage()
@@ -44,6 +44,10 @@ namespace Drash
                 UpdateLocation(watcher.Position.Location);
             };
 
+            graphStrokeColor = ((SolidColorBrush)Graph.Stroke).Color;
+            graphFillFrom = ((LinearGradientBrush)Graph.Fill).GradientStops[0].Color;
+            graphFillTo = ((LinearGradientBrush)Graph.Fill).GradientStops[1].Color;
+
             this.Loaded += MainPageLoaded;
         }
 
@@ -54,6 +58,8 @@ namespace Drash
                 firstFetch = watcher.Position != null;
             };
             SplashFadeout.Begin();
+
+            GestureService.GetGestureListener(this).Hold += (o, args) => FetchRain();
         }
 
         private void UpdateLocation(GeoCoordinate newLocation)
@@ -129,6 +135,7 @@ namespace Drash
 
             spinner.IsVisible = true;
             fetchingRain = true;
+            firstFetch = false;
             var uri = string.Format("http://gps.buienradar.nl/getrr.php?lat={0}&lon={1}", location.Latitude, location.Longitude);
 
             var wc = new WebClient();
@@ -171,13 +178,13 @@ namespace Drash
             }
 
             if (ErrorImage.Opacity > 0) {
-                ErrorFadeout.Begin(300, UpdateVisuals);
+                ErrorImage.FadeOut(UpdateVisuals);
                 return;
             }
 
             if (string.IsNullOrEmpty(locationName) && rain == null) {
                 if (DataRoot.Opacity > 0)
-                    DataRootFadeout.Begin();
+                    DataRoot.FadeOut();
                 return;
             }
 
@@ -188,30 +195,26 @@ namespace Drash
         private void VisualizeError(DrashError drashError)
         {
             if (DataRoot.Opacity > 0) {
-                DataRootFadeout.Begin(300, () => VisualizeError(drashError));
+                DataRoot.FadeIn(() => VisualizeError(drashError));
                 return;
             }
 
-            if (ErrorImage.Opacity < 1) {
+            if (ErrorImage.Opacity == 0) {
                 var uri = new Uri(drashError == DrashError.NoLocation ? "nolocation.png" : "nonetwork.png");
                 ErrorImage.Source = new BitmapImage(uri);
-                var transform = (CompositeTransform)ErrorImage.RenderTransform;
-                transform.ScaleX = 0.9;
-                transform.ScaleY = 0.9;
-                ErrorFadein.Begin();
+                ErrorImage.FadeIn();
                 return;
             }
 
-            ErrorFadeout.Begin(150, () => {
+            ErrorImage.FadeOutThenIn(between: () => {
                 var uri = new Uri(drashError == DrashError.NoLocation ? "nolocation.png" : "nonetwork.png");
                 ErrorImage.Source = new BitmapImage(uri);
-                ErrorFadein.Begin(150);
             });
         }
 
         private void VisualizeLocation(string name)
         {
-            ShowData(() => {
+            ShowData(animated => {
                 if (DataRoot.Opacity < 1) {
                     Location.Opacity = 1;
                     Location.Text = name;
@@ -220,16 +223,15 @@ namespace Drash
 
                 if (Location.Opacity < 1) {
                     Location.Text = name;
-                    LocationFadein.Begin(300);
+                    Location.FadeIn();
                     return;
                 }
 
                 if (Location.Text == name)
                     return;
 
-                LocationFadeout.Begin(150, () => {
+                Location.FadeOutThenIn(between: () => {
                     Location.Text = name;
-                    LocationFadein.Begin(150);
                 });
 
             });
@@ -239,10 +241,11 @@ namespace Drash
         {
             var animate = rainWasUpdated;
             rainWasUpdated = false;
-            ShowData(() => {
+            ShowData(animated => {
                 string chanceText;
                 Color chanceColor;
 
+                animated = animated && animate;
                 if (rainData != null && rainData.Chance >= 0) {
                     chanceText = string.Format("{0}%", rainData.Chance);
                     chanceColor = Colors.White;
@@ -255,41 +258,45 @@ namespace Drash
                 Action setter = () => {
                     Chance.Text = chanceText;
                     Chance.Foreground = new SolidColorBrush(chanceColor);
-                    VisualizeGraph(rainData);
+                    VisualizeGraph(rainData, animated);
                 };
 
-                if (DataRoot.Opacity < 1 || !animate) {
+                if (DataRoot.Opacity < 1 || !animated) {
                     Chance.Opacity = 1;
                     setter();
                     return;
                 }
 
-                DataGridFadeout.Begin(150, () => {
-                    setter();
-                    DataGridFadein.Begin(150);
-                });
+                DataGrid.FadeOutThenIn(between: setter);
             });
         }
 
-        private void VisualizeGraph(RainData rainData)
+        static Random rnd = new Random();
+
+        private void VisualizeGraph(RainData rainData, bool animated)
         {
+            
             List<int> pointValues;
             if (rainData == null || rainData.Points == null)
                 pointValues = new List<int>();
+            else if (rnd.Next(100) >= 50)
+                pointValues = rainData.Points.Select(p => 0).ToList();
             else
                 pointValues = rainData.Points.Select(p => p.AdjustedValue).ToList();
 
             while (pointValues.Count < 7)
                 pointValues.Add(0);
 
-            //M-2,246 L-2,100 L80,120 L160,180 L240,190 L320,190 L400,170 L482,160 L482,246
-            var existing1 = ((PathGeometry)Graph.Data);
+            var step = Graph.ActualWidth / pointValues.Count;
+            Func<int, double> xForIndex = idx => idx == 0 ? -2 : idx == pointValues.Count - 1 ? Graph.ActualWidth + 2 : idx * step;
 
             var x = 0;
+            var max = Graph.ActualHeight + 2 - 10;
+            var allZeros = pointValues.All(p => p == 0);
             var points = pointValues.Select(v => {
-                var y = 220 - (v * 220 / 100);
-                var p = new Point(x == 0 ? -2 : x == 480 ? 482 : x, y);
-                x += 480 / pointValues.Count;
+                var y = allZeros ? max - 40 : Math.Max(1, max - (v * max / 100));
+                var p = new Point(xForIndex(x), y);
+                x++;
                 return p;
             }).ToList();
 
@@ -297,37 +304,48 @@ namespace Drash
             PathFigure figure;
             if (path == null) {
                 path = new PathGeometry();
-                figure = new PathFigure() { StartPoint = new Point(-2.0, 246.0), IsClosed = true };
+                figure = new PathFigure() { StartPoint = new Point(-2.0, Graph.ActualHeight + 2), IsClosed = true };
                 path.Figures.Add(figure);
-                var zx = 0;
-                foreach (var value in pointValues) {
-                    figure.Segments.Add(new LineSegment() { Point = new Point(zx == 0 ? -2 : zx == 480 ? 482 : zx, 200) });
-                    zx += 480 / pointValues.Count;
+                foreach (var p in points) {
+                    figure.Segments.Add(new LineSegment() { Point = p });
                 }
-                figure.Segments.Add(new LineSegment() { Point = new Point(482, 246) });
+                figure.Segments.Add(new LineSegment() { Point = new Point(Graph.ActualWidth + 2, Graph.ActualHeight + 2) });
                 Graph.Data = path;
             }
 
-            var ms300 = TimeSpan.FromMilliseconds(300);
+            var ms300 = TimeSpan.FromMilliseconds(animated ? 300 : 0);
             var storyboard = new Storyboard() { Duration = ms300 };
 
             figure = path.Figures[0];
             for (var i = 0; i < points.Count; ++i) {
-                var anim = new PointAnimation() { Duration= ms300, To = points[i], FillBehavior = FillBehavior.HoldEnd };
+                var anim = new PointAnimation() { Duration = ms300, To = points[i], FillBehavior = FillBehavior.HoldEnd };
                 Storyboard.SetTarget(anim, figure.Segments[i]);
                 Storyboard.SetTargetProperty(anim, new PropertyPath(LineSegment.PointProperty));
                 storyboard.Children.Add(anim);
-
-                //((LineSegment)figure.Segments[i]).Point = points[i];
             }
-            LayoutRoot.Resources.Add(Guid.NewGuid().ToString("N"), storyboard);
+
+            var strokeAnim = new ColorAnimation() { Duration = ms300, FillBehavior = FillBehavior.HoldEnd, To = allZeros ? Colors.Transparent : graphStrokeColor};
+            Storyboard.SetTarget(strokeAnim, Graph.Stroke);
+            Storyboard.SetTargetProperty(strokeAnim, new PropertyPath(SolidColorBrush.ColorProperty));
+            storyboard.Children.Add(strokeAnim);
+
+            var fillTopAnim = new ColorAnimation() { Duration = ms300, FillBehavior = FillBehavior.HoldEnd, To = allZeros ? Colors.Black : graphFillFrom };
+            Storyboard.SetTarget(fillTopAnim, ((LinearGradientBrush)Graph.Fill).GradientStops[0]);
+            Storyboard.SetTargetProperty(fillTopAnim, new PropertyPath(GradientStop.ColorProperty));
+            storyboard.Children.Add(fillTopAnim);
+
+            //var fillBottomAnim = new ColorAnimation() { Duration = ms300, FillBehavior = FillBehavior.HoldEnd, To = allZeros ?  : graphFillTo };
+            //Storyboard.SetTarget(fillBottomAnim, ((LinearGradientBrush)Graph.Fill).GradientStops[0]);
+            //Storyboard.SetTargetProperty(fillBottomAnim, new PropertyPath(GradientStop.ColorProperty));
+            //storyboard.Children.Add(fillBottomAnim);
+
             storyboard.Begin(() => Graph.Data = path);
         }
 
-        private void ShowData(Action action)
+        private void ShowData(Action<bool> action)
         {
             if (ErrorImage.Opacity > 0) {
-                ErrorFadein.Begin(300, () => ShowData(action));
+                ErrorImage.FadeIn(() => ShowData(action));
                 return;
             }
 
@@ -335,12 +353,12 @@ namespace Drash
                 var transform = (CompositeTransform)DataRoot.RenderTransform;
                 transform.ScaleX = 0.9;
                 transform.ScaleY = 0.9;
-                action();
-                DataRootFadein.Begin();
+                action(false);
+                DataRoot.FadeIn();
                 return;
             }
 
-            action();
+            action(true);
         }
 
         private void RefreshButton_Click(object sender, EventArgs e)
