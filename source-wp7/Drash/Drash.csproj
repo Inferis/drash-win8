@@ -99,8 +99,12 @@
     <Content Include="ApplicationIcon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Resource Include="Resources\appbar.questionmark.rest.png" />
-    <Resource Include="Resources\appbar.refresh.rest.png" />
+    <Content Include="Resources\appbar.questionmark.rest.png" />
+    <Content Include="Resources\appbar.refresh.rest.png" />
+    <Resource Include="Resources\intensity0.png" />
+    <Resource Include="Resources\intensity1.png" />
+    <Resource Include="Resources\intensity2.png" />
+    <Resource Include="Resources\intensity3.png" />
     <Content Include="Toolkit.Content\ApplicationBar.Cancel.png" />
     <Content Include="Toolkit.Content\ApplicationBar.Check.png" />
     <Content Include="Toolkit.Content\ApplicationBar.Delete.png" />
