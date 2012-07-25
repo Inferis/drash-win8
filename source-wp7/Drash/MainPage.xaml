@@ -12,10 +12,11 @@
     Foreground="White"
     SupportedOrientations="Portrait" Orientation="Portrait"
     shell:SystemTray.IsVisible="True" shell:SystemTray.BackgroundColor="Black" shell:SystemTray.ForegroundColor="White" shell:SystemTray.Opacity="0.9">
+
     <phone:PhoneApplicationPage.Resources>
         <Storyboard x:Name="SplashFadeout">
-            <DoubleAnimation Duration="0:0:1" To="0" Storyboard.TargetName="Splash" Storyboard.TargetProperty="(UIElement.Opacity)" d:IsOptimized="True"/>
-            <DoubleAnimation Duration="0:0:1" To="76.5" Storyboard.TargetProperty="(UIElement.Projection).(PlaneProjection.RotationY)" Storyboard.TargetName="Splash" d:IsOptimized="True"/>
+            <DoubleAnimation Duration="0:0:0.5" To="0" Storyboard.TargetName="Splash" Storyboard.TargetProperty="(UIElement.Opacity)" d:IsOptimized="True"/>
+            <DoubleAnimation Duration="0:0:0.5" To="76.5" Storyboard.TargetProperty="(UIElement.Projection).(PlaneProjection.RotationY)" Storyboard.TargetName="Splash" d:IsOptimized="True"/>
         </Storyboard>
     </phone:PhoneApplicationPage.Resources>
 
@@ -52,7 +53,7 @@
                     <ColumnDefinition Width="1*" MinWidth="180"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock x:Name="Chance" Text="" FontSize="120" FontFamily="Segoe WP SemiLight" TextAlignment="Center" VerticalAlignment="Center" Grid.Column="0" RenderTransformOrigin="0.5,0.5">
+                <TextBlock x:Name="Chance" Text="" FontSize="126" FontFamily="Segoe WP SemiLight" TextAlignment="Center" VerticalAlignment="Center" Grid.Column="0" RenderTransformOrigin="0.5,0.5">
                 <TextBlock.RenderTransform>
                     <CompositeTransform />
                 </TextBlock.RenderTransform>

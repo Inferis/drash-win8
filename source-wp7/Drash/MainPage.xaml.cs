@@ -21,8 +21,8 @@ namespace Drash
         private RainData rain;
         private GeoCoordinate location;
         private string locationName;
-        private readonly DelayedAction updateLocation = new DelayedAction();
-        private readonly DelayedAction updateLocationName = new DelayedAction();
+        private readonly DelayedAction updateLocation;
+        private readonly DelayedAction updateLocationName;
         private bool firstFetch;
         private DrashError error = DrashError.None;
         private bool rainWasUpdated = false;
@@ -34,6 +34,9 @@ namespace Drash
         public MainPage()
         {
             InitializeComponent();
+
+            updateLocationName = new DelayedAction(Dispatcher);
+            updateLocation = new DelayedAction(Dispatcher);
 
             watcher = new GeoCoordinateWatcher { MovementThreshold = 500 };
             watcher.PositionChanged += (s, a) => {
@@ -274,16 +277,12 @@ namespace Drash
             });
         }
 
-        static Random rnd = new Random();
-
         private void VisualizeGraph(RainData rainData, bool animated)
         {
 
             List<int> pointValues;
             if (rainData == null || rainData.Points == null)
                 pointValues = new List<int>();
-            else if (rnd.Next(100) >= 50)
-                pointValues = rainData.Points.Select(p => 0).ToList();
             else
                 pointValues = rainData.Points.Select(p => p.AdjustedValue).ToList();
 
