@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Device.Location;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -250,6 +251,8 @@ namespace Drash
             ShowData(animated => {
                 string chanceText;
                 Color chanceColor;
+                string mmImage;
+                string mmText;
 
                 animated = animated && animate;
                 if (rainData != null && rainData.Chance >= 0) {
@@ -260,10 +263,22 @@ namespace Drash
                     chanceText = "?";
                     chanceColor = Colors.DarkGray;
                 }
+                if (rainData != null && (rainData.Intensity > 0 || rainData.Precipitation > 0)) {
+                    var mm = Math.Max(rainData.Precipitation, 0);
+                    mmText = Math.Floor(mm) == mm ? string.Format("{0}mm", (int)mm) : string.Format("{0:0.00}mm", mm);
+                    mmImage = ((int)Math.Max(1, Math.Min(1 + rainData.Intensity / 25.0, 4))).ToString(CultureInfo.InvariantCulture);
+                }
+                else {
+                    mmText = "0mm";
+                    mmImage = "0";
+                }
+                mmImage = string.Format("Resources/intensity{0}.png", mmImage);
 
                 Action setter = () => {
                     Chance.Text = chanceText;
                     Chance.Foreground = new SolidColorBrush(chanceColor);
+                    IntensityValue.Text = mmText;
+                    IntensityImage.Source = new BitmapImage(new Uri(mmImage, UriKind.Relative));
                     VisualizeGraph(rainData, animated);
                 };
 
@@ -370,6 +385,17 @@ namespace Drash
 
         private void InfoButton_Click(object sender, EventArgs e)
         {
+        }
+
+        private void Intensity_Tap(object sender, System.Windows.Input.GestureEventArgs e)
+        {
+            if (IntensityImage.Opacity > 0) {
+                IntensityImage.FadeOut(() => IntensityValue.FadeIn(duration: 150), duration: 150);
+            }
+            else {
+                IntensityValue.FadeOut(() => IntensityImage.FadeIn(duration: 150), duration: 150);
+            }
+
         }
     }
 }

@@ -11,7 +11,7 @@
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="White"
     SupportedOrientations="Portrait" Orientation="Portrait"
-    shell:SystemTray.IsVisible="True" shell:SystemTray.BackgroundColor="Black" shell:SystemTray.ForegroundColor="White" shell:SystemTray.Opacity="0.9">
+    shell:SystemTray.IsVisible="True" shell:SystemTray.BackgroundColor="black" shell:SystemTray.ForegroundColor="#fefefe" shell:SystemTray.Opacity="0.9">
 
     <phone:PhoneApplicationPage.Resources>
         <Storyboard x:Name="SplashFadeout">
@@ -53,14 +53,11 @@
                     <ColumnDefinition Width="1*" MinWidth="180"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock x:Name="Chance" Text="" FontSize="126" FontFamily="Segoe WP SemiLight" TextAlignment="Center" VerticalAlignment="Center" Grid.Column="0" RenderTransformOrigin="0.5,0.5">
-                <TextBlock.RenderTransform>
-                    <CompositeTransform />
-                </TextBlock.RenderTransform>
-                </TextBlock>
+                <TextBlock x:Name="Chance" Text="" FontSize="126" FontFamily="Segoe WP Light" TextAlignment="Center" VerticalAlignment="Center" Grid.Column="0" />
 
-                <Grid Grid.Column="1" x:Name="Intensity">
-                    <Image Source="Resources/intensity4.png" Stretch="None" />
+                <Grid Grid.Column="1" x:Name="Intensity" Tap="Intensity_Tap" Margin="-20,0,20,0">
+                    <Image x:Name="IntensityImage" Source="Resources/intensity0.png" Stretch="None" />
+                    <TextBlock x:Name="IntensityValue" Text="" FontSize="33" FontFamily="Segoe WP Light" TextAlignment="Center" VerticalAlignment="Center" Opacity="0" />
                 </Grid>
             </Grid>
 
