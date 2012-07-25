@@ -9,7 +9,6 @@ namespace Drash
         
         private RainPoint(DateTime stamp, int value)
         {
-            value = rnd.Next(0, 255);
             Stamp = stamp;
             Value = (int)(value * 100.0 / 255.0);
             Precipitation = value == 0 ? 0 : Math.Pow(10, (value - 109.0) / 32.0);
