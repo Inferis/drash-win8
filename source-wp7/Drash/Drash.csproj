@@ -63,6 +63,8 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="DelayedAction.cs" />
+    <Compile Include="DrashError.cs" />
     <Compile Include="GoogleAddressResolver.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
@@ -70,6 +72,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RainData.cs" />
     <Compile Include="RainPoint.cs" />
+    <Compile Include="StoryBoardExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -92,11 +95,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Resource Include="Resources\intensity4.png" />
+    <Resource Include="Resources\nolocation.png" />
+    <Resource Include="SubmissionInfo\nonetwork.png" />
+    <Resource Include="Resources\nonetwork.png" />
+    <Content Include="SplashScreenImage.jpg" />
     <Content Include="Screenshot1.png" />
     <Content Include="SmallAppTile.png" />
     <Content Include="LargeAppTile.png" />
     <Resource Include="MarketPlaceTile.png" />
-    <Content Include="SplashScreenImage.jpg" />
+    <Resource Include="Resources\Splash.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.$(TargetFrameworkProfile).Overrides.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.CSharp.targets" />
