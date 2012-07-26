@@ -67,6 +67,11 @@ namespace Drash
                 GestureService.GetGestureListener(this).Hold += (o, args) => FetchRain();
             });
 
+            TransitionService.SetNavigationInTransition(this, new NavigationInTransition() {
+                Backward = new TurnstileTransition() { Mode = TurnstileTransitionMode.BackwardIn },
+                Forward = new TurnstileTransition() { Mode = TurnstileTransitionMode.ForwardIn }
+            });
+
         }
 
         private void UpdateLocation(GeoCoordinate newLocation)
@@ -385,6 +390,7 @@ namespace Drash
 
         private void InfoButton_Click(object sender, EventArgs e)
         {
+            NavigationService.Navigate(new Uri("/AboutPage.xaml", UriKind.Relative));
         }
 
         private void Intensity_Tap(object sender, System.Windows.Input.GestureEventArgs e)
