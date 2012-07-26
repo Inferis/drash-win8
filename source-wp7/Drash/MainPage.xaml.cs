@@ -9,7 +9,6 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
 using NetworkInterface = System.Net.NetworkInformation.NetworkInterface;
 
@@ -24,12 +23,12 @@ namespace Drash
         private string locationName;
         private readonly DelayedAction updateLocation;
         private readonly DelayedAction updateLocationName;
+        private readonly DelayedAction updateRain;
         private bool firstFetch;
         private DrashError error = DrashError.None;
         private bool rainWasUpdated = false;
         private readonly Color graphStrokeColor;
         private readonly Color graphFillFrom;
-        private readonly Color graphFillTo;
 
         // Constructor
         public MainPage()
@@ -38,6 +37,7 @@ namespace Drash
 
             updateLocationName = new DelayedAction(Dispatcher);
             updateLocation = new DelayedAction(Dispatcher);
+            updateRain = new DelayedAction(Dispatcher, 3 * 60 * 1000);
 
             watcher = new GeoCoordinateWatcher { MovementThreshold = 500 };
             watcher.PositionChanged += (s, a) => {
@@ -51,7 +51,6 @@ namespace Drash
 
             graphStrokeColor = ((SolidColorBrush)Graph.Stroke).Color;
             graphFillFrom = ((LinearGradientBrush)Graph.Fill).GradientStops[0].Color;
-            graphFillTo = ((LinearGradientBrush)Graph.Fill).GradientStops[1].Color;
 
             Loaded += MainPageLoaded;
 
@@ -124,11 +123,8 @@ namespace Drash
             var resolver = new GoogleAddressResolver();
             resolver.ResolveAddressCompleted += (o, args) => {
                 if (args.Address == null || args.Address.IsUnknown) {
-                    locationName = string.Format("{0:0.00000},{1:0.00000}",
-                                                 watcher.Position.Location.
-                                                     Latitude,
-                                                 watcher.Position.Location.
-                                                     Longitude);
+                    if (location != null && !location.IsUnknown)
+                        locationName = string.Format("{0:0.00000},{1:0.00000}", location.Latitude, location.Longitude);
                 }
                 else {
                     locationName = string.Format("{0}, {1}", args.Address.City,
@@ -142,8 +138,18 @@ namespace Drash
         private void FetchRain()
         {
             if (fetchingRain) return;
-            if (location == null || location.IsUnknown)
+
+            updateRain.Cancel();
+            if (location == null || location.IsUnknown) {
+                updateRain.Run(FetchRain);
                 return;
+            }
+
+            if (!NetworkInterface.GetIsNetworkAvailable()) {
+                UpdateState();
+                updateRain.Run(FetchRain);
+                return;
+            }
 
             spinner.IsVisible = true;
             fetchingRain = true;
@@ -152,12 +158,14 @@ namespace Drash
 
             var wc = new WebClient();
             wc.DownloadStringCompleted += (sender, args) => {
-                if (args.Error != null) return;
-                RainData.TryParse(args.Result, out rain);
-                fetchingRain = false;
+                if (args.Error == null) {
+                    RainData.TryParse(args.Result, out rain);
+                    fetchingRain = false;
+                }
                 spinner.IsVisible = false;
                 rainWasUpdated = true;
                 UpdateState();
+                updateRain.Run(FetchRain);
             };
             wc.DownloadStringAsync(new Uri(uri));
         }
@@ -211,15 +219,14 @@ namespace Drash
                 return;
             }
 
+            var uri = new Uri(drashError == DrashError.NoLocation ? "Resources/nolocation.png" : "Resources/nonetwork.png", UriKind.Relative);
             if (ErrorImage.Opacity == 0) {
-                var uri = new Uri(drashError == DrashError.NoLocation ? "nolocation.png" : "nonetwork.png");
                 ErrorImage.Source = new BitmapImage(uri);
                 ErrorImage.FadeIn();
                 return;
             }
 
             ErrorImage.FadeOutThenIn(between: () => {
-                var uri = new Uri(drashError == DrashError.NoLocation ? "nolocation.png" : "nonetwork.png");
                 ErrorImage.Source = new BitmapImage(uri);
             });
         }
