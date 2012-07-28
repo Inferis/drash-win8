@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Device.Location;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Net;
@@ -29,6 +30,7 @@ namespace Drash
         private bool rainWasUpdated = false;
         private readonly Color graphStrokeColor;
         private readonly Color graphFillFrom;
+        private bool goodLocationName;
 
         // Constructor
         public MainPage()
@@ -77,6 +79,7 @@ namespace Drash
         {
             if (newLocation == null || newLocation.IsUnknown) {
                 locationName = "";
+                goodLocationName = false;
                 UpdateState();
                 return;
             }
@@ -107,8 +110,8 @@ namespace Drash
                     ResolveCurrentLocationThroughGoogle();
                 }
                 else {
-                    locationName = string.Format("{0}, {1}", args.Address.City,
-                                                 args.Address.CountryRegion);
+                    locationName = string.Format("{0}, {1}", args.Address.City, args.Address.CountryRegion);
+                    goodLocationName = true;
                     UpdateState();
                 }
             };
@@ -123,12 +126,15 @@ namespace Drash
             var resolver = new GoogleAddressResolver();
             resolver.ResolveAddressCompleted += (o, args) => {
                 if (args.Address == null || args.Address.IsUnknown) {
-                    if (location != null && !location.IsUnknown)
-                        locationName = string.Format("{0:0.00000},{1:0.00000}", location.Latitude, location.Longitude);
+                    if (location != null && !location.IsUnknown) {
+                        locationName = string.Format("{0:0.000000}, {1:0.000000}", location.Latitude, location.Longitude);
+                        goodLocationName = false;
+                    }
                 }
                 else {
                     locationName = string.Format("{0}, {1}", args.Address.City,
                                                  args.Address.CountryRegion);
+                    goodLocationName = true;
                 }
                 UpdateState();
             };
@@ -151,10 +157,15 @@ namespace Drash
                 return;
             }
 
+            // if we don't have a good location name, try to update it
+            if (!goodLocationName && location != null && !location.IsUnknown) {
+                updateLocationName.Run(ResolveCurrentLocation, 1000);
+            }
+
             spinner.IsVisible = true;
             fetchingRain = true;
             firstFetch = false;
-            var uri = string.Format("http://gps.buienradar.nl/getrr.php?lat={0}&lon={1}", location.Latitude, location.Longitude);
+            var uri = string.Format("http://gps.buienradar.nl/getrr.php?lat={0:0.000000}&lon={1:0.000000}", location.Latitude, location.Longitude);
 
             var wc = new WebClient();
             wc.DownloadStringCompleted += (sender, args) => {
@@ -410,5 +421,7 @@ namespace Drash
             }
 
         }
+
+
     }
 }
