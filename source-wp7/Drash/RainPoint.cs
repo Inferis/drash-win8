@@ -1,12 +1,18 @@
 using System;
 using System.Globalization;
+using System.Runtime.Serialization;
 
 namespace Drash
 {
-    internal class RainPoint
+    public class RainPoint
     {
         static Random rnd = new Random();
-        
+
+        public RainPoint()
+        {
+            
+        }
+
         private RainPoint(DateTime stamp, int value)
         {
             Stamp = stamp;
@@ -17,11 +23,11 @@ namespace Drash
             Intensity = (int)Math.Round(1 / (1 + Math.Pow(Math.E, -logisticIntensity)) * 100);
         }
 
-        public DateTime Stamp { get; private set; }
-        public int Value { get; private set; }
-        public int AdjustedValue { get; private set; }
-        public int Intensity { get; private set; }
-        public double Precipitation { get; private set; }
+        public DateTime Stamp { get; set; }
+        public int Value { get; set; }
+        public int AdjustedValue { get; set; }
+        public int Intensity { get; set; }
+        public double Precipitation { get; set; }
 
         public static RainPoint Parse(string source)
         {

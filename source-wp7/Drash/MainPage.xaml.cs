@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Device.Location;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.Serialization;
 using System.Threading;
 using System.Windows;
 using System.Windows.Media;
@@ -19,18 +21,34 @@ namespace Drash
     {
         private readonly GeoCoordinateWatcher watcher;
         private bool fetchingRain;
-        private RainData rain;
-        private GeoCoordinate location;
-        private string locationName;
         private readonly DelayedAction updateLocation;
         private readonly DelayedAction updateLocationName;
         private readonly DelayedAction updateRain;
         private bool firstFetch;
-        private DrashError error = DrashError.None;
-        private bool rainWasUpdated = false;
         private readonly Color graphStrokeColor;
         private readonly Color graphFillFrom;
-        private bool goodLocationName;
+
+        private bool loaded;
+
+        public Model Model
+        {
+            get { return ((App)Application.Current).Model; }
+        }
+
+        public void UpdateStateFromModel()
+        {
+            Location.Opacity = Model.LocationShown ? 1 : 0;
+            DataRoot.Opacity = Model.DataRootShown ? 1 : 0;
+            ErrorImage.Opacity = Model.ErrorImageShown ? 1 : 0;
+            Chance.Opacity = Model.ChanceShown ? 1 : 0;
+            IntensityImage.Opacity = Model.IntensityValueShown ? 0 : 1;
+            IntensityValue.Opacity = Model.IntensityValueShown ? 1 : 0;
+            updateLocation.Cancel();
+            updateLocationName.Cancel();
+
+            UpdateState();
+            updateRain.Run(FetchRain);
+        }
 
         // Constructor
         public MainPage()
@@ -41,15 +59,15 @@ namespace Drash
             updateLocation = new DelayedAction(Dispatcher);
             updateRain = new DelayedAction(Dispatcher, 3 * 60 * 1000);
 
+            UpdateStateFromModel();
+
             watcher = new GeoCoordinateWatcher { MovementThreshold = 500 };
             watcher.PositionChanged += (s, a) => {
-                if (location != null && location.GetDistanceTo(a.Position.Location) < 20)
+                if (Model.Location != null && Model.Location.GetDistanceTo(a.Position.Location) < 20)
                     return;
                 UpdateLocation(a.Position.Location);
             };
-            watcher.StatusChanged += (o, args) => {
-                UpdateLocation(watcher.Position.Location);
-            };
+            watcher.StatusChanged += (o, args) => UpdateLocation(watcher.Position.Location);
 
             graphStrokeColor = ((SolidColorBrush)Graph.Stroke).Color;
             graphFillFrom = ((LinearGradientBrush)Graph.Fill).GradientStops[0].Color;
@@ -64,6 +82,8 @@ namespace Drash
 
         private void MainPageLoaded(object sender, System.Windows.RoutedEventArgs e)
         {
+            loaded = true;
+
             SplashFadeout.Begin(() => {
                 GestureService.GetGestureListener(this).Hold += (o, args) => FetchRain();
             });
@@ -78,22 +98,22 @@ namespace Drash
         private void UpdateLocation(GeoCoordinate newLocation)
         {
             if (newLocation == null || newLocation.IsUnknown) {
-                locationName = "";
-                goodLocationName = false;
+                Model.LocationName = "";
+                Model.GoodLocationName = false;
                 UpdateState();
                 return;
             }
 
-            var delay = firstFetch || (location == null || location.IsUnknown) ||
-                        location.GetDistanceTo(newLocation) > 500
+            var delay = firstFetch || (Model.Location == null || Model.Location.IsUnknown) ||
+                        Model.Location.GetDistanceTo(newLocation) > 500
                             ? 0
                             : 2000;
             updateLocation.Run(() => {
-                location = newLocation;
+                Model.Location = newLocation;
                 UpdateState();
                 FetchRain();
 
-                if (location != null && !location.IsUnknown) {
+                if (Model.Location != null && !Model.Location.IsUnknown) {
                     updateLocationName.Run(ResolveCurrentLocation, 1000);
                 }
             }, delay);
@@ -101,7 +121,7 @@ namespace Drash
 
         private void ResolveCurrentLocation()
         {
-            if (location == null || location.IsUnknown)
+            if (Model.Location == null || Model.Location.IsUnknown)
                 return;
 
             var resolver = new CivicAddressResolver();
@@ -110,35 +130,35 @@ namespace Drash
                     ResolveCurrentLocationThroughGoogle();
                 }
                 else {
-                    locationName = string.Format("{0}, {1}", args.Address.City, args.Address.CountryRegion);
-                    goodLocationName = true;
+                    Model.LocationName = string.Format("{0}, {1}", args.Address.City, args.Address.CountryRegion);
+                    Model.GoodLocationName = true;
                     UpdateState();
                 }
             };
-            resolver.ResolveAddressAsync(location);
+            resolver.ResolveAddressAsync(Model.Location);
         }
 
         private void ResolveCurrentLocationThroughGoogle()
         {
-            if (location == null || location.IsUnknown)
+            if (Model.Location == null || Model.Location.IsUnknown)
                 return;
 
             var resolver = new GoogleAddressResolver();
             resolver.ResolveAddressCompleted += (o, args) => {
                 if (args.Address == null || args.Address.IsUnknown) {
-                    if (location != null && !location.IsUnknown) {
-                        locationName = string.Format("{0:0.000000}, {1:0.000000}", location.Latitude, location.Longitude);
-                        goodLocationName = false;
+                    if (Model.Location != null && !Model.Location.IsUnknown) {
+                        Model.LocationName = string.Format("{0:0.000000}, {1:0.000000}", Model.Location.Latitude, Model.Location.Longitude);
+                        Model.GoodLocationName = false;
                     }
                 }
                 else {
-                    locationName = string.Format("{0}, {1}", args.Address.City,
+                    Model.LocationName = string.Format("{0}, {1}", args.Address.City,
                                                  args.Address.CountryRegion);
-                    goodLocationName = true;
+                    Model.GoodLocationName = true;
                 }
                 UpdateState();
             };
-            resolver.ResolveAddressAsync(location);
+            resolver.ResolveAddressAsync(Model.Location);
         }
 
         private void FetchRain()
@@ -146,7 +166,7 @@ namespace Drash
             if (fetchingRain) return;
 
             updateRain.Cancel();
-            if (location == null || location.IsUnknown) {
+            if (Model.Location == null || Model.Location.IsUnknown) {
                 updateRain.Run(FetchRain);
                 return;
             }
@@ -158,23 +178,23 @@ namespace Drash
             }
 
             // if we don't have a good location name, try to update it
-            if (!goodLocationName && location != null && !location.IsUnknown) {
+            if (Model.GoodLocationName && Model.Location != null && !Model.Location.IsUnknown) {
                 updateLocationName.Run(ResolveCurrentLocation, 1000);
             }
 
             spinner.IsVisible = true;
             fetchingRain = true;
             firstFetch = false;
-            var uri = string.Format("http://gps.buienradar.nl/getrr.php?lat={0:0.000000}&lon={1:0.000000}", location.Latitude, location.Longitude);
+            var uri = string.Format("http://gps.buienradar.nl/getrr.php?lat={0:0.000000}&lon={1:0.000000}", Model.Location.Latitude, Model.Location.Longitude);
 
             var wc = new WebClient();
             wc.DownloadStringCompleted += (sender, args) => {
                 if (args.Error == null) {
-                    RainData.TryParse(args.Result, out rain);
+                    RainData.TryParse(args.Result, out Model.Rain);
                     fetchingRain = false;
                 }
                 spinner.IsVisible = false;
-                rainWasUpdated = true;
+                Model.RainWasUpdated = true;
                 UpdateState();
                 updateRain.Run(FetchRain);
             };
@@ -183,18 +203,21 @@ namespace Drash
 
         private void UpdateState()
         {
+            if (!loaded)
+                return;
+
             try {
                 if (!NetworkInterface.GetIsNetworkAvailable()) {
-                    error = DrashError.NoNetwork;
+                    Model.Error = DrashError.NoNetwork;
                     return;
                 }
 
-                if (location == null || location.IsUnknown) {
-                    error = DrashError.NoLocation;
+                if (Model.Location == null || Model.Location.IsUnknown) {
+                    Model.Error = DrashError.NoLocation;
                     return;
                 }
 
-                error = DrashError.None;
+                Model.Error = DrashError.None;
             }
             finally {
                 UpdateVisuals();
@@ -203,37 +226,42 @@ namespace Drash
 
         private void UpdateVisuals()
         {
-            if (error != DrashError.None) {
-                VisualizeError(error);
+            if (Model.Error != DrashError.None) {
+                VisualizeError(Model.Error);
                 return;
             }
 
-            if (ErrorImage.Opacity > 0) {
+            if (Model.ErrorImageShown) {
                 ErrorImage.FadeOut(UpdateVisuals);
+                Model.ErrorImageShown = false;
                 return;
             }
 
-            if (string.IsNullOrEmpty(locationName) && rain == null) {
-                if (DataRoot.Opacity > 0)
+            if (string.IsNullOrEmpty(Model.LocationName) && Model.Rain == null) {
+                if (Model.DataRootShown) {
                     DataRoot.FadeOut();
+                    Model.DataRootShown = false;
+                }
                 return;
             }
 
-            VisualizeRain(rain);
-            VisualizeLocation(locationName);
+            VisualizeRain(Model.Rain);
+            VisualizeLocation(Model.LocationName);
         }
 
         private void VisualizeError(DrashError drashError)
         {
-            if (DataRoot.Opacity > 0) {
-                DataRoot.FadeIn(() => VisualizeError(drashError));
+            if (Model.DataRootShown) {
+                DataRoot.FadeOut(() => VisualizeError(drashError));
+                Model.DataRootShown = false;
                 return;
             }
 
             var uri = new Uri(drashError == DrashError.NoLocation ? "Resources/nolocation.png" : "Resources/nonetwork.png", UriKind.Relative);
-            if (ErrorImage.Opacity == 0) {
+            if (!Model.ErrorImageShown) {
                 ErrorImage.Source = new BitmapImage(uri);
                 ErrorImage.FadeIn();
+                Model.ErrorImageShown = true;
                 return;
             }
 
@@ -245,15 +273,17 @@ namespace Drash
         private void VisualizeLocation(string name)
         {
             ShowData(animated => {
-                if (DataRoot.Opacity < 1) {
+                if (!Model.DataRootShown) {
                     Location.Opacity = 1;
+                    Model.LocationShown = true;
                     Location.Text = name;
                     return;
                 }
 
-                if (Location.Opacity < 1) {
+                if (!Model.LocationShown) {
                     Location.Text = name;
                     Location.FadeIn();
+                    Model.LocationShown = true;
                     return;
                 }
 
@@ -269,8 +299,8 @@ namespace Drash
 
         private void VisualizeRain(RainData rainData)
         {
-            var animate = rainWasUpdated;
-            rainWasUpdated = false;
+            var animate = Model.RainWasUpdated;
+            Model.RainWasUpdated = false;
             ShowData(animated => {
                 string chanceText;
                 Color chanceColor;
@@ -305,8 +335,9 @@ namespace Drash
                     VisualizeGraph(rainData, animated);
                 };
 
-                if (DataRoot.Opacity < 1 || !animated) {
+                if (!Model.DataRootShown || !animated) {
                     Chance.Opacity = 1;
+                    Model.ChanceShown = true;
                     setter();
                     return;
                 }
@@ -374,27 +405,20 @@ namespace Drash
             Storyboard.SetTargetProperty(fillTopAnim, new PropertyPath(GradientStop.ColorProperty));
             storyboard.Children.Add(fillTopAnim);
 
-            //var fillBottomAnim = new ColorAnimation() { Duration = ms300, FillBehavior = FillBehavior.HoldEnd, To = allZeros ?  : graphFillTo };
-            //Storyboard.SetTarget(fillBottomAnim, ((LinearGradientBrush)Graph.Fill).GradientStops[0]);
-            //Storyboard.SetTargetProperty(fillBottomAnim, new PropertyPath(GradientStop.ColorProperty));
-            //storyboard.Children.Add(fillBottomAnim);
-
             storyboard.Begin(() => Graph.Data = path);
         }
 
         private void ShowData(Action<bool> action)
         {
-            if (ErrorImage.Opacity > 0) {
-                ErrorImage.FadeIn(() => ShowData(action));
+            if (Model.ErrorImageShown) {
+                ErrorImage.FadeOut(() => ShowData(action));
                 return;
             }
 
-            if (DataRoot.Opacity < 1) {
-                var transform = (CompositeTransform)DataRoot.RenderTransform;
-                transform.ScaleX = 0.9;
-                transform.ScaleY = 0.9;
+            if (!Model.DataRootShown) {
                 action(false);
                 DataRoot.FadeIn();
+                Model.DataRootShown = true;
                 return;
             }
 
@@ -408,20 +432,86 @@ namespace Drash
 
         private void InfoButton_Click(object sender, EventArgs e)
         {
+            Model.IsAboutOpen = true;
             NavigationService.Navigate(new Uri("/AboutPage.xaml", UriKind.Relative));
+        }
+
+        protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+            Model.IsAboutOpen = false;
         }
 
         private void Intensity_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
-            if (IntensityImage.Opacity > 0) {
-                IntensityImage.FadeOut(() => IntensityValue.FadeIn(duration: 150), duration: 150);
+            if (Model.IntensityValueShown) {
+                IntensityValue.FadeOut(() => IntensityImage.FadeIn(duration: 150), duration: 150);
+                Model.IntensityValueShown = false;
             }
             else {
-                IntensityValue.FadeOut(() => IntensityImage.FadeIn(duration: 150), duration: 150);
+                IntensityImage.FadeOut(() => IntensityValue.FadeIn(duration: 150), duration: 150);
+                Model.IntensityValueShown = true;
             }
 
         }
 
+        public void RestoreState(IDictionary<string, object> state)
+        {
+            var mustUpdate = false;
+            var mustLocate = false;
 
+            if (state.ContainsKey("lat") && state.ContainsKey("lng")) {
+                Model.Location = new GeoCoordinate((double)state["lat"], (double)state["lng"]);
+                mustLocate = true;
+                mustUpdate = true;
+            }
+
+            if (state.ContainsKey("locationName")) {
+                Model.LocationName = state["locationName"] as string;
+                if (!string.IsNullOrEmpty(Model.LocationName))
+                    mustLocate = false;
+            }
+
+            if (state.ContainsKey("rain")) {
+                using (var buffer = new MemoryStream((byte[])state["rain"])) {
+                    var serializer = new DataContractSerializer(typeof(RainData), new[] { typeof(RainPoint) });
+                    Model.Rain = (RainData)serializer.ReadObject(buffer);
+                }
+
+                Model.RainWasUpdated = true;
+            }
+
+            if (!mustUpdate) return;
+
+            if (mustLocate)
+                UpdateLocation(Model.Location);
+            UpdateState();
+        }
+
+        public void StoreState(IDictionary<string, object> state)
+        {
+            if (Model.Location == null || Model.Location.IsUnknown) {
+                if (state.ContainsKey("lat")) state.Remove("lat");
+                if (state.ContainsKey("lng")) state.Remove("lng");
+            }
+            else {
+                state["lat"] = Model.Location.Latitude;
+                state["lng"] = Model.Location.Longitude;
+            }
+
+
+            state["name"] = Model.LocationName;
+            if (Model.Rain == null) {
+                if (state.ContainsKey("rain")) state.Remove("rain");
+            }
+            else {
+                var serializer = new DataContractSerializer(typeof(RainData), new[] { typeof(RainPoint) });
+                using (var buffer = new MemoryStream()) {
+                    serializer.WriteObject(buffer, Model.Rain);
+                    buffer.Flush();
+                    state["rain"] = buffer.GetBuffer();
+                }
+            }
+        }
     }
 }

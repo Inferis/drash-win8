@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.IsolatedStorage;
 using System.Linq;
 using System.Net;
 using System.Windows;
@@ -10,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Xml.Serialization;
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Shell;
 
@@ -22,6 +25,7 @@ namespace Drash
         /// </summary>
         /// <returns>The root frame of the Phone Application.</returns>
         public PhoneApplicationFrame RootFrame { get; private set; }
+        public Model Model { get; private set; }
 
         /// <summary>
         /// Constructor for the Application object.
@@ -55,31 +59,70 @@ namespace Drash
                 // and consume battery power when the user is not using the phone.
                 PhoneApplicationService.Current.UserIdleDetectionMode = IdleDetectionMode.Disabled;
             }
-
         }
 
         // Code to execute when the application is launching (eg, from Start)
         // This code will not execute when the application is reactivated
         private void Application_Launching(object sender, LaunchingEventArgs e)
         {
+            using (var store = IsolatedStorageFile.GetUserStoreForApplication()) {
+                if (store.FileExists("model.state")) {
+                    using (var stream = new IsolatedStorageFileStream("model.state", FileMode.OpenOrCreate, FileAccess.Read, store)) {
+                        using (var reader = new StreamReader(stream)) {
+                            if (!reader.EndOfStream) {
+                                var serializer = new XmlSerializer(typeof(Model));
+                                Model = (Model)serializer.Deserialize(reader);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // if the view model is not loaded, create a new one
+            if (Model == null) {
+                Model = new Model();
+            }
         }
 
         // Code to execute when the application is activated (brought to foreground)
         // This code will not execute when the application is first launched
         private void Application_Activated(object sender, ActivatedEventArgs e)
         {
+            if (e.IsApplicationInstancePreserved) {
+                return;
+            }
+
+            if (PhoneApplicationService.Current.State.ContainsKey("Model")) {
+                Model = (Model)PhoneApplicationService.Current.State["Model"];
+                var mp = RootFrame.Content as MainPage;
+                if (mp != null)
+                    mp.UpdateStateFromModel();
+            }
         }
 
         // Code to execute when the application is deactivated (sent to background)
         // This code will not execute when the application is closing
         private void Application_Deactivated(object sender, DeactivatedEventArgs e)
         {
+            PhoneApplicationService.Current.State["Model"] = Model;
+            SaveToPersistentStorage();
         }
 
         // Code to execute when the application is closing (eg, user hit Back)
         // This code will not execute when the application is deactivated
         private void Application_Closing(object sender, ClosingEventArgs e)
         {
+            SaveToPersistentStorage();
+        }
+
+        private void SaveToPersistentStorage()
+        {
+            using (var store = IsolatedStorageFile.GetUserStoreForApplication()) {
+                using (var stream = new IsolatedStorageFileStream("model.state", FileMode.Create, FileAccess.Write, store)) {
+                    var serializer = new XmlSerializer(typeof(Model));
+                    serializer.Serialize(stream, Model);
+                }
+            }
         }
 
         // Code to execute if a navigation fails
