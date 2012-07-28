@@ -118,7 +118,6 @@
     <Content Include="Toolkit.Content\ApplicationBar.Select.png" />
     <Resource Include="Resources\intensity4.png" />
     <Resource Include="Resources\nolocation.png" />
-    <Resource Include="SubmissionInfo\nonetwork.png" />
     <Resource Include="Resources\nonetwork.png" />
     <Content Include="SplashScreenImage.jpg" />
     <Content Include="Screenshot1.png" />
