@@ -61,11 +61,14 @@
     UIBezierPath* path = [UIBezierPath bezierPath];
     [path moveToPoint:(CGPoint) { 0, height }];
 
-    CGFloat minY = height-bottom;
+    CGFloat max = (height-bottom);
+    CGFloat minY = max;
     CGFloat x = 0;
     BOOL allZero = YES;
     if (_points) {
         for (RainPoint* point in _points) {
+            CGFloat y = MIN(max - ((CGFloat)point.adjustedValue * max / 100.0), max - 10.0);
+            NSLog(@"%i -> %f/%f", point.adjustedValue, y, max);
             if (point.adjustedValue > 0) allZero = NO;
         }
 
@@ -74,7 +77,7 @@
                 CGFloat y = ((100 - MAX(point.adjustedValue, 7)) / 100.0) * (height-bottom);
                 minY = MIN(minY, y);
                 [path addLineToPoint:(CGPoint) { x, y }];
-                x += width/(_points.count-2);
+            x += width/(_points.count-1);
             }
         }
     }
@@ -83,7 +86,7 @@
     if (allZero) {
         for (int i=0; i<7; ++i) {
             [path addLineToPoint:(CGPoint) { x, 0 }];
-            x += width/5;
+            x += width/6;
         }
         minY = (height-bottom)/2.0;
         newColors = [NSArray arrayWithObjects:(id)[UIColor clearColor].CGColor, [UIColor colorWithHex:0x991e4c67].CGColor, nil];

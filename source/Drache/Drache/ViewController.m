@@ -370,6 +370,7 @@
         NSString* query = [NSString stringWithFormat:@"lat=%f&lon=%f",
                            _locationManager.location.coordinate.latitude,
                            _locationManager.location.coordinate.longitude];
+        NSLog(@"%@", query);
         Tin* tin = [Tin new];
         [tin setTimeoutSeconds:30];
         [tin get:@"http://gps.buienradar.nl/getrr.php" query:query success:^(TinResponse *response) {

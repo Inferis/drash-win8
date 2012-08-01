@@ -58,6 +58,7 @@
     NSMutableArray* points = [NSMutableArray array];
     int count = 0;
     for (NSString* line in lines) {
+        NSLog(@"%@", line);
         NSArray* parts = [line componentsSeparatedByString:@"|"];
         if (parts.count < 2)
             continue;
@@ -67,6 +68,7 @@
         NSDate* time = [self scanDate:[parts objectAtIndex:1]];
 
         if ([time timeIntervalSinceDate:now] > -300) {
+            NSLog(@"%@ %d", time, value);
             [points addObject:[[RainPoint alloc] initWithValue:value]];
         }
 
@@ -98,6 +100,10 @@
     _precipitation = totalPrecipitation;
     _points = [NSArray arrayWithArray:points];
     
+    NSLog(@"d: C=%d%% i=%d p=%f", _chance, _intensity, _precipitation);
+    for (RainPoint* p in _points) {
+        NSLog(@"p: v=%d av=%d i=%i, p=%f", p.value, p.adjustedValue, p.intensity, p.precipitation);
+    }
     return YES;
 }
 
