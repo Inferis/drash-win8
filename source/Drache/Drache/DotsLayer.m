@@ -59,10 +59,6 @@
     [@"0:30" drawAtPoint:(CGPoint) { self.bounds.size.width - 2 - sz.width, height*3 - sz.height/2 } withFont:font];
     UIGraphicsPopContext();
 #else
-//    NSGraphicsContext* ctx = [NSGraphicsContext graphicsContextWithGraphicsPort:context flipped:YES];
-//    NSGraphicsContext* wasCtx = [NSGraphicsContext currentContext];
-//    [NSGraphicsContext setCurrentContext:ctx];
-    
     NSDictionary* attributes = @{
         NSFontAttributeName: [NSFont fontWithName:@"HelveticaNeue-Light" size:11],
         NSForegroundColorAttributeName:color
@@ -70,8 +66,6 @@
     CGSize sz = [@"0:30" sizeWithAttributes:attributes];
     [@"0:00" drawAtPoint:(CGPoint) { 2, mheight - 15 - height*3 + sz.height/2 } withAttributes:attributes];
     [@"0:30" drawAtPoint:(CGPoint) { self.bounds.size.width - 2 - sz.width, mheight - 15 - height*3 + sz.height/2 } withAttributes:attributes];
-
-//    [NSGraphicsContext setCurrentContext:wasCtx];
 #endif
     
     
