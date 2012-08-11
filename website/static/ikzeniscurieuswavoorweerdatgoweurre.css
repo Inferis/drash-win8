@@ -1,0 +1,111 @@
+body {
+	background: #efefef url(img/bg.jpg) top left;
+	margin: 0;
+	padding: 0;
+	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", Helvetica;
+	text-align: center;
+	color: #666;
+	font-size: 13pt;
+}
+
+.top {
+	background: #c0c0c0 url(img/gradient.jpg) top center no-repeat;
+	margin: 0;
+	padding: 0 0 50px 0;
+}
+
+h1 {
+	background: url(img/title.png) top left no-repeat;
+	height: 126px;
+	width: 409px;
+	text-indent: -10000px;
+	margin: 0 0 40px 0;
+}
+
+a {
+	color: black;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+.around {
+	width: 1000px;
+	margin: 0 auto;
+	text-align: left;
+}
+
+
+@-webkit-keyframes app {
+	0% {
+		opacity: 0.0;
+		top: -10px;
+	}
+	20% {
+		opacity: 0.0;
+		top: -10px;
+	}
+	100% {
+		top: 0;
+		opacity: 1;
+	}
+}
+
+.app { 
+	position: relative;
+	float: left;
+	background: url(img/app.png) top left repeat-x;
+	width: 520px;
+	height: 667px;
+	animation: app 1s ease-in;
+	-ms-animation: app 1s ease-in;
+	-moz-animation: app 1s ease-in;
+	-webkit-animation: app 1s ease-in;
+}
+
+.info {
+	margin-left: 550px;
+	line-height: 120%;
+	padding-top: 40px;
+	margin-right: 20px;
+	text-align: justify;
+}
+
+.avail {
+	font-size: 28pt;
+	text-align: center;
+	margin-top: 80px;
+	font-family: "HelveticaNeue-Ultralight", "Helvetica Neue Ultralight", Helvetica;
+}
+
+.footer {
+	margin: 0;
+	background: url(img/footer.png) top left repeat-x;
+	height: 200px;
+	font-size: 10pt;
+	font-family: "HelveticaNeue-Medium", "Helvetica Neue Medium", Helvetica;
+}
+
+.footer .around {
+	padding: 30px 20px;
+	background: none;
+}
+
+
+.copy {
+	color: #aaa;
+	float: left;
+	line-height: 40px;
+	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", Helvetica;
+}
+
+.inim {
+	color: #333;
+	text-align: right;
+	background: url(img/inim.png) center right no-repeat;
+	padding-right: 60px;
+	height: 40px;
+	line-height: 40px;
+}
