@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Runtime.Serialization;
 using System.Threading;
 using System.Windows;
@@ -60,6 +61,7 @@ namespace Drash
             updateRain = new DelayedAction(Dispatcher, 3 * 60 * 1000);
 
             UpdateStateFromModel();
+            NetworkChange.NetworkAddressChanged += (sender, args) => UpdateState();
 
             watcher = new GeoCoordinateWatcher { MovementThreshold = 500 };
             watcher.PositionChanged += (s, a) => {
