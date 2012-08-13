@@ -9,9 +9,9 @@ using System.Resources;
 [assembly: AssemblyTitle("Drash")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Interface Implementation")]
 [assembly: AssemblyProduct("Drash")]
-[assembly: AssemblyCopyright("Copyright ©  2012")]
+[assembly: AssemblyCopyright("Copyright © Adriaenssen BVBA  2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

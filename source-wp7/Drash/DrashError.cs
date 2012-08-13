@@ -1,6 +1,6 @@
 namespace Drash
 {
-    internal enum DrashError
+    public enum DrashError
     {
         None,
         NoLocation,

@@ -2,7 +2,7 @@
 
 <Deployment xmlns="http://schemas.microsoft.com/windowsphone/2009/deployment" AppPlatformVersion="7.1">
     <App xmlns="" ProductID="{b464d09b-4fa8-4701-87c6-c37b17a71460}" Title="Drash" 
-         RuntimeType="Silverlight" Version="1.0.0.0" Genre="apps.normal"  Author="Drash author" 
+         RuntimeType="Silverlight" Version="1.0.0.0" Genre="apps.normal"  Author="Interface Implementation" 
          Description="Sample description" Publisher="Drash">
         <IconPath IsRelative="true" IsResource="false">ApplicationIcon.png</IconPath>
         <Capabilities>
