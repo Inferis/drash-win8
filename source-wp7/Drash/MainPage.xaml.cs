@@ -178,7 +178,7 @@ namespace Drash
             }
 
             // if we don't have a good location name, try to update it
-            if (Model.GoodLocationName && Model.Location != null && !Model.Location.IsUnknown) {
+            if (!Model.GoodLocationName && Model.Location != null && !Model.Location.IsUnknown) {
                 updateLocationName.Run(ResolveCurrentLocation, 1000);
             }
 
