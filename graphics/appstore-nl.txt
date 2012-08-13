@@ -1,0 +1,19 @@
+Het weerbericht zegt of het gaat regenen: Drash vertelt je waar en wanneer.
+
+Drash toont in een oogopslag hoeveel kans er is op neerslag op je huidige locatie tijdens het komende half uur. Het percentage geeft aan hoe waarschijnlijk het is dat je een paraplu zal nodig hebben, het wolkje geeft een idee over hoeveel regen je mag verwachten.
+
+Drash downloadt gegevens van buienradar.nl, de verwachtingen werken alleen in Nederland, België en het Groothertogdom Luxemburg. Elders zal je altijd 0% kans op neerslag zien.
+
+Makkelijk te gebruiken;
+- des te hoger het percentage, des te groter de kans dat het zal regenen
+- het wolkje geeft de hevigheid aan
+- tap op het wolkje om de verwachte hoeveelheid neerslag te zien
+
+Waar en wanneer:
+- je ziet enkel de neerslagverwachtingen voor jouw locatie
+- refresh door je vinger op het scherm te houden
+- na 5 minuten of wanneer je locatie verandert refresht Drash vanzelf
+
+Neerslagbalk:
+- een gedetailleerde grafiek toont het verloop voor de volgende 30 minuten
+- laat zien op welk moment het weer beter wordt (of slechter)
