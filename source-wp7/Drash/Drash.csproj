@@ -115,6 +115,12 @@
     <Resource Include="Resources\intensity1.png" />
     <Resource Include="Resources\intensity2.png" />
     <Resource Include="Resources\intensity3.png" />
+    <Resource Include="SubmissionInfo\LargeAppTile.png" />
+    <Content Include="SubmissionInfo\ManualTestResults.xml" />
+    <Resource Include="SubmissionInfo\MarketPlaceTile.png" />
+    <Resource Include="SubmissionInfo\Screenshot1.png" />
+    <Content Include="SubmissionInfo\Settings.xml" />
+    <Resource Include="SubmissionInfo\SmallAppTile.png" />
     <Content Include="Toolkit.Content\ApplicationBar.Cancel.png" />
     <Content Include="Toolkit.Content\ApplicationBar.Check.png" />
     <Content Include="Toolkit.Content\ApplicationBar.Delete.png" />
@@ -129,6 +135,7 @@
     <Resource Include="MarketPlaceTile.png" />
     <Resource Include="Resources\Splash.jpg" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.$(TargetFrameworkProfile).Overrides.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
