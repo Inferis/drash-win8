@@ -1,0 +1,20 @@
+The weather report shows you what to expect: Drash tells you the where and when. 
+
+Dra.sh shows at a glance the chances of rainfall at your current location during the next half hour. The percentage indicates how likely it is you'll need an umbrella, the cloud icon gives an idea about how much rain is expected.
+
+Since Drash downloads data from buienradar.nl the forecast only works in the Netherlands and Belgium. Everywhere else you'll see a 0% chance of rainfall.
+
+Easy to use:
+- the higher the number, the greater the chance it will rain
+- the cloud shows the intensity
+- a tap on the cloud reveals the expected amount
+
+Where and when:
+- only see the forecast for your current location
+- refresh by tapping and holding
+- auto-refresh every 5 minutes or when your position changes
+
+Rain bar:
+- a detailed graph indicates the rainfall progress for the next 30 minutes
+- reveals at what point the weather gets better (or worse)
+- calculated using data from buienradar.nl (Belgium and the Netherlands only)
