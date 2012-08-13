@@ -321,7 +321,7 @@ namespace Drash
                     chanceColor = Colors.DarkGray;
                 }
                 if (rainData != null && (rainData.Intensity > 0 || rainData.Precipitation > 0)) {
-                    var mm = Math.Max(rainData.Precipitation, 0);
+                    var mm = Math.Max(rainData.Precipitation, 0.01);
                     mmText = Math.Floor(mm) == mm ? string.Format("{0}", (int)mm) : string.Format("{0:0.00}", mm);
                     mmImage = ((int)Math.Max(1, Math.Min(1 + rainData.Intensity / 25.0, 4))).ToString(CultureInfo.InvariantCulture);
                 }
