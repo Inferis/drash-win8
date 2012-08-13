@@ -10,6 +10,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
+using Microsoft.Phone.Tasks;
 
 namespace Drash
 {
@@ -18,6 +19,13 @@ namespace Drash
         public AboutPage()
         {
             InitializeComponent();
+        }
+
+        private void BuienRadar_Tap(object sender, System.Windows.Input.GestureEventArgs e)
+        {
+            WebBrowserTask wbTask = new WebBrowserTask();
+            wbTask.Uri = new Uri("http://gratisweerdata.buienradar.nl", UriKind.RelativeOrAbsolute);
+            wbTask.Show();
         }
     }
 }

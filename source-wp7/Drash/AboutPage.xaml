@@ -30,7 +30,11 @@
             <TextBlock Text="Gives the chance of rain at your location in the next 30m." TextWrapping="Wrap" Margin="9,0,0,0" Foreground="Black" FontFamily="Segoe WP Light"/>
             <TextBlock Text="Works only in Belgium and the Netherlands. Updates automatically every 5 minutes or when you move far enough from your original location." TextWrapping="Wrap" Margin="9,10,0,0" Foreground="Black" FontFamily="Segoe WP Light"/>
             <TextBlock Text="Press anywhere on the screen for a few seconds to update manually." TextWrapping="Wrap" Margin="9,10,0,0" Foreground="Black" FontFamily="Segoe WP Light"/>
-            <TextBlock Text="Uses free data from buienradar.nl." TextWrapping="Wrap" Margin="9,50,0,0" Foreground="Black" FontFamily="Segoe WP Light"/>
+            <TextBlock Tap="BuienRadar_Tap" TextWrapping="Wrap" Margin="9,50,0,0" Foreground="Black" FontFamily="Segoe WP Light">
+                <Run Text="Uses free data from" />
+                <Run Text="buienradar.nl" Foreground="#333333" FontFamily="Segoe WP" TextDecorations="Underline" />
+                <Run Text="."/>
+            </TextBlock>
         </StackPanel>
     </Grid>
  
