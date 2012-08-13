@@ -57,7 +57,10 @@
 
                 <Grid Grid.Column="1" x:Name="Intensity" Tap="Intensity_Tap" Margin="-20,0,20,0">
                     <Image x:Name="IntensityImage" Source="Resources/intensity0.png" Stretch="None" />
-                    <TextBlock x:Name="IntensityValue" Text="" FontSize="33" FontFamily="Segoe WP Light" TextAlignment="Center" VerticalAlignment="Center" Opacity="0" />
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" x:Name="IntensityValue" Opacity="0">
+                        <TextBlock x:Name="IntensityValueNumber" Text="0" FontSize="50" FontFamily="Segoe WP Light" TextAlignment="Center" VerticalAlignment="Center" />
+                        <TextBlock Text="mm" FontSize="50" FontFamily="Segoe WP Light" TextAlignment="Center" VerticalAlignment="Center" Margin="0,-20,0,0"/>
+                    </StackPanel>
                 </Grid>
             </Grid>
 

@@ -318,11 +318,11 @@ namespace Drash
                 }
                 if (rainData != null && (rainData.Intensity > 0 || rainData.Precipitation > 0)) {
                     var mm = Math.Max(rainData.Precipitation, 0);
-                    mmText = Math.Floor(mm) == mm ? string.Format("{0}mm", (int)mm) : string.Format("{0:0.00}mm", mm);
+                    mmText = Math.Floor(mm) == mm ? string.Format("{0}", (int)mm) : string.Format("{0:0.00}", mm);
                     mmImage = ((int)Math.Max(1, Math.Min(1 + rainData.Intensity / 25.0, 4))).ToString(CultureInfo.InvariantCulture);
                 }
                 else {
-                    mmText = "0mm";
+                    mmText = "0";
                     mmImage = "0";
                 }
                 mmImage = string.Format("Resources/intensity{0}.png", mmImage);
@@ -330,7 +330,7 @@ namespace Drash
                 Action setter = () => {
                     Chance.Text = chanceText;
                     Chance.Foreground = new SolidColorBrush(chanceColor);
-                    IntensityValue.Text = mmText;
+                    IntensityValueNumber.Text = mmText;
                     IntensityImage.Source = new BitmapImage(new Uri(mmImage, UriKind.Relative));
                     VisualizeGraph(rainData, animated);
                 };
