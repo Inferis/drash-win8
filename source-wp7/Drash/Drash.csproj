@@ -119,6 +119,10 @@
     <Content Include="SubmissionInfo\ManualTestResults.xml" />
     <Resource Include="SubmissionInfo\MarketPlaceTile.png" />
     <Resource Include="SubmissionInfo\Screenshot1.png" />
+    <Resource Include="SubmissionInfo\Screenshot2.png" />
+    <Resource Include="SubmissionInfo\Screenshot3.png" />
+    <Resource Include="SubmissionInfo\Screenshot4.png" />
+    <Resource Include="SubmissionInfo\Screenshot5.png" />
     <Content Include="SubmissionInfo\Settings.xml" />
     <Resource Include="SubmissionInfo\SmallAppTile.png" />
     <Content Include="Toolkit.Content\ApplicationBar.Cancel.png" />
