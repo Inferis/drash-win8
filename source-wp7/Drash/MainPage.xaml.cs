@@ -265,6 +265,10 @@ namespace Drash
                 return;
             }
 
+            var current = ErrorImage.Source as BitmapImage;
+            if (current != null && uri == current.UriSource)
+                return;
+
             ErrorImage.FadeOutThenIn(between: () => {
                 ErrorImage.Source = new BitmapImage(uri);
             });
