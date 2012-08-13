@@ -50,8 +50,11 @@ namespace Drash
                         return new CivicAddress();
 
                     var result = doc.Root.Descendants("result").WithTypeValue("street_address").FirstOrDefault();
-                    if (result == null)
-                        return new CivicAddress();
+                    if (result == null) {
+                        result = doc.Root.Descendants("result").WithTypeValue("route").FirstOrDefault();
+                        if (result == null)
+                            return new CivicAddress();
+                    }
 
                     var components = result.Elements("address_component").ToArray();
                     var addressLine1 = string.Format("{0} {1}",
