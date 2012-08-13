@@ -22,7 +22,7 @@
 
     <!--LayoutRoot is the root grid where all page content is placed-->
     <Grid x:Name="LayoutRoot" Background="Black">
-        <Grid x:Name="DataRoot" Background="Transparent" Opacity="0" RenderTransformOrigin="0.5,0.5">
+        <Grid x:Name="DataRoot" Background="Transparent" RenderTransformOrigin="0.5,0.5" Opacity="0">
             <Grid.RenderTransform>
                 <CompositeTransform />
             </Grid.RenderTransform>
@@ -42,7 +42,12 @@
                     </TextBlock.RenderTransform>
                 </TextBlock>
             </Grid>
-            <Path Data="M0,0 L480,0" Stretch="UniformToFill" Grid.Row="1" StrokeDashArray="1 4" Stroke="White" Opacity="0.8" StrokeThickness="1" />
+            <Line X1="0" Y1="0" X2="{Binding ActualWidth, ElementName=LayoutRoot}" Y2="0" 
+                  StrokeThickness="2" Stretch="UniformToFill"
+                  VerticalAlignment="Top" 
+				  UseLayoutRounding="False" Grid.Row="1" StrokeDashArray="1 1" Stroke="White" 
+                  Grid.RowSpan="2"
+				  Opacity="0.6" />
 
             <Grid Grid.Row="2" x:Name="DataGrid">
                 <Grid.RenderTransform>
@@ -64,7 +69,12 @@
                 </Grid>
             </Grid>
 
-            <Path Data="M0,0 L480,0" Stretch="UniformToFill" Grid.Row="3" StrokeDashArray="1 4" Stroke="White" Opacity="0.8" StrokeThickness="1" />
+            <Line X1="0" Y1="0" X2="{Binding ActualWidth, ElementName=LayoutRoot}" Y2="0" 
+                  StrokeThickness="2" Stretch="UniformToFill"
+                  VerticalAlignment="Top" 
+				  UseLayoutRounding="False" Grid.Row="3" StrokeDashArray="1 1" Stroke="White" 
+                  Grid.RowSpan="2"
+				  Opacity="0.6" />
 
             <Grid Grid.Row="4">
                 <Path x:Name="Graph" Stroke="#40a1d9" StrokeThickness="3">
@@ -79,7 +89,6 @@
 
                 </Path>
             </Grid>
-
         </Grid>
 
         <Image Stretch="None" x:Name="Splash" Source="Resources/Splash.jpg" HorizontalAlignment="Center" VerticalAlignment="Center">
