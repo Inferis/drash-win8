@@ -1,0 +1,11 @@
+This app does one task: it gives the probability of rain occuring in the next half our, at your current location. 
+
+Basically, that's all it does. Just fire it up, let it load and check the chance of you getting wet when stepping out for groceries (for example). It'll give you a percentage indicating the probability of you getting wet. 
+
+You can also see if it'll rain hard (tap the cloud icon to see how much rain is predicted to fall), and you'll get a nice graph of rain intensity in the next half hour, so you know what to expect.
+
+It will automatically reevaluate your rain situation after 5 minutes, or when you move far enough from your current location to warrant it a refresh. 
+
+You can manually update the rain status using a long press on the screen (2 seconds or so). 
+
+You’ll only get useful results when used in Belgium, the Netherlands or Luxembourg since it uses data provided by Buienradar.nl. It will function outside those countries, but the results will be incorrect (you'll always get 0%).
