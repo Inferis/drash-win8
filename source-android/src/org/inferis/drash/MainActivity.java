@@ -3,17 +3,13 @@ package org.inferis.drash;
 import android.os.Bundle;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.RelativeLayout;
-import android.widget.LinearLayout;
-import android.widget.ImageView;
-import android.view.animation.*;
-import android.view.animation.Animation.AnimationListener;
+import com.nineoldandroids.animation.*;
+import com.nineoldandroids.animation.Animator.AnimatorListener;
 
-@SuppressLint("NewApi")
 public class MainActivity extends Activity implements View.OnTouchListener {
 	private boolean intensityValueShown;
 	
@@ -35,58 +31,68 @@ public class MainActivity extends Activity implements View.OnTouchListener {
 
     public boolean onTouch(View v, MotionEvent event) {
     	if (event.getAction() != MotionEvent.ACTION_UP) return true;
-    	Log.v("DRASH", "action = " + event.getAction() + ", shown = " + intensityValueShown);
     	
     	final View intensityImage = findViewById(R.id.intensityImage);
     	final View intensityValue = findViewById(R.id.intensityValue);
     	
     	if (intensityValueShown) {
-    		fadeOut(intensityValue, new Completion() {
+    		fadeOut(intensityValue, true, new Completion() {
 				public void onComplete() {
-		    		fadeIn(intensityImage, null);
+		    		fadeIn(intensityImage, true, null);
 				}
 			});
     	}
     	else {
-    		fadeOut(intensityImage, new Completion() {
+    		fadeOut(intensityImage, true, new Completion() {
 				public void onComplete() {
-		    		fadeIn(intensityValue, null);
+		    		fadeIn(intensityValue, true, null);
 				}
 			});
     	}
-    	
 
     	intensityValueShown = !intensityValueShown;
     	return true;
     }
     
-    private void fadeIn(final View view, final Completion completion) {
-		Animation anim = AnimationUtils.loadAnimation(this, R.anim.fade_in);
-		anim.setFillAfter(true);
-		anim.setAnimationListener(new AnimationListener() {
-			public void onAnimationStart(Animation animation) {}
-			public void onAnimationRepeat(Animation animation) {}
-			public void onAnimationEnd(Animation animation) {
+    private void fadeIn(final View view, boolean fast, final Completion completion) {
+    	AnimatorSet set = new AnimatorSet();
+    	set.playTogether(
+		    ObjectAnimator.ofFloat(view, "scaleX", 0.9f, 1f),
+		    ObjectAnimator.ofFloat(view, "scaleY", 0.9f, 1f),
+		    ObjectAnimator.ofFloat(view, "alpha", 0f, 1f)
+		);
+		set.addListener(new AnimatorListener() {
+			public void onAnimationStart(Animator animation) {}
+			public void onAnimationRepeat(Animator animation) {}
+			public void onAnimationEnd(Animator animation) {
+				if (completion != null)	completion.onComplete();
+			}
+			public void onAnimationCancel(Animator animation) {
 				if (completion != null)	completion.onComplete();
 			}
 		});
-    	Log.v("DRASH", "fadein " + view.getId());
-		view.startAnimation(anim);
+		set.setDuration(fast ? 150 : 300).start();
     }
     
-    private void fadeOut(final View view, final Completion completion) {
-		Animation anim = AnimationUtils.loadAnimation(this, R.anim.fade_out);
-		anim.setFillAfter(true);
-		anim.setAnimationListener(new AnimationListener() {
-			public void onAnimationStart(Animation animation) {}
-			public void onAnimationRepeat(Animation animation) {}
-			public void onAnimationEnd(Animation animation) {
+    private void fadeOut(final View view, boolean fast, final Completion completion) {
+    	AnimatorSet set = new AnimatorSet();
+    	set.playTogether(
+		    ObjectAnimator.ofFloat(view, "scaleX", 1f, 0.9f),
+		    ObjectAnimator.ofFloat(view, "scaleY", 1f, 0.9f),
+		    ObjectAnimator.ofFloat(view, "alpha", 1f, 0f)
+		);
+		set.addListener(new AnimatorListener() {
+			public void onAnimationStart(Animator animation) {}
+			public void onAnimationRepeat(Animator animation) {}
+			public void onAnimationEnd(Animator animation) {
+				if (completion != null)	completion.onComplete();
+			}
+			public void onAnimationCancel(Animator animation) {
 				if (completion != null)	completion.onComplete();
 			}
 		});
-    	Log.v("DRASH", "fadeout " + view.getId());
-		view.startAnimation(anim);
-    }
+		set.setDuration(fast ? 150 : 300).start();
+   }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -94,6 +100,7 @@ public class MainActivity extends Activity implements View.OnTouchListener {
         return true;
     }
     
+    @SuppressLint("NewApi")
     public void disableHardwareRendering(View v) {
         if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {
             v.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
