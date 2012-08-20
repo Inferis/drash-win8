@@ -30,6 +30,7 @@ namespace Drash
         private readonly Color graphFillFrom;
 
         private bool loaded;
+        private bool updatingLocation = false;
 
         public Model Model
         {
@@ -97,13 +98,13 @@ namespace Drash
 
         }
 
-        private void UpdateLocation(GeoCoordinate newLocation)
+        private bool UpdateLocation(GeoCoordinate newLocation)
         {
             if (newLocation == null || newLocation.IsUnknown) {
                 Model.LocationName = "";
                 Model.GoodLocationName = false;
                 UpdateState();
-                return;
+                return false;
             }
 
             var delay = firstFetch || (Model.Location == null || Model.Location.IsUnknown) ||
@@ -119,6 +120,7 @@ namespace Drash
                     updateLocationName.Run(ResolveCurrentLocation, 1000);
                 }
             }, delay);
+            return true;
         }
 
         private void ResolveCurrentLocation()
@@ -126,6 +128,8 @@ namespace Drash
             if (Model.Location == null || Model.Location.IsUnknown)
                 return;
 
+            updatingLocation = true;
+            UpdateSpinner();
             var resolver = new CivicAddressResolver();
             resolver.ResolveAddressCompleted += (o, args) => {
                 if (args.Address == null || args.Address.IsUnknown) {
@@ -134,6 +138,8 @@ namespace Drash
                 else {
                     Model.LocationName = string.Format("{0}, {1}", args.Address.City, args.Address.CountryRegion);
                     Model.GoodLocationName = true;
+                    updatingLocation = false;
+                    UpdateSpinner();
                     UpdateState();
                 }
             };
@@ -147,6 +153,7 @@ namespace Drash
 
             var resolver = new GoogleAddressResolver();
             resolver.ResolveAddressCompleted += (o, args) => {
+                updatingLocation = false;
                 if (args.Address == null || args.Address.IsUnknown) {
                     if (Model.Location != null && !Model.Location.IsUnknown) {
                         Model.LocationName = string.Format("{0:0.000000}, {1:0.000000}", Model.Location.Latitude, Model.Location.Longitude);
@@ -154,10 +161,10 @@ namespace Drash
                     }
                 }
                 else {
-                    Model.LocationName = string.Format("{0}, {1}", args.Address.City,
-                                                 args.Address.CountryRegion);
+                    Model.LocationName = string.Format("{0}, {1}", args.Address.City, args.Address.CountryRegion);
                     Model.GoodLocationName = true;
                 }
+                UpdateSpinner();
                 UpdateState();
             };
             resolver.ResolveAddressAsync(Model.Location);
@@ -169,22 +176,26 @@ namespace Drash
 
             updateRain.Cancel();
             if (Model.Location == null || Model.Location.IsUnknown) {
-                updateRain.Run(FetchRain);
+                // no location, schedule new fetch
+                if (!UpdateLocation(watcher.Position.Location))
+                    updateRain.Run(FetchRain);
                 return;
             }
 
             if (!NetworkInterface.GetIsNetworkAvailable()) {
+                // no network, schedule new fetch
                 UpdateState();
                 updateRain.Run(FetchRain);
                 return;
             }
 
             // if we don't have a good location name, try to update it
-            if (!Model.GoodLocationName && Model.Location != null && !Model.Location.IsUnknown) {
+            if (!Model.GoodLocationName) {
+                // also try to resolve location
                 updateLocationName.Run(ResolveCurrentLocation, 1000);
             }
 
-            spinner.IsVisible = true;
+            UpdateSpinner();
             fetchingRain = true;
             firstFetch = false;
             var uri = string.Format("http://gps.buienradar.nl/getrr.php?lat={0:0.000000}&lon={1:0.000000}", Model.Location.Latitude, Model.Location.Longitude);
@@ -195,7 +206,7 @@ namespace Drash
                     RainData.TryParse(args.Result, out Model.Rain);
                     fetchingRain = false;
                 }
-                spinner.IsVisible = false;
+                UpdateSpinner();
                 Model.RainWasUpdated = true;
                 UpdateState();
                 updateRain.Run(FetchRain);
@@ -203,6 +214,10 @@ namespace Drash
             wc.DownloadStringAsync(new Uri(uri));
         }
 
+        private void UpdateSpinner()
+        {
+            spinner.IsVisible = fetchingRain || updatingLocation;
+        }
         private void UpdateState()
         {
             if (!loaded)
