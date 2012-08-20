@@ -218,6 +218,7 @@ namespace Drash
         {
             spinner.IsVisible = fetchingRain || updatingLocation;
         }
+
         private void UpdateState()
         {
             if (!loaded)
@@ -337,10 +338,21 @@ namespace Drash
                     chanceText = "?";
                     chanceColor = Colors.DarkGray;
                 }
-                if (rainData != null && (rainData.Intensity > 0 || rainData.Precipitation > 0)) {
-                    var mm = Math.Max(rainData.Precipitation, 0.01);
-                    mmText = Math.Floor(mm) == mm ? string.Format("{0}", (int)mm) : string.Format("{0:0.00}", mm);
-                    mmImage = ((int)Math.Max(1, Math.Min(1 + rainData.Intensity / 25.0, 4))).ToString(CultureInfo.InvariantCulture);
+
+                var intensity = 0;
+                var mm = 0.0;
+                if (rainData != null) {
+                    mm = rainData.Precipitation;
+                    intensity = rainData.Intensity;
+                }
+
+                if (intensity > 0 || mm > 0) {
+                    mm = Math.Max(mm, 0.001);
+                    intensity = ((int)Math.Max(1, Math.Min(1 + intensity / 25.0, 4)));
+
+                    var format = mm < 0.01 ? "{0:0.00}" : "{0:0.000}";
+                    mmText = Math.Floor(mm) == mm ? string.Format("{0}", (int)mm) : string.Format(format, mm);
+                    mmImage = intensity.ToString(CultureInfo.InvariantCulture);
                 }
                 else {
                     mmText = "0";
