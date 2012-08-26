@@ -1,5 +1,11 @@
 package org.inferis.drash;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+
+import android.location.*;
+import android.content.Context;
 import android.os.Bundle;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -12,6 +18,7 @@ import com.nineoldandroids.animation.Animator.AnimatorListener;
 
 public class MainActivity extends Activity implements View.OnTouchListener {
 	private boolean intensityValueShown;
+	private LocationListener locationListener;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -27,8 +34,52 @@ public class MainActivity extends Activity implements View.OnTouchListener {
         // add touch events
         RelativeLayout intensityLayout = (RelativeLayout)findViewById(R.id.intensityLayout);
         intensityLayout.setOnTouchListener(this);
+                
+        // start location
+        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        locationListener = new LocationListener() {
+            public void onLocationChanged(Location location) {
+                locationUpdated(location);
+            }
+
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+            	if (status == LocationProvider.AVAILABLE)
+            		statusChanged(true);
+            	else
+            		statusChanged(false);
+            }
+
+            public void onProviderEnabled(String provider) {
+            	statusChanged(true);
+            }
+            public void onProviderDisabled(String provider) {
+            	statusChanged(false);
+            }
+        };
+
+        // Register the listener with the Location Manager to receive location updates
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 500, locationListener);
     }
 
+    
+    public void locationUpdated(Location newLocation) {
+    	if (newLocation != null) {
+    		
+    	}
+    	else {
+            Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+            try {
+				List<Address> addresses = geocoder.getFromLocation(newLocation.getLatitude(), newLocation.getLongitude(), 1);
+			} catch (IOException e) {
+				
+			}
+    	}
+    }
+    
+    public void statusChanged(boolean online) {
+    	
+    }
+    
     public boolean onTouch(View v, MotionEvent event) {
     	if (event.getAction() != MotionEvent.ACTION_UP) return true;
     	
