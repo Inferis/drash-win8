@@ -73,6 +73,7 @@
     </Compile>
     <Compile Include="DelayedAction.cs" />
     <Compile Include="DrashError.cs" />
+    <Compile Include="DrashSettings.cs" />
     <Compile Include="FadeExtensions.cs" />
     <Compile Include="GoogleAddressResolver.cs" />
     <Compile Include="MainPage.xaml.cs">
