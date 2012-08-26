@@ -407,7 +407,7 @@ namespace Drash
             Func<int, double> xForIndex = idx => idx == 0 ? -2 : idx == pointValues.Count - 1 ? graphSize.Width + 2 : idx * step;
 
             var x = 0;
-            var max = graphSize.Height + 2 - 10;
+            var max = graphSize.Height + 2 - 34;
             var allZeros = pointValues.All(p => p == 0);
             var points = pointValues.Select(v => {
                 var y = allZeros ? max - 40 : Math.Max(1, max - (v * max / 100));
