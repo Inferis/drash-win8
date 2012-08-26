@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Device.Location;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Runtime.Serialization;
-using System.Threading;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -67,7 +65,7 @@ namespace Drash
 
             watcher = new GeoCoordinateWatcher { MovementThreshold = 500 };
             watcher.PositionChanged += (s, a) => {
-                if (Model.Location != null && Model.Location.GetDistanceTo(a.Position.Location) < 20)
+                if (Model.Location != null && !Model.Location.IsUnknown && Model.Location.GetDistanceTo(a.Position.Location) < 20)
                     return;
                 UpdateLocation(a.Position.Location);
             };
@@ -77,19 +75,28 @@ namespace Drash
             graphFillFrom = ((LinearGradientBrush)Graph.Fill).GradientStops[0].Color;
 
             Loaded += MainPageLoaded;
-
-            ThreadPool.QueueUserWorkItem(o => {
-                watcher.Start();
-                firstFetch = watcher.Position != null;
-            });
         }
 
         private void MainPageLoaded(object sender, System.Windows.RoutedEventArgs e)
         {
-            loaded = true;
+            var asked = DrashSettings.LocationAllowedAsked;
+            var allowed = DrashSettings.LocationAllowed;
 
             SplashFadeout.Begin(() => {
+                loaded = true;
+
                 GestureService.GetGestureListener(this).Hold += (o, args) => FetchRain();
+                if (!asked) {
+                    var result = MessageBox.Show("Would you like to display the rain forecast based on your current location? This will send your location to buienradar.nl to retrieve the forecast. You can disable location services in the About screen.", "Enable location services?", MessageBoxButton.OKCancel);
+                    allowed = result == MessageBoxResult.OK;
+                    DrashSettings.LocationAllowed = allowed;
+                }
+
+                if (allowed) {
+                    watcher.Start();
+                    firstFetch = watcher.Position != null;
+                }
+
             });
 
             TransitionService.SetNavigationInTransition(this, new NavigationInTransition() {
@@ -199,7 +206,7 @@ namespace Drash
             UpdateSpinner();
             fetchingRain = true;
             firstFetch = false;
-            var uri = string.Format("http://gps.buienradar.nl/getrr.php?lat={0:0.000000}&lon={1:0.000000}", Model.Location.Latitude, Model.Location.Longitude);
+            var uri = string.Format("http://gps.buienradar.nl/getrr.php?lat={0:0.000000}&lon={1:0.000000}&stamp={2}", Model.Location.Latitude, Model.Location.Longitude, DateTime.UtcNow.Ticks);
 
             var wc = new WebClient();
             wc.DownloadStringCompleted += (sender, args) => {
@@ -222,9 +229,6 @@ namespace Drash
 
         private void UpdateState()
         {
-            if (!loaded)
-                return;
-
             try {
                 if (!NetworkInterface.GetIsNetworkAvailable()) {
                     Model.Error = DrashError.NoNetwork;
@@ -351,7 +355,7 @@ namespace Drash
                     mm = Math.Max(mm, 0.001);
                     intensity = ((int)Math.Max(1, Math.Min(1 + intensity / 25.0, 4)));
 
-                    var format = mm < 0.01 ? "{0:0.00}" : "{0:0.000}";
+                    var format = mm < 0.01 ? "{0:0.000}" : "{0:0.00}";
                     mmText = Math.Floor(mm) == mm ? string.Format("{0}", (int)mm) : string.Format(format, mm);
                     mmImage = intensity.ToString(CultureInfo.InvariantCulture);
                 }
@@ -480,7 +484,17 @@ namespace Drash
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-            Model.IsAboutOpen = false;
+            if (Model.IsAboutOpen) {
+                Model.IsAboutOpen = false;
+                if (DrashSettings.LocationAllowed) {
+                    watcher.Start();
+                }
+                else {
+                    watcher.Stop();
+                    Model.Location = GeoCoordinate.Unknown;
+                    UpdateState();
+                }
+            }
         }
 
         private void Intensity_Tap(object sender, System.Windows.Input.GestureEventArgs e)
