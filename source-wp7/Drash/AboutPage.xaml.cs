@@ -12,14 +12,25 @@ namespace Drash
             InitializeComponent();
         }
 
-        private void BuienRadar_Tap(object sender, System.Windows.Input.GestureEventArgs e)
+        protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
         {
-            new WebBrowserTask {Uri = new Uri("http://gratisweerdata.buienradar.nl", UriKind.RelativeOrAbsolute)}.Show();
+            base.OnNavigatedTo(e);
+            AllowLocation.IsChecked = DrashSettings.LocationAllowed;
         }
 
-        private void Website_Tap(object sender, GestureEventArgs e)
+        private void BuienRadar_Tap(object sender, GestureEventArgs e)
+        {
+            new WebBrowserTask { Uri = new Uri("http://gratisweerdata.buienradar.nl", UriKind.RelativeOrAbsolute) }.Show();
+        }
+
+        private void Website_Tap(object sender, GestureEventArgs gestureEventArgs)
         {
             new WebBrowserTask { Uri = new Uri("http://interfaceimplementation.be", UriKind.RelativeOrAbsolute) }.Show();
+        }
+
+        private void AllowLocation_Changed(object sender, System.Windows.RoutedEventArgs e)
+        {
+            DrashSettings.LocationAllowed = AllowLocation.IsChecked.GetValueOrDefault(false);
         }
     }
 }
