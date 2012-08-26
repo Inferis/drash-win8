@@ -31,6 +31,7 @@ namespace Drash
 
         private bool loaded;
         private bool updatingLocation = false;
+        private Size graphSize;
 
         public Model Model
         {
@@ -381,21 +382,28 @@ namespace Drash
 
         private void VisualizeGraph(RainData rainData, bool animated)
         {
+            if (Graph.ActualWidth == 0 || Graph.ActualHeight == 0)
+                return;
 
             List<int> pointValues;
             if (rainData == null || rainData.Points == null)
                 pointValues = new List<int>();
             else
-                pointValues = rainData.Points.Select(p => p.AdjustedValue).ToList();
+                pointValues = rainData.Points.Take(7).Select(p => p.AdjustedValue).ToList();
 
             while (pointValues.Count < 7)
                 pointValues.Add(0);
 
-            var step = Graph.ActualWidth / pointValues.Count;
-            Func<int, double> xForIndex = idx => idx == 0 ? -2 : idx == pointValues.Count - 1 ? Graph.ActualWidth + 2 : idx * step;
+            var path = Graph.Data as PathGeometry;
+            if (graphSize.Width == 0 && graphSize.Height == 0) {
+                graphSize = new Size(Graph.ActualWidth, Graph.ActualHeight);
+            }
+
+            var step = graphSize.Width / (pointValues.Count-1);
+            Func<int, double> xForIndex = idx => idx == 0 ? -2 : idx == pointValues.Count - 1 ? graphSize.Width + 2 : idx * step;
 
             var x = 0;
-            var max = Graph.ActualHeight + 2 - 10;
+            var max = graphSize.Height + 2 - 10;
             var allZeros = pointValues.All(p => p == 0);
             var points = pointValues.Select(v => {
                 var y = allZeros ? max - 40 : Math.Max(1, max - (v * max / 100));
@@ -403,17 +411,17 @@ namespace Drash
                 x++;
                 return p;
             }).ToList();
+            points.Add(new Point(graphSize.Width + 2, graphSize.Height + 2));
+            //points.Add(new Point(-2, graphSize.Height + 2));
 
-            var path = Graph.Data as PathGeometry;
             PathFigure figure;
             if (path == null) {
                 path = new PathGeometry();
-                figure = new PathFigure() { StartPoint = new Point(-2.0, Graph.ActualHeight + 2), IsClosed = true };
+                figure = new PathFigure() { StartPoint = new Point(-2.0, graphSize.Height + 2), IsClosed = true };
                 path.Figures.Add(figure);
                 foreach (var p in points) {
                     figure.Segments.Add(new LineSegment() { Point = p });
                 }
-                figure.Segments.Add(new LineSegment() { Point = new Point(Graph.ActualWidth + 2, Graph.ActualHeight + 2) });
                 Graph.Data = path;
             }
 
