@@ -94,10 +94,16 @@
     NSString* mmText;
     UIImage* cloudImage;
     
+    int intensity = 0;
+    CGFloat mm = 0;
     if (rain) {
-        CGFloat mm = MAX(rain.precipitation, 0);
-        mmText = floorf(mm) == mm ? [NSString stringWithFormat:@"%d", (int)mm] : [NSString stringWithFormat:@"%01.2f", mm];
-        int intensity = mm == 0 ? 0 : (int)MAX(1, MIN(1 + (rain.intensity / 25.0), 4));
+        mm = floorf(MAX(rain.precipitation, 0)*1000)/1000.0;
+        intensity = mm == 0 ? 0 : (int)MAX(1, MIN(1 + (rain.intensity / 25.0), 4));
+    }
+    
+    if (mm > 0 || intensity > 0) {
+        NSString* format = mm < 0.01 ? @"%01.3f" : @"%01.2f";
+        mmText = floorf(mm) == mm ? [NSString stringWithFormat:@"%d", (int)mm] : [NSString stringWithFormat:format, mm];
         cloudImage = [UIImage imageNamed:[NSString stringWithFormat:@"intensity%d.png", intensity]];
     }
     else {

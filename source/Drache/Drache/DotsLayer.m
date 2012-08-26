@@ -25,15 +25,19 @@
 - (void)drawLayer:(CALayer *)layer inContext:(CGContextRef)context {
     CGFloat mheight = self.bounds.size.height;
     CGFloat bottom = self.bounds.size.height > self.bounds.size.width ? 40 : 30;
-    CGFloat height = (self.bounds.size.height - bottom) / 3;
+    CGFloat height = (mheight - bottom) / 3;
+    CGFloat sign = 1;
     
     // white color
 #if TARGET_OS_IPHONE
     UIColor* color = [UIColor colorWithWhite:0.85 alpha:1];
     CGContextSetStrokeColorWithColor(context, color.CGColor);
+    mheight = 0;
+    sign = -1;
 #else
     NSColor* color = [NSColor colorWithCalibratedWhite:0.85 alpha:1];
     CGContextSetStrokeColorWithColor(context, color.CGColor);
+    CGFloat sign = 1;
 #endif
     // dotted
     CGFloat dash[2] = { 1, 3 };
@@ -41,12 +45,12 @@
     // 1px
     CGContextSetLineWidth(context, 1.0);
     
-    CGContextMoveToPoint(context, 0, mheight - height);
-    CGContextAddLineToPoint(context, self.bounds.size.width, mheight - height);
-    CGContextMoveToPoint(context, 0, mheight - height*2);
-    CGContextAddLineToPoint(context, self.bounds.size.width, mheight - height*2);
-    CGContextMoveToPoint(context, 30, mheight - height*3);
-    CGContextAddLineToPoint(context, self.bounds.size.width-30, mheight - height*3);
+    CGContextMoveToPoint(context, 0, mheight - height * sign);
+    CGContextAddLineToPoint(context, self.bounds.size.width, mheight - height * sign);
+    CGContextMoveToPoint(context, 0, mheight - height*2 * sign);
+    CGContextAddLineToPoint(context, self.bounds.size.width, mheight - height*2 * sign);
+    CGContextMoveToPoint(context, 30, mheight - height*3 * sign);
+    CGContextAddLineToPoint(context, self.bounds.size.width-30, mheight - height*3 * sign);
 
     CGContextStrokePath(context);
 

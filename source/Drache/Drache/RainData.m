@@ -40,6 +40,7 @@
     }
     return self;
 }
+
 - (BOOL)parse:(NSString*)data {
     _chance = -1;
     _intensity = 0;
@@ -90,7 +91,7 @@
             total = MAX(0, total) + (int)(point.intensity*useWeight);
             weight = weight - useWeight;
         }
-        totalPrecipitation += point.precipitation/60*5;
+        totalPrecipitation += point.precipitation/60.0*5.0;
 
         NSLog(@"%d -> %fmm/u = %fmm, intensity %d -> %d (%d * %f)", point.value, point.precipitation, point.precipitation/60*5, point.adjustedValue, (int)(point.intensity*useWeight), point.intensity, useWeight);
     }
