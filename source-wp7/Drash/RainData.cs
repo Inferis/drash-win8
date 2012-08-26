@@ -24,14 +24,13 @@ namespace Drash
             foreach (var point in Points) {
                 var useWeight = point.Intensity == 100 ? weight : weight / 2.0;
 
-                totalIntensity += (int)(point.AdjustedValue * useWeight * 2);
+                totalIntensity += point.AdjustedValue;
                 accounted++;
-                total = Math.Max(total, 0) + (int)(point.Intensity * useWeight);
-                weight = weight - useWeight;
-                totalPrecipitation += point.Precipitation;
-
-                if (weight <= 0)
-                    break;
+                if (weight > 0) {
+                    total = Math.Max(total, 0) + (int)(point.Intensity * useWeight);
+                    weight = weight - useWeight;
+                }
+                totalPrecipitation += point.Precipitation/60.0*5.0;
             }
 
             Chance = Math.Min(total, 99);
