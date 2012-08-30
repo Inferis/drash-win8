@@ -93,7 +93,7 @@
         }
         totalPrecipitation += point.precipitation/60.0*5.0;
 
-        NSLog(@"%d -> %fmm/u = %fmm, intensity %d -> %d (%d * %f)", point.value, point.precipitation, point.precipitation/60*5, point.adjustedValue, (int)(point.intensity*useWeight), point.intensity, useWeight);
+//        NSLog(@"%d -> %fmm/u = %fmm, intensity %d -> %d (%d * %f)", point.value, point.precipitation, point.precipitation/60*5, point.adjustedValue, (int)(point.intensity*useWeight), point.intensity, useWeight);
     }
     
     _chance = MIN(total, 99);
