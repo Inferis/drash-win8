@@ -42,7 +42,7 @@
     _mmLabel.textColor = [UIColor whiteColor];
     _mmLabel.backgroundColor = [UIColor clearColor];
     _mmLabel.textAlignment = UITextAlignmentCenter;
-    _mmLabel.font = [UIFont fontWithName:@"HelveticaNeue-CondensedBold" size:35];
+    _mmLabel.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:35];
     _mmLabel.text = @"mm";
     [self addSubview:_mmLabel];
 }
@@ -65,7 +65,7 @@
     x = MAX(x, CGRectGetMinX([[_cloudViews objectAtIndex:0] frame]));
     CGFloat max = CGRectGetMaxX([[_cloudViews lastObject] frame]);
     x = MIN(x, max-sz.width);
-    _mmLabel.frame = (CGRect) { x, CGRectGetMaxY(cloud.frame), sz };
+    _mmLabel.frame = (CGRect) { x, CGRectGetMaxY(cloud.frame) - 5.0f, sz };
 }
 
 - (void)setIntensity:(int)intensity formattedPrecipitation:(NSString*)precipitation animated:(BOOL)animated {
@@ -76,9 +76,9 @@
     x = MAX(x, CGRectGetMinX([[_cloudViews objectAtIndex:0] frame]));
     CGFloat max = CGRectGetMaxX([[_cloudViews lastObject] frame]);
     x = MIN(x, max-sz.width);
-    CGRect frame = (CGRect) { x, CGRectGetMaxY(cloud.frame), sz };
+    CGRect frame = (CGRect) { x, CGRectGetMaxY(cloud.frame) - 5.0f, sz };
 
-    if (animated) {
+    if ( animated) {
         if (_currentIntensity != intensity) {
             [UIView animateWithDuration:0.15 animations:^{
                 [[_cloudViews objectAtIndex:_currentIntensity] setAlpha:DISABLEDALPHA];
