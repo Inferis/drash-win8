@@ -86,6 +86,7 @@
     int accounted = 0;
     for (RainPoint* point in points) {
         CGFloat useWeight = point.intensity == 100 ? weight : weight/2.0;
+        CGFloat useWeight = point.intensity == 100 ? weight : point.intensity < 2 ? weight*0.1 : weight/2.0;
 
         totalIntensity = totalIntensity + point.adjustedValue;
         accounted++;
