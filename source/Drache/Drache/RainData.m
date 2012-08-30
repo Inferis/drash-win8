@@ -97,6 +97,7 @@
     }
     
     _chance = MIN(total, 99);
+    if (totalIntensity > 0) _chance = MIN(total, 1);
     _intensity = totalIntensity > 0 ? MIN((int)((CGFloat)totalIntensity / (CGFloat)accounted), 100) : 0;
     _precipitation = totalPrecipitation;
     _points = [NSArray arrayWithArray:points];
