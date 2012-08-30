@@ -53,6 +53,7 @@
 		E2494F1615B56B9500D18128 /* ErrorView.m in Sources */ = {isa = PBXBuildFile; fileRef = E2494F1515B56B9500D18128 /* ErrorView.m */; };
 		E2494F1A15B571AE00D18128 /* UIView+Pop.m in Sources */ = {isa = PBXBuildFile; fileRef = E2494F1915B571AE00D18128 /* UIView+Pop.m */; };
 		E2494F1D15B57B8900D18128 /* RainData.m in Sources */ = {isa = PBXBuildFile; fileRef = E2494F1C15B57B8900D18128 /* RainData.m */; };
+		E250171315EF759C0022072E /* PocketSVG.m in Sources */ = {isa = PBXBuildFile; fileRef = E250171015EF759C0022072E /* PocketSVG.m */; };
 		E256798C15B5DF600027F9DD /* GraphLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = E256798B15B5DF600027F9DD /* GraphLayer.m */; };
 		E256798F15B5E1E20027F9DD /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E256798E15B5E1E20027F9DD /* QuartzCore.framework */; };
 		E256799215B5E7B30027F9DD /* UIColor+Hex.m in Sources */ = {isa = PBXBuildFile; fileRef = E256799115B5E7B30027F9DD /* UIColor+Hex.m */; };
@@ -163,6 +164,8 @@
 		E2494F1915B571AE00D18128 /* UIView+Pop.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+Pop.m"; sourceTree = "<group>"; };
 		E2494F1B15B57B8900D18128 /* RainData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RainData.h; sourceTree = "<group>"; };
 		E2494F1C15B57B8900D18128 /* RainData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RainData.m; sourceTree = "<group>"; };
+		E250170F15EF759C0022072E /* PocketSVG.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PocketSVG.h; sourceTree = "<group>"; };
+		E250171015EF759C0022072E /* PocketSVG.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PocketSVG.m; sourceTree = "<group>"; };
 		E256798A15B5DF600027F9DD /* GraphLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GraphLayer.h; sourceTree = "<group>"; };
 		E256798B15B5DF600027F9DD /* GraphLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GraphLayer.m; sourceTree = "<group>"; };
 		E256798E15B5E1E20027F9DD /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
@@ -281,6 +284,7 @@
 		E209A00115B053E000C3B56C /* vendor */ = {
 			isa = PBXGroup;
 			children = (
+				E250170E15EF759C0022072E /* PocketSVG */,
 				E209A00215B053E000C3B56C /* AFNetworking */,
 				E209A01915B053E000C3B56C /* coby */,
 				E209A02515B053E000C3B56C /* Reachability */,
@@ -436,6 +440,15 @@
 			name = extensions;
 			sourceTree = "<group>";
 		};
+		E250170E15EF759C0022072E /* PocketSVG */ = {
+			isa = PBXGroup;
+			children = (
+				E250170F15EF759C0022072E /* PocketSVG.h */,
+				E250171015EF759C0022072E /* PocketSVG.m */,
+			);
+			path = PocketSVG;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -554,6 +567,7 @@
 				E256798C15B5DF600027F9DD /* GraphLayer.m in Sources */,
 				E256799215B5E7B30027F9DD /* UIColor+Hex.m in Sources */,
 				E2288E7F15B5F298000598A6 /* DotsLayer.m in Sources */,
+				E250171315EF759C0022072E /* PocketSVG.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
