@@ -23,6 +23,8 @@
 @property (nonatomic, strong) IBOutlet ErrorView* errorView;
 @property (nonatomic, strong) IBOutlet UIActivityIndicatorView* smallSpinner;
 @property (nonatomic, strong) IBOutlet UIButton* infoButton;
+@property (nonatomic, strong) IBOutlet UIButton* refreshButton;
+@property (nonatomic, strong) IBOutlet UIImageView* zoomImageView;
 
 @end
 

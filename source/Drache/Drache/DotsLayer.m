@@ -24,7 +24,7 @@
 
 - (void)drawLayer:(CALayer *)layer inContext:(CGContextRef)context {
     CGFloat mheight = self.bounds.size.height;
-    CGFloat bottom = self.bounds.size.height > self.bounds.size.width ? 40 : 30;
+    CGFloat bottom = self.bounds.size.height > self.bounds.size.width || IsIPad() ? 40 : 30;
     CGFloat height = (mheight - bottom) / 3;
     CGFloat sign = 1;
     
@@ -49,11 +49,12 @@
     CGContextAddLineToPoint(context, self.bounds.size.width, mheight - height * sign);
     CGContextMoveToPoint(context, 0, mheight - height*2 * sign);
     CGContextAddLineToPoint(context, self.bounds.size.width, mheight - height*2 * sign);
-    CGContextMoveToPoint(context, 30, mheight - height*3 * sign);
-    CGContextAddLineToPoint(context, self.bounds.size.width-30, mheight - height*3 * sign);
+//    CGContextMoveToPoint(context, 30, mheight - height*3 * sign);
+//    CGContextAddLineToPoint(context, self.bounds.size.width-30, mheight - height*3 * sign);
 
     CGContextStrokePath(context);
 
+/*
 #if TARGET_OS_IPHONE
     UIGraphicsPushContext(context);
     [color setFill];
@@ -71,7 +72,7 @@
     [@"0:00" drawAtPoint:(CGPoint) { 2, mheight - 15 - height*3 + sz.height/2 } withAttributes:attributes];
     [@"0:30" drawAtPoint:(CGPoint) { self.bounds.size.width - 2 - sz.width, mheight - 15 - height*3 + sz.height/2 } withAttributes:attributes];
 #endif
-    
+*/
     
 }
 
