@@ -58,9 +58,9 @@
     self.dataView.alpha = 0;
     self.smallSpinner.alpha = 0;
     
-    CGRect bottomRect = CGRectOffsetTopAndShrink(self.view.bounds, self.view.bounds.size.height-40);
-    self.smallSpinner.frame = CGRectCenterIn(self.smallSpinner.frame, bottomRect);
-    self.infoButton.frame = CGRectCenterIn(self.infoButton.frame, bottomRect);
+    //CGRect bottomRect = CGRectOffsetTopAndShrink(self.view.bounds, self.view.bounds.size.height-40);
+    //self.smallSpinner.frame = CGRectCenterIn(self.smallSpinner.frame, bottomRect);
+    //self.infoButton.frame = CGRectCenterIn(self.infoButton.frame, bottomRect);
   
     UILongPressGestureRecognizer* longTapper = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(forcedRefresh:)];
     longTapper.minimumPressDuration = 1.5;
@@ -116,12 +116,14 @@
     if (UIInterfaceOrientationIsLandscape(toInterfaceOrientation) == UIInterfaceOrientationIsLandscape(self.interfaceOrientation))
         return;
     
-    if (UIInterfaceOrientationIsLandscape(toInterfaceOrientation)) {
+    if (UIInterfaceOrientationIsLandscape(toInterfaceOrientation) && !IsIPad()) {
         self.smallSpinner.frame = CGRectOffset(self.smallSpinner.frame, 0, 5);
+        self.refreshButton.frame = CGRectOffset(self.refreshButton.frame, 0, 5);
         self.infoButton.frame = CGRectOffset(self.infoButton.frame, 0, 5);
     }
     else {
         self.smallSpinner.frame = CGRectOffset(self.smallSpinner.frame, 0, -5);
+        self.refreshButton.frame = CGRectOffset(self.refreshButton.frame, 0, -5);
         self.infoButton.frame = CGRectOffset(self.infoButton.frame, 0, -5);
     }
 }
@@ -135,6 +137,10 @@
 {
     if (IsIPad()) return YES;             
     return (interfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);
+}
+
+- (IBAction)forcedRefresh {
+    [self fetchRain];
 }
 
 - (void)forcedRefresh:(UILongPressGestureRecognizer*)longTapper {
@@ -399,19 +405,10 @@
     }
     
     dispatch_sync_main(^{
-        [UIView animateWithDuration:0.15 animations:^{
-            self.smallSpinner.transform = CGAffineTransformMakeScale(0.6, 0.6);
-            self.infoButton.transform = CGAffineTransformMakeScale(0.6, 0.6);
-        } completion:^(BOOL finished) {
-            [UIView animateWithDuration:0.15 animations:^{
-                self.smallSpinner.transform = CGAffineTransformIdentity;
-                self.infoButton.transform = CGAffineTransformIdentity;
-                self.smallSpinner.frame = CGRectOffset(self.smallSpinner.frame, -20, 0);
-                self.infoButton.frame = CGRectOffset(self.infoButton.frame, 20, 0);
-                [self.smallSpinner startAnimating];
-                self.smallSpinner.alpha = 1;
-            }];
-        }];
+        [self.refreshButton popOutCompletion:^{
+            [self.smallSpinner startAnimating];
+            [self.smallSpinner popInCompletion:nil fast:YES];
+        } fast:YES];
     });
 }
 
@@ -424,20 +421,10 @@
     }
 
     dispatch_sync_main(^{
-        [UIView animateWithDuration:0.15 animations:^{
-            self.smallSpinner.frame = CGRectOffset(self.smallSpinner.frame, 20, 0);
-            self.infoButton.frame = CGRectOffset(self.infoButton.frame, -20, 0);
-            self.smallSpinner.alpha = 0;
-            self.smallSpinner.transform = CGAffineTransformMakeScale(0.6, 0.6);
-            self.infoButton.transform = CGAffineTransformMakeScale(0.6, 0.6);
-        } completion:^(BOOL finished) {
-            [UIView animateWithDuration:0.15 animations:^{
-                self.smallSpinner.transform = CGAffineTransformIdentity;
-                self.infoButton.transform = CGAffineTransformIdentity;
-            } completion:^(BOOL finished) {
-                [self.smallSpinner stopAnimating];
-            }];
-        }];
+        [self.smallSpinner popOutCompletion:^{
+            [self.smallSpinner stopAnimating];
+            [self.refreshButton popInCompletion:nil fast:YES];
+        } fast:YES];
     });
 }
 
