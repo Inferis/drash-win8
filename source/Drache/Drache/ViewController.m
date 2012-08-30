@@ -25,6 +25,7 @@
 @property (nonatomic, strong) IBOutlet UIButton* infoButton;
 @property (nonatomic, strong) IBOutlet UIButton* refreshButton;
 @property (nonatomic, strong) IBOutlet UIImageView* zoomImageView;
+@property (nonatomic, strong) IBOutlet UILabel* zoomLabel;
 
 @end
 
@@ -43,11 +44,15 @@
     NSString* _error;
     BOOL _reachable;
     BOOL _firstFetch;
+    int _entries;
 }
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    _entries = [[[NSUserDefaults standardUserDefaults] valueForKey:@"entries"] intValue];
+    _entries = MIN(MAX(_entries, 6), 24);
     
     _rain = nil;
     _locationName = @"";
@@ -58,13 +63,20 @@
     self.dataView.alpha = 0;
     self.smallSpinner.alpha = 0;
     
-    //CGRect bottomRect = CGRectOffsetTopAndShrink(self.view.bounds, self.view.bounds.size.height-40);
-    //self.smallSpinner.frame = CGRectCenterIn(self.smallSpinner.frame, bottomRect);
-    //self.infoButton.frame = CGRectCenterIn(self.infoButton.frame, bottomRect);
+    self.zoomImageView.image = [UIImage imageNamed:[NSString stringWithFormat:@"dial%d.png", _entries*5]];
+    self.zoomLabel.text = [NSString stringWithFormat:@"%d:%02d", (_entries*5) / 60, (_entries*5) % 60];
   
     UILongPressGestureRecognizer* longTapper = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(forcedRefresh:)];
     longTapper.minimumPressDuration = 1.5;
     [self.view addGestureRecognizer:longTapper];
+    
+    UISwipeGestureRecognizer* zoomer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(zoomed:)];
+    zoomer.direction = UISwipeGestureRecognizerDirectionLeft;
+    [self.view addGestureRecognizer:zoomer];
+
+    zoomer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(zoomed:)];
+    zoomer.direction = UISwipeGestureRecognizerDirectionRight;
+    [self.view addGestureRecognizer:zoomer];
 
     _locationManager = [CLLocationManager new];
     _locationManager.delegate = self;
@@ -146,6 +158,29 @@
 - (void)forcedRefresh:(UILongPressGestureRecognizer*)longTapper {
     if (longTapper.state == UIGestureRecognizerStateBegan)
         [self fetchRain];
+}
+
+- (void)zoomed:(UISwipeGestureRecognizer*)zoomer {
+    if (zoomer.state == UIGestureRecognizerStateEnded) {
+        NSLog(@"zoomer = %d", zoomer.direction);
+        int entries = _entries + (zoomer.direction == UISwipeGestureRecognizerDirectionLeft ? 3 : -3);
+        entries = MIN(MAX(6, entries), 24);
+        
+        if (_entries != entries) {
+            [self.zoomImageView popOutThen:^(UIView *view) {
+                self.zoomImageView.image = [UIImage imageNamed:[NSString stringWithFormat:@"dial%d.png", entries*5]];
+            } popInCompletion:^{
+                [self updateState];
+            }];
+            [self.zoomLabel popOutThen:^(UIView *view) {
+                self.zoomLabel.text = [NSString stringWithFormat:@"%d:%02d", (entries*5) / 60, (entries*5) % 60];
+            } popInCompletion:^{
+            }];
+            _entries = entries;
+            [[NSUserDefaults standardUserDefaults] setValue:@(entries) forKey:@"entries"];
+            [[NSUserDefaults standardUserDefaults] synchronize];
+        }
+    }
 }
 
 - (IBAction)infoTapped:(id)sender {

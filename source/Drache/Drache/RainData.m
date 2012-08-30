@@ -74,9 +74,6 @@
             NSLog(@"%@ %d", time, value);
             [points addObject:[[RainPoint alloc] initWithValue:value]];
         }
-
-        if (count++ > NUMPOINTS)
-            break;
     }
     
     CGFloat weight = 1;
