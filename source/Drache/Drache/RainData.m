@@ -100,9 +100,17 @@
     }
     
     _chance = MIN(total, 99);
-    if (totalIntensity > 0) _chance = MAX(_chance, 1);
     _intensity = totalIntensity > 0 ? MIN((int)((CGFloat)totalIntensity / (CGFloat)accounted), 100) : 0;
-    _precipitation = totalPrecipitation;
+    if (_intensity > 0 || _chance > 0) {
+        _chance = MAX(_chance, 1);
+        _precipitation = MAX(0.001, totalPrecipitation);
+        _intensity = MAX(_intensity, 1);
+    }
+    else {
+        _chance = 0;
+        _precipitation = 0;
+        _intensity = 0;
+    }
     _points = [NSArray arrayWithArray:points];
     
     NSLog(@"d: C=%d%% i=%d p=%f", _chance, _intensity, _precipitation);
