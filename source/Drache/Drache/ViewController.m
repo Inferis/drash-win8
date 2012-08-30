@@ -131,6 +131,7 @@
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
+    if (IsIPad()) return YES;             
     return (interfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);
 }
 

@@ -65,7 +65,9 @@
             continue;
 
         int value = MAX(0, [[parts objectAtIndex:0] intValue]);
-        //value = 130 + arc4random() % 50; // count*(arc4random() % 20) + arc4random() % 40;
+//        value = 130 + arc4random() % 50;
+//        value = count*(arc4random() % 20) + arc4random() % 40;
+//        value = arc4random() % 120;
         NSDate* time = [self scanDate:[parts objectAtIndex:1]];
 
         if ([time timeIntervalSinceDate:now] > -300) {
@@ -97,7 +99,7 @@
     }
     
     _chance = MIN(total, 99);
-    if (totalIntensity > 0) _chance = MIN(total, 1);
+    if (totalIntensity > 0) _chance = MAX(_chance, 1);
     _intensity = totalIntensity > 0 ? MIN((int)((CGFloat)totalIntensity / (CGFloat)accounted), 100) : 0;
     _precipitation = totalPrecipitation;
     _points = [NSArray arrayWithArray:points];

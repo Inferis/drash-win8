@@ -59,8 +59,8 @@
 					</object>
 					<object class="IBUIButton" id="608193477">
 						<reference key="NSNextResponder" ref="774585933"/>
-						<int key="NSvFlags">269</int>
-						<string key="NSFrame">{{151, 430}, {18, 19}}</string>
+						<int key="NSvFlags">265</int>
+						<string key="NSFrame">{{285, 430}, {18, 19}}</string>
 						<reference key="NSSuperview" ref="774585933"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView"/>
@@ -95,8 +95,8 @@
 					</object>
 					<object class="IBUIActivityIndicatorView" id="515135871">
 						<reference key="NSNextResponder" ref="774585933"/>
-						<int key="NSvFlags">269</int>
-						<string key="NSFrame">{{150, 429}, {20, 20}}</string>
+						<int key="NSvFlags">265</int>
+						<string key="NSFrame">{{250, 429}, {20, 20}}</string>
 						<reference key="NSSuperview" ref="774585933"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="608193477"/>

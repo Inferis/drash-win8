@@ -10,6 +10,8 @@
 #import "UIView+Pop.h"
 #import "RainData.h"
 #import "PrecipitationView.h"
+#import "PhonePrecipitationView.h"
+#import "PadPrecipitationView.h"
 #import "GraphLayer.h"
 #import <QuartzCore/QuartzCore.h>
 #import "DotsLayer.h"
@@ -42,6 +44,8 @@
     self.backgroundColor = [UIColor clearColor];
     self.opaque = NO;
     
+    CGFloat locationFontSize = IsIPad() ? 40 : 20;
+    CGFloat chanceFontSize = IsIPad() ? 150 : 90;
     
     // build location label
     _locationLabel = [[UILabel alloc] init];
@@ -50,7 +54,7 @@
     _locationLabel.textColor = [UIColor whiteColor];
     _locationLabel.backgroundColor = [UIColor clearColor];
     _locationLabel.textAlignment = UITextAlignmentCenter;
-    _locationLabel.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:20];
+    _locationLabel.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:locationFontSize];
     [self addSubview:_locationLabel];
 
     // data container view for animation purposes
@@ -65,10 +69,10 @@
     _chanceLabel.textColor = [UIColor whiteColor];
     _chanceLabel.backgroundColor = [UIColor clearColor];
     _chanceLabel.textAlignment = UITextAlignmentCenter;
-    _chanceLabel.font = [UIFont fontWithName:@"HelveticaNeue-UltraLight" size:90];
+    _chanceLabel.font = [UIFont fontWithName:@"HelveticaNeue-UltraLight" size:chanceFontSize];
     [_dataView addSubview:_chanceLabel];
-    
-    _mmView = [PrecipitationView new];
+
+    _mmView = IsIPad() ? [PadPrecipitationView new] : [PhonePrecipitationView new];
     [_dataView addSubview:_mmView];
     
     _graphLayer = [GraphLayer new];
@@ -89,12 +93,14 @@
     CGFloat bottom = self.bounds.size.height > self.bounds.size.width ? 40 : 30;
     CGFloat height = (self.bounds.size.height - bottom) / 3;
     CGFloat width = self.bounds.size.width;
+    CGFloat parentWidth = IsIPad() ? 768 : 320;
+    CGFloat factor = IsIPad() ? 2.5 : 1.7777777;
     
     _locationLabel.frame = (CGRect) { 0, 0, width, height };
-    _dataView.frame = (CGRect) { (width-320)/2, height, 320, height };
-    _chanceLabel.frame = (CGRect) { 10, 0, floorf(320/1.7777777), height };
+    _dataView.frame = (CGRect) { (width-parentWidth)/2, height, parentWidth, height };
+    _chanceLabel.frame = (CGRect) { 10, 0, floorf(parentWidth/factor), height };
     CGFloat x = CGRectGetMaxX(_chanceLabel.frame);
-    _mmView.frame = (CGRect) { x, 0, 320-x, height };
+    _mmView.frame = (CGRect) { x, 0, parentWidth-x, height };
     
     _graphLayer.frame = (CGRect) { -1, height*2, width+2, height + bottom+1 };
 
@@ -128,11 +134,23 @@
     }
 
     _setting = YES;
-    [_dataView popOutThen:^(UIView *view) {
-        setValues();
-    } popInCompletion:^{
-        _setting = NO;
-    }];
+    if (IsIPad()) {
+        [_chanceLabel popOutThen:^(UIView *view) {
+            _chanceLabel.text = chanceText;
+            _chanceLabel.textColor = chanceColor;
+        } popInCompletion:^{
+            _setting = NO;
+        }];
+        [_mmView setRain:rain animated:animated];
+        [_graphLayer setRain:rain animated:animated];
+    }
+    else {
+        [_dataView popOutThen:^(UIView *view) {
+            setValues();
+        } popInCompletion:^{
+            _setting = NO;
+        }];
+    }
 }
 
 
