@@ -46,6 +46,7 @@
     BOOL _reachable;
     BOOL _firstFetch;
     int _entries;
+    UIPopoverController* _infoController;
 }
 
 - (void)viewDidLoad
@@ -181,10 +182,18 @@
     }
 }
 
-- (IBAction)infoTapped:(id)sender {
+
+- (IBAction)infoTapped:(UIButton*)sender {
     InfoViewController* infoViewController = [[InfoViewController alloc] initWithNibName:nil bundle:nil];
-    infoViewController.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
-    [self presentViewController:infoViewController animated:YES completion:nil];
+    
+    if (IsIPad()) {
+        _infoController = [[UIPopoverController alloc] initWithContentViewController:infoViewController];
+        [_infoController presentPopoverFromRect:sender.frame inView:self.view permittedArrowDirections:UIPopoverArrowDirectionDown animated:YES];
+    }
+    else {
+        infoViewController.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
+        [self presentViewController:infoViewController animated:YES completion:nil];
+    }
 }
 
 #pragma mark - network
