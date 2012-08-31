@@ -15,6 +15,5 @@
 
 @property (strong, nonatomic, readonly) Reachability* network;
 @property (strong, nonatomic) UIWindow *window;
-@property (strong, nonatomic) ViewController *viewController;
 
 @end

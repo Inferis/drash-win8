@@ -8,10 +8,12 @@
 
 #import "InfoViewController.h"
 #import <QuartzCore/QuartzCore.h>
+#import "IIViewDeckController.h"
 
-@interface InfoViewController ()
+@interface InfoViewController () <IIViewDeckControllerDelegate>
 
 @property (nonatomic, strong) IBOutlet UITextView* acknowledgmentsTextView;
+@property (nonatomic, strong) IBOutlet UIButton* closeButton;
 
 @end
 
@@ -29,9 +31,18 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    self.contentSizeForViewInPopover = self.view.bounds.size;
+    self.viewDeckController.rotationBehavior = IIViewDeckRotationKeepsViewSizes;
     
-    self.acknowledgmentsTextView.text = @"Free weather data:\r\n  http://gratisweerdata.buienradar.nl/\r\nCoby by @junkiesxl:\r\n  http://github.com/pjaspers/coby\r\nTin by @junkiesxl:\r\n  http://github.com/pjaspers/tin\r\nAFNetworking by Github:\r\n  http://github.com/AFNetworking/AFNetworking/";
+    if (IsIPad())
+        self.closeButton.alpha = 0;
+    
+    self.acknowledgmentsTextView.text = @"This app uses free weather data provided by Buienradar.nl (see: http://gratisweerdata.buienradar.nl). Incorrect predictions usually are caused by bad data returned from the weather service. Atmospheric conditions can reduce the effectiveness of the predications.";
+}
+
+- (BOOL)viewDeckControllerWillOpenRightView:(IIViewDeckController *)viewDeckController animated:(BOOL)animated {
+    self.viewDeckController.rightLedge = self.viewDeckController.view.bounds.size.width - 320;
+    self.view.frame = CGRectOffsetLeftAndShrink(self.viewDeckController.view.bounds, self.viewDeckController.rightLedge);
+    return YES;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -51,7 +62,10 @@
 }
 
 - (IBAction)closeTapped:(id)sender {
-    [self dismissViewControllerAnimated:YES completion:nil];
+    if (self.viewDeckController) 
+        [self.viewDeckController closeRightView];
+    else
+        [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation

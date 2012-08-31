@@ -17,6 +17,7 @@
 #import "UIView+Pop.h"
 #import "RainData.h"
 #import "NSUserDefaults+Settings.h"
+#import "IIViewDeckController.h"
 
 @interface ViewController () <CLLocationManagerDelegate>
 
@@ -186,9 +187,8 @@
 - (IBAction)infoTapped:(UIButton*)sender {
     InfoViewController* infoViewController = [[InfoViewController alloc] initWithNibName:nil bundle:nil];
     
-    if (IsIPad()) {
-        _infoController = [[UIPopoverController alloc] initWithContentViewController:infoViewController];
-        [_infoController presentPopoverFromRect:sender.frame inView:self.view permittedArrowDirections:UIPopoverArrowDirectionDown animated:YES];
+    if (self.viewDeckController) {
+        [self.viewDeckController openRightView];
     }
     else {
         infoViewController.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
