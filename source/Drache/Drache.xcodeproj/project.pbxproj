@@ -72,6 +72,7 @@
 		E255990015EFF80A0023962D /* dial90@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E25598FC15EFF80A0023962D /* dial90@2x.png */; };
 		E255990115EFF80A0023962D /* dial105@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E25598FD15EFF80A0023962D /* dial105@2x.png */; };
 		E255990215EFF80A0023962D /* dial120@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E25598FE15EFF80A0023962D /* dial120@2x.png */; };
+		E255990515F032780023962D /* NSUserDefaults+Settings.m in Sources */ = {isa = PBXBuildFile; fileRef = E255990415F032780023962D /* NSUserDefaults+Settings.m */; };
 		E256798C15B5DF600027F9DD /* GraphLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = E256798B15B5DF600027F9DD /* GraphLayer.m */; };
 		E256798F15B5E1E20027F9DD /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E256798E15B5E1E20027F9DD /* QuartzCore.framework */; };
 		E256799215B5E7B30027F9DD /* UIColor+Hex.m in Sources */ = {isa = PBXBuildFile; fileRef = E256799115B5E7B30027F9DD /* UIColor+Hex.m */; };
@@ -204,6 +205,8 @@
 		E25598FC15EFF80A0023962D /* dial90@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "dial90@2x.png"; sourceTree = "<group>"; };
 		E25598FD15EFF80A0023962D /* dial105@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "dial105@2x.png"; sourceTree = "<group>"; };
 		E25598FE15EFF80A0023962D /* dial120@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "dial120@2x.png"; sourceTree = "<group>"; };
+		E255990315F032780023962D /* NSUserDefaults+Settings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSUserDefaults+Settings.h"; sourceTree = "<group>"; };
+		E255990415F032780023962D /* NSUserDefaults+Settings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSUserDefaults+Settings.m"; sourceTree = "<group>"; };
 		E256798A15B5DF600027F9DD /* GraphLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GraphLayer.h; sourceTree = "<group>"; };
 		E256798B15B5DF600027F9DD /* GraphLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GraphLayer.m; sourceTree = "<group>"; };
 		E256798E15B5E1E20027F9DD /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
@@ -494,6 +497,8 @@
 				E256799115B5E7B30027F9DD /* UIColor+Hex.m */,
 				E2494F1815B571AE00D18128 /* UIView+Pop.h */,
 				E2494F1915B571AE00D18128 /* UIView+Pop.m */,
+				E255990315F032780023962D /* NSUserDefaults+Settings.h */,
+				E255990415F032780023962D /* NSUserDefaults+Settings.m */,
 			);
 			name = extensions;
 			sourceTree = "<group>";
@@ -644,6 +649,7 @@
 				E250171315EF759C0022072E /* PocketSVG.m in Sources */,
 				E250171815EF8F3C0022072E /* PadPrecipitationView.m in Sources */,
 				E250171B15EF91070022072E /* PhonePrecipitationView.m in Sources */,
+				E255990515F032780023962D /* NSUserDefaults+Settings.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
