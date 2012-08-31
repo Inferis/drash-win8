@@ -52,6 +52,10 @@
 		E211CC7815EFC45500C459EA /* refresh.png in Resources */ = {isa = PBXBuildFile; fileRef = E211CC7415EFC45500C459EA /* refresh.png */; };
 		E211CC7915EFC45500C459EA /* refresh@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E211CC7515EFC45500C459EA /* refresh@2x.png */; };
 		E216851415B0E2A7007216BF /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E216851315B0E2A7007216BF /* libz.dylib */; };
+		E228306D15F0AF4B00D53481 /* btn-hi.png in Resources */ = {isa = PBXBuildFile; fileRef = E228306915F0AF4B00D53481 /* btn-hi.png */; };
+		E228306E15F0AF4B00D53481 /* btn-hi@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E228306A15F0AF4B00D53481 /* btn-hi@2x.png */; };
+		E228306F15F0AF4B00D53481 /* btn.png in Resources */ = {isa = PBXBuildFile; fileRef = E228306B15F0AF4B00D53481 /* btn.png */; };
+		E228307015F0AF4B00D53481 /* btn@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E228306C15F0AF4B00D53481 /* btn@2x.png */; };
 		E2288E7F15B5F298000598A6 /* DotsLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = E2288E7E15B5F298000598A6 /* DotsLayer.m */; };
 		E2494F1115B56B8000D18128 /* DataView.m in Sources */ = {isa = PBXBuildFile; fileRef = E2494F1015B56B8000D18128 /* DataView.m */; };
 		E2494F1615B56B9500D18128 /* ErrorView.m in Sources */ = {isa = PBXBuildFile; fileRef = E2494F1515B56B9500D18128 /* ErrorView.m */; };
@@ -177,6 +181,10 @@
 		E211CC7415EFC45500C459EA /* refresh.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = refresh.png; sourceTree = "<group>"; };
 		E211CC7515EFC45500C459EA /* refresh@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "refresh@2x.png"; sourceTree = "<group>"; };
 		E216851315B0E2A7007216BF /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
+		E228306915F0AF4B00D53481 /* btn-hi.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn-hi.png"; sourceTree = "<group>"; };
+		E228306A15F0AF4B00D53481 /* btn-hi@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn-hi@2x.png"; sourceTree = "<group>"; };
+		E228306B15F0AF4B00D53481 /* btn.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn.png; sourceTree = "<group>"; };
+		E228306C15F0AF4B00D53481 /* btn@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn@2x.png"; sourceTree = "<group>"; };
 		E2288E7D15B5F298000598A6 /* DotsLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DotsLayer.h; sourceTree = "<group>"; };
 		E2288E7E15B5F298000598A6 /* DotsLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DotsLayer.m; sourceTree = "<group>"; };
 		E2494F0F15B56B8000D18128 /* DataView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataView.h; sourceTree = "<group>"; };
@@ -436,6 +444,10 @@
 		E209A05F15B0603300C3B56C /* assets */ = {
 			isa = PBXGroup;
 			children = (
+				E228306915F0AF4B00D53481 /* btn-hi.png */,
+				E228306A15F0AF4B00D53481 /* btn-hi@2x.png */,
+				E228306B15F0AF4B00D53481 /* btn.png */,
+				E228306C15F0AF4B00D53481 /* btn@2x.png */,
 				E25598F315EFF56D0023962D /* info-hi.png */,
 				E25598F415EFF56D0023962D /* info-hi@2x.png */,
 				E25598F515EFF56D0023962D /* info.png */,
@@ -599,6 +611,10 @@
 				E255990015EFF80A0023962D /* dial90@2x.png in Resources */,
 				E255990115EFF80A0023962D /* dial105@2x.png in Resources */,
 				E255990215EFF80A0023962D /* dial120@2x.png in Resources */,
+				E228306D15F0AF4B00D53481 /* btn-hi.png in Resources */,
+				E228306E15F0AF4B00D53481 /* btn-hi@2x.png in Resources */,
+				E228306F15F0AF4B00D53481 /* btn.png in Resources */,
+				E228307015F0AF4B00D53481 /* btn@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
