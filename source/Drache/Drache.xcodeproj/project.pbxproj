@@ -56,6 +56,8 @@
 		E228306E15F0AF4B00D53481 /* btn-hi@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E228306A15F0AF4B00D53481 /* btn-hi@2x.png */; };
 		E228306F15F0AF4B00D53481 /* btn.png in Resources */ = {isa = PBXBuildFile; fileRef = E228306B15F0AF4B00D53481 /* btn.png */; };
 		E228307015F0AF4B00D53481 /* btn@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E228306C15F0AF4B00D53481 /* btn@2x.png */; };
+		E228307A15F0C3D500D53481 /* IIViewDeckController.m in Sources */ = {isa = PBXBuildFile; fileRef = E228307715F0C3D500D53481 /* IIViewDeckController.m */; };
+		E228307B15F0C3D500D53481 /* WrapController.m in Sources */ = {isa = PBXBuildFile; fileRef = E228307915F0C3D500D53481 /* WrapController.m */; };
 		E2288E7F15B5F298000598A6 /* DotsLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = E2288E7E15B5F298000598A6 /* DotsLayer.m */; };
 		E2494F1115B56B8000D18128 /* DataView.m in Sources */ = {isa = PBXBuildFile; fileRef = E2494F1015B56B8000D18128 /* DataView.m */; };
 		E2494F1615B56B9500D18128 /* ErrorView.m in Sources */ = {isa = PBXBuildFile; fileRef = E2494F1515B56B9500D18128 /* ErrorView.m */; };
@@ -185,6 +187,10 @@
 		E228306A15F0AF4B00D53481 /* btn-hi@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn-hi@2x.png"; sourceTree = "<group>"; };
 		E228306B15F0AF4B00D53481 /* btn.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn.png; sourceTree = "<group>"; };
 		E228306C15F0AF4B00D53481 /* btn@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn@2x.png"; sourceTree = "<group>"; };
+		E228307615F0C3D500D53481 /* IIViewDeckController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IIViewDeckController.h; sourceTree = "<group>"; };
+		E228307715F0C3D500D53481 /* IIViewDeckController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IIViewDeckController.m; sourceTree = "<group>"; };
+		E228307815F0C3D500D53481 /* WrapController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WrapController.h; sourceTree = "<group>"; };
+		E228307915F0C3D500D53481 /* WrapController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WrapController.m; sourceTree = "<group>"; };
 		E2288E7D15B5F298000598A6 /* DotsLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DotsLayer.h; sourceTree = "<group>"; };
 		E2288E7E15B5F298000598A6 /* DotsLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DotsLayer.m; sourceTree = "<group>"; };
 		E2494F0F15B56B8000D18128 /* DataView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataView.h; sourceTree = "<group>"; };
@@ -333,6 +339,7 @@
 		E209A00115B053E000C3B56C /* vendor */ = {
 			isa = PBXGroup;
 			children = (
+				E228307515F0C3D500D53481 /* ViewDeck */,
 				E250170E15EF759C0022072E /* PocketSVG */,
 				E209A00215B053E000C3B56C /* AFNetworking */,
 				E209A01915B053E000C3B56C /* coby */,
@@ -479,6 +486,17 @@
 				E209A06115B0603300C3B56C /* nonetwork@2x.png */,
 			);
 			path = assets;
+			sourceTree = "<group>";
+		};
+		E228307515F0C3D500D53481 /* ViewDeck */ = {
+			isa = PBXGroup;
+			children = (
+				E228307615F0C3D500D53481 /* IIViewDeckController.h */,
+				E228307715F0C3D500D53481 /* IIViewDeckController.m */,
+				E228307815F0C3D500D53481 /* WrapController.h */,
+				E228307915F0C3D500D53481 /* WrapController.m */,
+			);
+			path = ViewDeck;
 			sourceTree = "<group>";
 		};
 		E2494F1315B56B8400D18128 /* views */ = {
@@ -666,6 +684,8 @@
 				E250171815EF8F3C0022072E /* PadPrecipitationView.m in Sources */,
 				E250171B15EF91070022072E /* PhonePrecipitationView.m in Sources */,
 				E255990515F032780023962D /* NSUserDefaults+Settings.m in Sources */,
+				E228307A15F0C3D500D53481 /* IIViewDeckController.m in Sources */,
+				E228307B15F0C3D500D53481 /* WrapController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
