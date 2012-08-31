@@ -11,6 +11,7 @@
 #import "PhonePrecipitationView.h"
 #import "UIView+Pop.h"
 #import "RainData.h"
+#import "NSUserDefaults+Settings.h"
 
 @implementation PrecipitationView
 
@@ -38,11 +39,12 @@
 - (void)setRain:(RainData*)rain animated:(BOOL)animated {
     NSString* mmText;
     
+    int entries = [[NSUserDefaults standardUserDefaults] entries];
     int intensity = 0;
     CGFloat mm = 0;
     if (rain) {
-        mm = floorf(MAX(rain.precipitation, 0)*1000)/1000.0;
-        intensity = mm == 0 ? 0 : (int)MAX(1, MIN(1 + (rain.intensity / 25.0), 4));
+        mm = floorf(MAX([rain precipitationForEntries:entries], 0)*1000)/1000.0;
+        intensity = mm == 0 ? 0 : (int)MAX(1, MIN(1 + ([rain intensityForEntries:entries] / 25.0), 4));
     }
     
     if (mm > 0 || intensity > 0) {

@@ -11,6 +11,7 @@
 #import "UIColor+Hex.h"
 #import "RainData.h"
 #import "Coby.h"
+#import "NSUserDefaults+Settings.h"
 
 @implementation GraphLayer {
     NSArray* _points;
@@ -68,14 +69,13 @@
     CGFloat x = 0;
     BOOL allZero = YES;
     
-    int entries = [[[NSUserDefaults standardUserDefaults] valueForKey:@"entries"] intValue];
+    int entries = [[NSUserDefaults standardUserDefaults] entries];
     entries = MIN(MAX(entries, 6), _points.count);
     
     NSArray* points = _points;
     if (points) {
         for (RainPoint* point in points) {
             CGFloat y = MIN(max - ((CGFloat)point.adjustedValue * max / 100.0), max - 10.0);
-            NSLog(@"%i -> %f/%f", point.adjustedValue, y, max);
             if (point.adjustedValue > 0) allZero = NO;
         }
 

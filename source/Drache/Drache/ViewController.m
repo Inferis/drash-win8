@@ -16,6 +16,7 @@
 #import "ErrorView.h"
 #import "UIView+Pop.h"
 #import "RainData.h"
+#import "NSUserDefaults+Settings.h"
 
 @interface ViewController () <CLLocationManagerDelegate>
 
@@ -51,8 +52,7 @@
 {
     [super viewDidLoad];
     
-    _entries = [[[NSUserDefaults standardUserDefaults] valueForKey:@"entries"] intValue];
-    _entries = MIN(MAX(_entries, 6), 24);
+    _entries = [[NSUserDefaults standardUserDefaults] entries];
     
     _rain = nil;
     _locationName = @"";
@@ -64,18 +64,13 @@
     self.smallSpinner.alpha = 0;
     
     self.zoomImageView.image = [UIImage imageNamed:[NSString stringWithFormat:@"dial%d.png", _entries*5]];
-    self.zoomLabel.text = [NSString stringWithFormat:@"%d:%02d", (_entries*5) / 60, (_entries*5) % 60];
+    self.zoomLabel.text = [NSString stringWithFormat:@"%dmin", (_entries*5)];
   
     UILongPressGestureRecognizer* longTapper = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(forcedRefresh:)];
     longTapper.minimumPressDuration = 1.5;
     [self.view addGestureRecognizer:longTapper];
     
-    UISwipeGestureRecognizer* zoomer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(zoomed:)];
-    zoomer.direction = UISwipeGestureRecognizerDirectionLeft;
-    [self.view addGestureRecognizer:zoomer];
-
-    zoomer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(zoomed:)];
-    zoomer.direction = UISwipeGestureRecognizerDirectionRight;
+    UIPanGestureRecognizer* zoomer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(zoomed:)];
     [self.view addGestureRecognizer:zoomer];
 
     _locationManager = [CLLocationManager new];
@@ -160,26 +155,29 @@
         [self fetchRain];
 }
 
-- (void)zoomed:(UISwipeGestureRecognizer*)zoomer {
-    if (zoomer.state == UIGestureRecognizerStateEnded) {
-        NSLog(@"zoomer = %d", zoomer.direction);
-        int entries = _entries + (zoomer.direction == UISwipeGestureRecognizerDirectionLeft ? 3 : -3);
+- (void)zoomed:(UIPanGestureRecognizer*)zoomer {
+    if (zoomer.state != UIGestureRecognizerStateChanged)
+        return;
+    
+    CGPoint delta = [zoomer translationInView:self.view];
+    if (ABS(delta.y) < 25 && ABS(delta.x) > 30) {
+        int factor = 1 + (int)floorf(ABS([zoomer velocityInView:self.view].x)/1000.0);
+
+        int entries = _entries + (delta.x < 0 ? 3 : -3)*factor;
         entries = MIN(MAX(6, entries), 24);
         
         if (_entries != entries) {
-            [self.zoomImageView popOutThen:^(UIView *view) {
-                self.zoomImageView.image = [UIImage imageNamed:[NSString stringWithFormat:@"dial%d.png", entries*5]];
-            } popInCompletion:^{
-                [self updateState];
-            }];
-            [self.zoomLabel popOutThen:^(UIView *view) {
-                self.zoomLabel.text = [NSString stringWithFormat:@"%d:%02d", (entries*5) / 60, (entries*5) % 60];
-            } popInCompletion:^{
-            }];
+            self.zoomImageView.image = [UIImage imageNamed:[NSString stringWithFormat:@"dial%d.png", entries*5]];
+            self.zoomLabel.text = [NSString stringWithFormat:@"%dmin", (entries*5)];
+            
             _entries = entries;
-            [[NSUserDefaults standardUserDefaults] setValue:@(entries) forKey:@"entries"];
-            [[NSUserDefaults standardUserDefaults] synchronize];
+            NSLog(@"entries = %i", entries);
+            [[NSUserDefaults standardUserDefaults] setEntries:entries];
+            [self updateState];
+            [zoomer setTranslation:CGPointZero inView:self.view];
         }
+        else if (_entries == 24 || _entries == 6)
+            [zoomer setTranslation:CGPointZero inView:self.view];
     }
 }
 

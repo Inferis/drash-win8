@@ -9,7 +9,7 @@
 #import "PadPrecipitationView.h"
 #import "UIView+Pop.h"
 
-#define DISABLEDALPHA 0.3
+#define DISABLEDALPHA 0.2
 
 @implementation PadPrecipitationView {
     NSArray* _cloudViews;
