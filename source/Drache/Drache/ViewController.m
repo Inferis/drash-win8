@@ -188,7 +188,7 @@
     InfoViewController* infoViewController = [[InfoViewController alloc] initWithNibName:nil bundle:nil];
     
     if (self.viewDeckController) {
-        [self.viewDeckController openRightView];
+        [self.viewDeckController toggleRightView];
     }
     else {
         infoViewController.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;

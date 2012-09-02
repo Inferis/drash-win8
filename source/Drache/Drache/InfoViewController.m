@@ -62,10 +62,7 @@
 }
 
 - (IBAction)closeTapped:(id)sender {
-    if (self.viewDeckController) 
-        [self.viewDeckController closeRightView];
-    else
-        [self dismissViewControllerAnimated:YES completion:nil];
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
