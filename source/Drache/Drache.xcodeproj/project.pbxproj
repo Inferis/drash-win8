@@ -839,7 +839,7 @@
 		E216851615B0E444007216BF /* Adhoc */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Tom Adriaenssen";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Drache/Drache-Prefix.pch";
 				INFOPLIST_FILE = "Drache/Drache-Info.plist";
@@ -849,7 +849,7 @@
 					"\"$(SRCROOT)/Drache/vendor/TestFlightSDK\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "BFCC36AB-B4D2-4273-8947-594116540D17";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
 			};
