@@ -179,9 +179,6 @@ __typeof__(h) __h = (h);                                    \
 @synthesize centerController = _centerController;
 @synthesize leftController = _leftController;
 @synthesize rightController = _rightController;
-@synthesize leftLedge = _leftLedge;
-@synthesize rightLedge = _rightLedge;
-@synthesize maxLedge = _maxLedge;
 @synthesize resizesCenterView = _resizesCenterView;
 @synthesize originalShadowOpacity = _originalShadowOpacity;
 @synthesize originalShadowPath = _originalShadowPath;
@@ -194,7 +191,7 @@ __typeof__(h) __h = (h);                                    \
 @synthesize centerhiddenInteractivity = _centerhiddenInteractivity;
 @synthesize centerTapper = _centerTapper;
 @synthesize centerView = _centerView;
-@synthesize rotationBehavior = _rotationBehavior;
+@synthesize sizeMode = _sizeMode;
 @synthesize enabled = _enabled;
 @synthesize elastic = _elastic;
 
@@ -211,7 +208,7 @@ __typeof__(h) __h = (h);                                    \
         _panningMode = IIViewDeckFullViewPanning;
         _navigationControllerBehavior = IIViewDeckNavigationControllerContained;
         _centerhiddenInteractivity = IIViewDeckCenterHiddenUserInteractive;
-        _rotationBehavior = IIViewDeckRotationKeepsLedgeSizes;
+        _sizeMode = IIViewDeckLedgeSizeMode;
         _viewAppeared = NO;
         _resizesCenterView = NO;
         self.panners = [NSMutableArray array];
@@ -227,8 +224,8 @@ __typeof__(h) __h = (h);                                    \
         self.centerController = centerController;
         self.leftController = nil;
         self.rightController = nil;
-        self.leftLedge = 44;
-        self.rightLedge = 44;
+        _leftLedge = 44;
+        _rightLedge = 44;
     }
     return self;
 }
@@ -338,13 +335,13 @@ __typeof__(h) __h = (h);                                    \
 - (CGFloat)limitOffset:(CGFloat)offset {
     if (_leftController && _rightController) return offset;
     
-    if (_leftController && self.maxLedge > 0) {
-        CGFloat left = self.referenceBounds.size.width - self.maxLedge;
-        offset = MAX(offset, left);
+    if (_leftController && _maxLedge > 0) {
+        CGFloat left = self.referenceBounds.size.width - _maxLedge;
+        offset = MIN(offset, left);
     }
-    else if (_rightController && self.maxLedge > 0) {
-        CGFloat right = self.maxLedge - self.referenceBounds.size.width;
-        offset = MIN(offset, right);
+    else if (_rightController && _maxLedge > 0) {
+        CGFloat right = _maxLedge - self.referenceBounds.size.width;
+        offset = MAX(offset, right);
     }
     
     return offset;
@@ -378,7 +375,10 @@ __typeof__(h) __h = (h);                                    \
 
 #pragma mark - ledges
 
-- (void)setLeftLedge:(CGFloat)leftLedge {
+- (void)setLeftSize:(CGFloat)leftSize {
+    // we store ledge sizes internally but allow size to be specified depending on size mode.
+    CGFloat leftLedge = [self sizeAsLedge:leftSize];
+    
     // Compute the final ledge in two steps. This prevents a strange bug where
     // nesting MAX(X, MIN(Y, Z)) with miniscule referenceBounds returns a bogus near-zero value.
     CGFloat minLedge = MIN(self.referenceBounds.size.width, leftLedge);
@@ -398,7 +398,15 @@ __typeof__(h) __h = (h);                                    \
     _leftLedge = leftLedge;
 }
 
-- (void)setRightLedge:(CGFloat)rightLedge {
+- (CGFloat)leftSize {
+    return [self ledgeAsSize:_leftLedge];
+}
+
+
+- (void)setRightSize:(CGFloat)rightSize {
+    // we store ledge sizes internally but allow size to be specified depending on size mode.
+    CGFloat rightLedge = [self ledgeAsSize:rightSize];
+
     // Compute the final ledge in two steps. This prevents a strange bug where
     // nesting MAX(X, MIN(Y, Z)) with miniscule referenceBounds returns a bogus near-zero value.
     CGFloat minLedge = MIN(self.referenceBounds.size.width, rightLedge);
@@ -418,7 +426,14 @@ __typeof__(h) __h = (h);                                    \
     _rightLedge = rightLedge;
 }
 
-- (void)setMaxLedge:(CGFloat)maxLedge {
+- (CGFloat)rightSize {
+    return [self ledgeAsSize:_rightLedge];
+}
+
+- (void)setMaxSize:(CGFloat)maxSize {
+    // we store ledge sizes internally but allow size to be specified depending on size mode.
+    CGFloat maxLedge = [self sizeAsLedge:maxSize];
+
     _maxLedge = maxLedge;
     if (_leftController && _rightController) {
         NSLog(@"IIViewDeckController: warning: setting maxLedge with 2 side controllers. Value will be ignored.");
@@ -426,13 +441,32 @@ __typeof__(h) __h = (h);                                    \
     }
     
     if (_leftController && _leftLedge > _maxLedge) {
-        self.leftLedge = _maxLedge;
+        _leftLedge = _maxLedge;
     }
     else if (_rightController && _rightLedge > _maxLedge) {
-        self.rightLedge = _maxLedge;
+        _rightLedge = _maxLedge;
     }
     
     [self setSlidingFrameForOffset:_offset];
+}
+
+- (CGFloat)maxSize {
+    return [self ledgeAsSize:_maxLedge];
+}
+
+
+- (CGFloat)sizeAsLedge:(CGFloat)size {
+    if (_sizeMode == IIViewDeckLedgeSizeMode)
+        return size;
+    else
+        return self.referenceBounds.size.width - size;
+}
+
+- (CGFloat)ledgeAsSize:(CGFloat)ledge {
+    if (_sizeMode == IIViewDeckLedgeSizeMode)
+        return ledge;
+    else
+        return self.referenceBounds.size.width - ledge;
 }
 
 #pragma mark - View lifecycle
@@ -558,10 +592,10 @@ __typeof__(h) __h = (h);                                    \
     _preRotationWidth = self.referenceBounds.size.width;
     _preRotationCenterWidth = self.centerView.bounds.size.width;
     
-    if (self.rotationBehavior == IIViewDeckRotationKeepsViewSizes) {
-        _leftWidth = self.leftController.view.frame.size.width;
-        _rightWidth = self.rightController.view.frame.size.width;
-    }
+//    if (self.rotationBehavior == IIViewDeckRotationKeepsViewSizes) {
+//        _leftWidth = self.leftController.view.frame.size.width;
+//        _rightWidth = self.rightController.view.frame.size.width;
+//    }
     
     BOOL should = YES;
     if (self.centerController)
@@ -602,13 +636,13 @@ __typeof__(h) __h = (h);                                    \
 - (void)arrangeViewsAfterRotation {
     if (_preRotationWidth <= 0) return;
     
-    NSLog(@"arrange %@", NSStringFromCGRect(self.slidingControllerView.frame));
+    NSLog(@"arrange scf=%@ rb=%@ vb=%@", NSStringFromCGRect(self.slidingControllerView.frame), NSStringFromCGRect(self.referenceBounds), NSStringFromCGRect(self.view.bounds));
     CGFloat offset = self.slidingControllerView.frame.origin.x;
     if (self.resizesCenterView && offset == 0) {
         offset = offset + (_preRotationCenterWidth - _preRotationWidth);
     }
     
-    if (self.rotationBehavior == IIViewDeckRotationKeepsLedgeSizes) {
+    if (self.sizeMode == IIViewDeckLedgeSizeMode) {
         if (offset > 0) {
             offset = self.referenceBounds.size.width - _preRotationWidth + offset;
         }
@@ -617,9 +651,9 @@ __typeof__(h) __h = (h);                                    \
         }
     }
     else {
-        self.leftLedge = self.leftLedge + self.referenceBounds.size.width - _preRotationWidth; 
-        self.rightLedge = self.rightLedge + self.referenceBounds.size.width - _preRotationWidth; 
-        self.maxLedge = self.maxLedge + self.referenceBounds.size.width - _preRotationWidth; 
+        _leftLedge = _leftLedge + self.referenceBounds.size.width - _preRotationWidth; 
+        _rightLedge = _rightLedge + self.referenceBounds.size.width - _preRotationWidth; 
+        _maxLedge = _maxLedge + self.referenceBounds.size.width - _preRotationWidth;
     }
     [self setSlidingFrameForOffset:offset];
     
@@ -637,11 +671,11 @@ __typeof__(h) __h = (h);                                    \
 }
 
 - (BOOL)leftControllerIsOpen {
-    return self.leftController && CGRectGetMinX(self.slidingControllerView.frame) > 0 && CGRectGetMinX(self.slidingControllerView.frame) <= self.leftLedge;
+    return self.leftController && CGRectGetMinX(self.slidingControllerView.frame) > 0 && CGRectGetMinX(self.slidingControllerView.frame) <= _leftLedge;
 }
 
 - (BOOL)rightControllerIsOpen {
-    return self.rightController && CGRectGetMaxX(self.slidingControllerView.frame) < self.referenceBounds.size.width && CGRectGetMaxX(self.slidingControllerView.frame) >= self.leftLedge;
+    return self.rightController && CGRectGetMaxX(self.slidingControllerView.frame) < self.referenceBounds.size.width && CGRectGetMaxX(self.slidingControllerView.frame) >= _leftLedge;
 }
 
 - (void)showCenterView {
@@ -700,7 +734,7 @@ __typeof__(h) __h = (h);                                    \
 }
 
 - (void)openLeftViewAnimated:(BOOL)animated options:(UIViewAnimationOptions)options completion:(void (^)(IIViewDeckController *))completed {
-    if (!self.leftController || II_FLOAT_EQUAL(CGRectGetMinX(self.slidingControllerView.frame), self.leftLedge)) return;
+    if (!self.leftController || II_FLOAT_EQUAL(CGRectGetMinX(self.slidingControllerView.frame), _leftLedge)) return;
     
     // check the delegate to allow opening
     if (![self checkDelegate:@selector(viewDeckControllerWillOpenLeftView:animated:) animated:animated]) return;
@@ -709,7 +743,7 @@ __typeof__(h) __h = (h);                                    \
     
     [UIView animateWithDuration:OPEN_SLIDE_DURATION(animated) delay:0 options:options | UIViewAnimationOptionLayoutSubviews | UIViewAnimationOptionBeginFromCurrentState animations:^{
         self.leftController.view.hidden = NO;
-        [self setSlidingFrameForOffset:self.referenceBounds.size.width - self.leftLedge];
+        [self setSlidingFrameForOffset:self.referenceBounds.size.width - _leftLedge];
         [self centerViewHidden];
     } completion:^(BOOL finished) {
         if (completed) completed(self);
@@ -814,7 +848,7 @@ __typeof__(h) __h = (h);                                    \
 }
 
 - (void)openRightViewAnimated:(BOOL)animated options:(UIViewAnimationOptions)options completion:(void (^)(IIViewDeckController *))completed {
-    if (!self.rightController || II_FLOAT_EQUAL(CGRectGetMaxX(self.slidingControllerView.frame), self.rightLedge)) return;
+    if (!self.rightController || II_FLOAT_EQUAL(CGRectGetMaxX(self.slidingControllerView.frame), _rightLedge)) return;
     
     // check the delegate to allow opening
     if (![self checkDelegate:@selector(viewDeckControllerWillOpenRightView:animated:) animated:animated]) return;
@@ -823,7 +857,7 @@ __typeof__(h) __h = (h);                                    \
     
     [UIView animateWithDuration:OPEN_SLIDE_DURATION(animated) delay:0 options:options | UIViewAnimationOptionLayoutSubviews animations:^{
         self.rightController.view.hidden = NO;
-        [self setSlidingFrameForOffset:self.rightLedge - self.referenceBounds.size.width];
+        [self setSlidingFrameForOffset:_rightLedge - self.referenceBounds.size.width];
         [self centerViewHidden];
     } completion:^(BOOL finished) {
         if (completed) completed(self);
@@ -989,7 +1023,7 @@ __typeof__(h) __h = (h);                                    \
     if (!self.rightController) x = MAX(0, x);
     
     CGFloat w = self.referenceBounds.size.width;
-    CGFloat lx = MAX(MIN(x, w-self.leftLedge), -w+self.rightLedge);
+    CGFloat lx = MAX(MIN(x, w-_leftLedge), -w+_rightLedge);
     
     if (self.elastic) {
         CGFloat dx = ABS(x) - ABS(lx);
@@ -1027,16 +1061,16 @@ __typeof__(h) __h = (h);                                    \
             [self centerViewHidden];
         }
         
-        CGFloat lw3 = (w-self.leftLedge) / 3.0;
-        CGFloat rw3 = (w-self.rightLedge) / 3.0;
+        CGFloat lw3 = (w-_leftLedge) / 3.0;
+        CGFloat rw3 = (w-_rightLedge) / 3.0;
         CGFloat velocity = [panner velocityInView:self.referenceView].x;
         if (ABS(velocity) < 500) {
             // small velocity, no movement
-            if (x >= w - self.leftLedge - lw3) {
+            if (x >= w - _leftLedge - lw3) {
                 [self openLeftViewAnimated:YES options:UIViewAnimationOptionCurveEaseOut completion:nil];
                 animated = YES;
             }
-            else if (x <= self.rightLedge + rw3 - w) {
+            else if (x <= _rightLedge + rw3 - w) {
                 [self openRightViewAnimated:YES options:UIViewAnimationOptionCurveEaseOut completion:nil];
                 animated = YES;
             }

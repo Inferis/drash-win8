@@ -88,7 +88,6 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reachabilityChanged:) name:kReachabilityChangedNotification object:nil];
     
     UIImageView* splash = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"Default.png"]];
-    splash.frame = (CGRect) { 0, -[UIApplication sharedApplication].statusBarFrame.size.height, splash.frame.size };
     splash.tag = 998811;
     [self.view addSubview:splash];
 }
@@ -96,6 +95,13 @@
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
+    UIImageView* splash = (UIImageView*)[self.view viewWithTag:998811];
+    if (IsIPad()) {
+        splash.frame = (CGRect) { (self.view.bounds.size.width - splash.frame.size.width)/2.0, (self.view.bounds.size.height - splash.frame.size.height)/2.0, splash.frame.size };
+    }
+    else {
+        splash.frame = (CGRect) { 0, -[UIApplication sharedApplication].statusBarFrame.size.height, splash.frame.size };
+    }
     [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackOpaque animated:YES];
 }
 
@@ -104,6 +110,14 @@
     
     UIImageView* splash = (UIImageView*)[self.view viewWithTag:998811];
     if (splash) {
+        if (IsIPad()) {
+            splash.frame = (CGRect) { (self.view.bounds.size.width - splash.frame.size.width)/2.0, (self.view.bounds.size.height - splash.frame.size.height)/2.0, splash.frame.size };
+        }
+        else {
+            splash.frame = (CGRect) { 0, -[UIApplication sharedApplication].statusBarFrame.size.height, splash.frame.size };
+        }
+
+        splash.tag = 0;
         [UIView animateWithDuration:0.3 delay:0 options:UIViewAnimationOptionCurveEaseIn animations:^{
             splash.transform = CGAffineTransformMakeScale(1.5, 1.5);
             splash.alpha = 0;
@@ -122,10 +136,13 @@
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
     [super willRotateToInterfaceOrientation:toInterfaceOrientation duration:duration];
     
+    if (IsIPad())
+        return;
+    
     if (UIInterfaceOrientationIsLandscape(toInterfaceOrientation) == UIInterfaceOrientationIsLandscape(self.interfaceOrientation))
         return;
     
-    if (UIInterfaceOrientationIsLandscape(toInterfaceOrientation) && !IsIPad()) {
+    if (UIInterfaceOrientationIsLandscape(toInterfaceOrientation)) {
         self.smallSpinner.frame = CGRectOffset(self.smallSpinner.frame, 0, 5);
         self.refreshButton.frame = CGRectOffset(self.refreshButton.frame, 0, 5);
         self.infoButton.frame = CGRectOffset(self.infoButton.frame, 0, 5);
@@ -173,7 +190,7 @@
             self.zoomLabel.text = [NSString stringWithFormat:@"%dmin", (entries*5)];
             
             _entries = entries;
-            NSLog(@"entries = %i", entries);
+            //NSLog(@"entries = %i", entries);
             [[NSUserDefaults standardUserDefaults] setEntries:entries];
             [self updateState];
             [zoomer setTranslation:CGPointZero inView:self.view];

@@ -27,32 +27,36 @@
 
 @protocol IIViewDeckControllerDelegate;
 
-typedef enum {
+enum {
     IIViewDeckNoPanning,              // no panning allowed
     IIViewDeckFullViewPanning,        // the default: touch anywhere in the center view to drag the center view around
     IIViewDeckNavigationBarPanning,   // panning only occurs when you start touching in the navigation bar (when the center controller is a UINavigationController with a visible navigation bar). Otherwise it will behave as IIViewDeckNoPanning. 
     IIViewDeckPanningViewPanning      // panning only occurs when you start touching in a UIView set in panningView property
-} IIViewDeckPanningMode;
+};
+typedef UInt32 IIViewDeckPanningMode;
 
 
-typedef enum {
+enum {
     IIViewDeckCenterHiddenUserInteractive,         // the center view stays interactive
     IIViewDeckCenterHiddenNotUserInteractive,      // the center view will become nonresponsive to useractions
     IIViewDeckCenterHiddenNotUserInteractiveWithTapToClose, // the center view will become nonresponsive to useractions, but will allow the user to tap it so that it closes
     IIViewDeckCenterHiddenNotUserInteractiveWithTapToCloseBouncing, // same as IIViewDeckCenterHiddenNotUserInteractiveWithTapToClose, but closes the center view bouncing
-} IIViewDeckCenterHiddenInteractivity;
+};
+typedef UInt32 IIViewDeckCenterHiddenInteractivity;
 
 
-typedef enum {
+enum {
     IIViewDeckNavigationControllerContained,      // the center navigation controller will act as any other viewcontroller. Pushing and popping view controllers will be contained in the centerview.
     IIViewDeckNavigationControllerIntegrated      // the center navigation controller will integrate with the viewdeck.
-} IIViewDeckNavigationControllerBehavior;
+};
+typedef UInt32 IIViewDeckNavigationControllerBehavior;
 
 
-typedef enum {
-    IIViewDeckRotationKeepsLedgeSizes, // when rotating, the ledge sizes are kept (side views are more/less visible)
-    IIViewDeckRotationKeepsViewSizes  // when rotating, the size view sizes are kept (ledges change)
-} IIViewDeckRotationBehavior;
+enum {
+    IIViewDeckLedgeSizeMode, // when rotating, the ledge sizes are kept (side views are more/less visible)
+    IIViewDeckViewSizeMode  // when rotating, the size view sizes are kept (ledges change)
+};
+typedef UInt32 IIViewDeckSizeMode;
 
 
 #define IIViewDeckCenterHiddenCanTapToClose(interactivity) ((interactivity) == IIViewDeckCenterHiddenNotUserInteractiveWithTapToClose || (interactivity) == IIViewDeckCenterHiddenNotUserInteractiveWithTapToCloseBouncing)
@@ -63,7 +67,8 @@ typedef enum {
 @private    
     CGFloat _panOrigin;
     BOOL _viewAppeared;
-    CGFloat _preRotationWidth, _leftWidth, _rightWidth, _preRotationCenterWidth, _maxLedge, _offset;
+    CGFloat _preRotationWidth, _preRotationCenterWidth, _offset;
+    CGFloat _maxLedge, _leftLedge, _rightLedge;
     BOOL _centerViewVisible;
     BOOL _shouldViewDidAppear;
 }
@@ -78,14 +83,14 @@ typedef enum {
 @property (nonatomic, getter=isEnabled) BOOL enabled;
 @property (nonatomic) BOOL elastic;
 
-@property (nonatomic) CGFloat leftLedge;
-@property (nonatomic) CGFloat rightLedge;
-@property (nonatomic) CGFloat maxLedge;
+@property (nonatomic) CGFloat leftSize;
+@property (nonatomic) CGFloat rightSize;
+@property (nonatomic) CGFloat maxSize;
 @property (nonatomic) BOOL resizesCenterView;
 @property (nonatomic) IIViewDeckPanningMode panningMode;
 @property (nonatomic) IIViewDeckCenterHiddenInteractivity centerhiddenInteractivity;
 @property (nonatomic) IIViewDeckNavigationControllerBehavior navigationControllerBehavior;
-@property (nonatomic) IIViewDeckRotationBehavior rotationBehavior;
+@property (nonatomic) IIViewDeckSizeMode sizeMode;
 
 - (id)initWithCenterViewController:(UIViewController*)centerController;
 - (id)initWithCenterViewController:(UIViewController*)centerController leftViewController:(UIViewController*)leftController;
