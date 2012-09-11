@@ -74,10 +74,9 @@
     
     NSArray* points = _points;
     if (points) {
-        for (RainPoint* point in points) {
-            CGFloat y = MIN(max - ((CGFloat)point.adjustedValue * max / 100.0), max - 10.0);
-            if (point.adjustedValue > 0) allZero = NO;
-        }
+        allZero = ![points any:^BOOL(RainPoint* point) {
+            return point.adjustedValue > 0;
+        }];
 
         if (!allZero) {
             for (RainPoint* point in points) {
