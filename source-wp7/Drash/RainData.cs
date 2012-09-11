@@ -1,22 +1,27 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 
 namespace Drash
 {
-    internal class RainData
+    public class RainData
     {
-        private readonly RainPoint[] points;
-
-        private RainData(RainPoint[] points)
+        public RainData()
+            : this(new List<RainPoint>())
         {
-            this.points = points;
+
+        }
+
+        private RainData(List<RainPoint> points)
+        {
+            Points = points;
             var weight = 1.0;
             var totalIntensity = 0;
             var accounted = 0;
             var total = -1;
             var totalPrecipitation = 0.0;
-            foreach (var point in points) {
+            foreach (var point in Points) {
                 var useWeight = point.Intensity == 100 ? weight : weight / 2.0;
 
                 totalIntensity += (int)(point.AdjustedValue * useWeight * 2);
@@ -34,10 +39,10 @@ namespace Drash
             Precipitation = totalPrecipitation;
         }
 
-        public IEnumerable<RainPoint> Points { get { return points; } }
-        public int Chance { get; private set; }
-        public int Intensity { get; private set; }
-        public double Precipitation { get; private set; }
+        public IList<RainPoint> Points { get; set; }
+        public int Chance { get; set; }
+        public int Intensity { get; set; }
+        public double Precipitation { get; set; }
 
         public static bool TryParse(string source, out RainData data)
         {
@@ -50,7 +55,7 @@ namespace Drash
             var points = lines.Select(RainPoint.Parse);
             points = points.SkipWhile(p => p.Stamp.AddMinutes(5) < DateTime.Now).Take(7);
 
-            data = new RainData(points.ToArray());
+            data = new RainData(points.ToList());
             return true;
         }
     }
