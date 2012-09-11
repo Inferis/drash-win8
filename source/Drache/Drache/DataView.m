@@ -81,6 +81,8 @@
     _dotsLayer = [DotsLayer new];
     [self.layer addSublayer:_dotsLayer];
     
+    self.clipsToBounds = YES;
+    
     [self setRain:nil animated:NO];
 }
 

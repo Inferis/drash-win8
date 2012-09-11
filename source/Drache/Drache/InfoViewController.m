@@ -31,17 +31,17 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    self.viewDeckController.rotationBehavior = IIViewDeckRotationKeepsViewSizes;
+    self.viewDeckController.sizeMode = IIViewDeckViewSizeMode;
+    self.viewDeckController.rightSize = 320;
     
     if (IsIPad())
         self.closeButton.alpha = 0;
     
-    self.acknowledgmentsTextView.text = @"This app uses free weather data provided by Buienradar.nl (see: http://gratisweerdata.buienradar.nl). Incorrect predictions usually are caused by bad data returned from the weather service. Atmospheric conditions can reduce the effectiveness of the predications.";
+    self.acknowledgmentsTextView.text = @"This app uses free weather data provided by Buienradar.nl (see: http://gratisweerdata.buienradar.nl). Incorrect predictions usually are caused by bad data returned from the weather service. Atmospheric conditions can reduce the effectiveness of the predictions.";
 }
 
 - (BOOL)viewDeckControllerWillOpenRightView:(IIViewDeckController *)viewDeckController animated:(BOOL)animated {
-    self.viewDeckController.rightLedge = self.viewDeckController.view.bounds.size.width - 320;
-    self.view.frame = CGRectOffsetLeftAndShrink(self.viewDeckController.view.bounds, self.viewDeckController.rightLedge);
+    self.view.frame = CGRectOffsetLeftAndShrink(self.viewDeckController.view.bounds, self.viewDeckController.view.bounds.size.width-self.viewDeckController.rightSize);
     return YES;
 }
 
