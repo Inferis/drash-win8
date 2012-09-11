@@ -15,6 +15,7 @@
 #import "GraphLayer.h"
 #import <QuartzCore/QuartzCore.h>
 #import "DotsLayer.h"
+#import "NSUserDefaults+Settings.h"
 
 @implementation DataView {
     UILabel* _locationLabel;
@@ -111,16 +112,17 @@
 }
 
 - (void)setRain:(RainData*)rain animated:(BOOL)animated {
-    NSString* chanceText;
-    UIColor* chanceColor;
+    NSString* chanceText = @"?";
+    UIColor* chanceColor = [UIColor grayColor];
 
-    if (rain && rain.chance >= 0) {
-        chanceText = [NSString stringWithFormat:@"%d%%", rain.chance];
-        chanceColor = [UIColor whiteColor];
-    }
-    else {
-        chanceText = @"?";
-        chanceColor = [UIColor grayColor];
+    if (rain) {
+        int entries = [[NSUserDefaults standardUserDefaults] entries];
+
+        int chance = [rain chanceForEntries:entries];
+        if (chance >= 0) {
+            chanceText = [NSString stringWithFormat:@"%d%%", chance];
+            chanceColor = [UIColor whiteColor];
+        }
     }
     
     void(^setValues)() = ^{

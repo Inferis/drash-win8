@@ -47,7 +47,7 @@
         totalPrecipitation += point.precipitation/60.0*5.0;
     }
     
-    if (_chance > 0)
+    if ([self chanceForEntries:entries] > 0)
         totalPrecipitation = MAX(0.001, totalPrecipitation);
 
     return totalPrecipitation;
@@ -62,13 +62,43 @@
     }
     
     totalIntensity =  totalIntensity > 0 ? MIN((int)((CGFloat)totalIntensity / (CGFloat)accounted), 100) : 0;
-    if (_chance > 0)
+    if ([self chanceForEntries:entries] > 0)
         totalIntensity = MAX(1, totalIntensity);
     return totalIntensity;
 }
 
+- (int)chanceForEntries:(int)entries {
+    CGFloat weight = 1;
+    int chance = -1;
+//    NSLog(@"=== chance for %d", entries);
+    for (RainPoint* point in [_points take:entries]) {
+        CGFloat useWeight = point.intensity == 100 ? weight : point.intensity < 2 ? weight*0.1 : weight/2.0;
+        
+        if (weight > 0) {
+            chance = MAX(0, chance) + (int)(point.intensity*useWeight);
+            weight = weight - useWeight;
+        }
+        else if (point.intensity > 80) {
+            CGFloat factor = 1.0f/MAX(1.0f, 100.0f-point.intensity);
+            chance = (int)((CGFloat)chance * (1.0f - factor) + (CGFloat)point.intensity * factor);
+        }
+        
+//        NSLog(@"%d -> %fmm/u = %fmm, intensity %d -> %d (%d * %f) ~ %d", point.value, point.precipitation, point.precipitation/60*5, point.adjustedValue, (int)(point.intensity*useWeight), point.intensity, useWeight, chance);
+    }
+    
+    chance = MIN(chance, 99);
+    if (chance > 0) {
+        chance = MAX(chance, 1);
+    }
+    else {
+        chance = 0;
+    }
+//    NSLog(@"=== chance for %d = %d", entries, chance);
+    
+    return chance;
+}
+
 - (BOOL)parse:(NSString*)data {
-    _chance = -1;
     _points = [NSArray array];
     
     if (IsEmpty(data))
@@ -82,7 +112,6 @@
     NSDate* now = [NSDate date];
     NSMutableArray* points = [NSMutableArray array];
     for (NSString* line in lines) {
-        NSLog(@"%@", line);
         NSArray* parts = [line componentsSeparatedByString:@"|"];
         if (parts.count < 2)
             continue;
@@ -98,26 +127,6 @@
         }
     }
     
-    CGFloat weight = 1;
-    int total = -1;
-    for (RainPoint* point in points) {
-        CGFloat useWeight = point.intensity == 100 ? weight : point.intensity < 2 ? weight*0.1 : weight/2.0;
-
-        if (weight > 0) {
-            total = MAX(0, total) + (int)(point.intensity*useWeight);
-            weight = weight - useWeight;
-        }
-
-        NSLog(@"%d -> %fmm/u = %fmm, intensity %d -> %d (%d * %f)", point.value, point.precipitation, point.precipitation/60*5, point.adjustedValue, (int)(point.intensity*useWeight), point.intensity, useWeight);
-    }
-    
-    _chance = MIN(total, 99);
-    if (_chance > 0) {
-        _chance = MAX(_chance, 1);
-    }
-    else {
-        _chance = 0;
-    }
     _points = [NSArray arrayWithArray:points];
     
 //    NSLog(@"d: C=%d%% i=%d p=%f", _chance, _intensity, _precipitation);
