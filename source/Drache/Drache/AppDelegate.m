@@ -8,9 +8,13 @@
 
 #import "AppDelegate.h"
 #import "ViewController.h"
+#import "InfoViewController.h"
 #import "TestFlight.h"
+#import "IIViewDeckController.h"
 
-@implementation AppDelegate
+@implementation AppDelegate {
+    ViewController* _viewController;
+}
 
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
@@ -24,9 +28,17 @@
 
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
 
-    // Override point for customization after application launch.
-    self.viewController = [[ViewController alloc] initWithNibName:@"ViewController" bundle:nil];
-    self.window.rootViewController = self.viewController;
+    _viewController = [[ViewController alloc] initWithNibName:@"ViewController" bundle:nil];
+    if (IsIPad()) {
+        InfoViewController* infoController = [[InfoViewController alloc] initWithNibName:@"InfoViewController" bundle:nil];
+        IIViewDeckController* deckController = [[IIViewDeckController alloc] initWithCenterViewController:_viewController rightViewController:infoController];
+        deckController.panningMode = IIViewDeckNoPanning;
+        self.window.rootViewController = deckController;
+    }
+    else {
+        self.window.rootViewController = _viewController;
+    }
+    
     [self.window makeKeyAndVisible];
     
     return YES;

@@ -6,40 +6,104 @@
     xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="768"
+    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="696"
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="{StaticResource PhoneForegroundBrush}"
     SupportedOrientations="Portrait" Orientation="Portrait"
     shell:SystemTray.IsVisible="True">
+    <phone:PhoneApplicationPage.Resources>
+        <Storyboard x:Name="SplashFadeout">
+            <DoubleAnimation Duration="0:0:0.3" To="0" Storyboard.TargetName="Splash" Storyboard.TargetProperty="(UIElement.Opacity)" d:IsOptimized="True"/>
+            <DoubleAnimation Duration="0:0:0.3" To="76.5" Storyboard.TargetProperty="(UIElement.Projection).(PlaneProjection.RotationY)" Storyboard.TargetName="Splash" d:IsOptimized="True"/>
+        </Storyboard>
+    </phone:PhoneApplicationPage.Resources>
 
     <!--LayoutRoot is the root grid where all page content is placed-->
     <Grid x:Name="LayoutRoot" Background="Transparent">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+        <Grid x:Name="DataRoot" Background="Transparent" Opacity="0" RenderTransformOrigin="0.5,0.5">
+            <Grid.RenderTransform>
+                <CompositeTransform />
+            </Grid.RenderTransform>
 
-        <!--TitlePanel contains the name of the application and page title-->
-        <StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,17,0,28">
-            <TextBlock x:Name="ApplicationTitle" Text="MY APPLICATION" Style="{StaticResource PhoneTextNormalStyle}"/>
-            <TextBlock x:Name="PageTitle" Text="page name" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}"/>
-        </StackPanel>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="1"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="1"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-        <!--ContentPanel - place additional content here-->
-        <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0"></Grid>
+            <Grid Grid.Row="0">
+                <TextBlock x:Name="Location" Text="" FontSize="32" FontFamily="Segoe WP Light" TextAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                    <TextBlock.RenderTransform>
+                        <CompositeTransform />
+                    </TextBlock.RenderTransform>
+                </TextBlock>
+            </Grid>
+            <Path Data="M0,0 L480,0" Stretch="UniformToFill" Grid.Row="1" StrokeDashArray="1 4" Stroke="White" Opacity="0.8" StrokeThickness="1" />
+
+            <Grid Grid.Row="2" x:Name="DataGrid">
+                <Grid.RenderTransform>
+                    <CompositeTransform />
+                </Grid.RenderTransform>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="1*" MinWidth="180"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock x:Name="Chance" Text="" FontSize="120" FontFamily="Segoe WP SemiLight" TextAlignment="Center" VerticalAlignment="Center" Grid.Column="0" RenderTransformOrigin="0.5,0.5">
+                <TextBlock.RenderTransform>
+                    <CompositeTransform />
+                </TextBlock.RenderTransform>
+                </TextBlock>
+
+                <Grid Grid.Column="1" x:Name="Intensity">
+                    <Image Source="Resources/intensity4.png" Stretch="None" />
+                </Grid>
+            </Grid>
+
+            <Path Data="M0,0 L480,0" Stretch="UniformToFill" Grid.Row="3" StrokeDashArray="1 4" Stroke="White" Opacity="0.8" StrokeThickness="1" />
+
+            <Grid Grid.Row="4">
+                <Path x:Name="Graph" Stroke="#40a1d9" StrokeThickness="3">
+                    <Path.Fill>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <LinearGradientBrush.GradientStops>
+                                <GradientStop Color="#9980ccff" Offset="0" />
+                                <GradientStop Color="#991e4c67" Offset="1" />
+                            </LinearGradientBrush.GradientStops>
+                        </LinearGradientBrush>
+                    </Path.Fill>
+
+                </Path>
+            </Grid>
+
+        </Grid>
+
+        <Image Stretch="None" x:Name="Splash" Source="Resources/Splash.jpg" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Image.Projection>
+                <PlaneProjection CenterOfRotationX="0"/>
+            </Image.Projection>
+        </Image>
+
+        <Image Stretch="None" x:Name="ErrorImage" Source="Resources/nolocation.png" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0" RenderTransformOrigin="0.5,0.5">
+            <Image.RenderTransform>
+                <CompositeTransform />
+            </Image.RenderTransform>
+        </Image>
     </Grid>
- 
+
     <!--Sample code showing usage of ApplicationBar-->
-    <!--<phone:PhoneApplicationPage.ApplicationBar>
-        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
-            <shell:ApplicationBarIconButton IconUri="/Images/appbar_button1.png" Text="Button 1"/>
-            <shell:ApplicationBarIconButton IconUri="/Images/appbar_button2.png" Text="Button 2"/>
-            <shell:ApplicationBar.MenuItems>
-                <shell:ApplicationBarMenuItem Text="MenuItem 1"/>
-                <shell:ApplicationBarMenuItem Text="MenuItem 2"/>
-            </shell:ApplicationBar.MenuItems>
+    <phone:PhoneApplicationPage.ApplicationBar>
+        <shell:ApplicationBar IsVisible="True" Mode="Minimized" IsMenuEnabled="False">
+            <shell:ApplicationBarIconButton IconUri="/Images/appbar_button1.png" Text="Refresh" Click="RefreshButton_Click"/>
+            <shell:ApplicationBarIconButton IconUri="/Images/appbar_button2.png" Text="About" Click="InfoButton_Click"/>
         </shell:ApplicationBar>
-    </phone:PhoneApplicationPage.ApplicationBar>-->
+    </phone:PhoneApplicationPage.ApplicationBar>
+
+    <shell:SystemTray.ProgressIndicator>
+        <shell:ProgressIndicator x:Name="spinner" IsIndeterminate="True" IsVisible="false" />
+    </shell:SystemTray.ProgressIndicator>
 
 </phone:PhoneApplicationPage>

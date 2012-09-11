@@ -11,12 +11,14 @@
 #import "UIColor+Hex.h"
 #import "RainData.h"
 #import "Coby.h"
+#import "NSUserDefaults+Settings.h"
 
 @implementation GraphLayer {
     NSArray* _points;
     CAShapeLayer* _borderLayer;
     CAGradientLayer* _gradientLayer;
     CAShapeLayer* _mask;
+    int _entries;
 }
 
 - (id)init {
@@ -37,6 +39,7 @@
         
         _mask = [[CAShapeLayer alloc] init];
         _gradientLayer.mask = _mask;
+        _entries = 6;
         
         [self generateMaskAnimated:NO];
     }
@@ -49,41 +52,48 @@
 }
 
 - (void)setRain:(RainData*)rain animated:(BOOL)animated {
-    _points = [rain.points take:7];
+    _points = rain.points;
     [self generateMaskAnimated:animated];
 }
 
 - (void)generateMaskAnimated:(BOOL)animated {
     CGFloat width = self.bounds.size.width;
     CGFloat height = self.bounds.size.height;
-    CGFloat bottom = self.superlayer.frame.size.height > self.superlayer.frame.size.width ? 40 : 30;
+    CGFloat bottom = self.superlayer.frame.size.height > self.superlayer.frame.size.width && !IsIPad() ? 40 : 30;
     
     UIBezierPath* path = [UIBezierPath bezierPath];
     [path moveToPoint:(CGPoint) { 0, height }];
 
-    CGFloat minY = height-bottom;
+    CGFloat max = (height-bottom);
+    CGFloat minY = max;
     CGFloat x = 0;
     BOOL allZero = YES;
-    if (_points) {
-        for (RainPoint* point in _points) {
-            if (point.adjustedValue > 0) allZero = NO;
-        }
+    
+    int entries = [[NSUserDefaults standardUserDefaults] entries];
+    entries = MIN(MAX(entries, 6), _points.count);
+    
+    NSArray* points = _points;
+    if (points) {
+        allZero = ![points any:^BOOL(RainPoint* point) {
+            return point.adjustedValue > 0;
+        }];
 
         if (!allZero) {
-            for (RainPoint* point in _points) {
+            for (RainPoint* point in points) {
                 CGFloat y = ((100 - MAX(point.adjustedValue, 7)) / 100.0) * (height-bottom);
                 minY = MIN(minY, y);
                 [path addLineToPoint:(CGPoint) { x, y }];
-                x += width/(_points.count-2);
+                x += width/entries;
             }
+            [path addLineToPoint:(CGPoint) { x, (93.0 / 100.0) * (height-bottom) }];
         }
     }
     
     NSArray* newColors;
     if (allZero) {
-        for (int i=0; i<7; ++i) {
+        for (int i=0; i<points.count; ++i) {
             [path addLineToPoint:(CGPoint) { x, 0 }];
-            x += width/5;
+            x += width/entries;
         }
         minY = (height-bottom)/2.0;
         newColors = [NSArray arrayWithObjects:(id)[UIColor clearColor].CGColor, [UIColor colorWithHex:0x991e4c67].CGColor, nil];
@@ -94,6 +104,13 @@
     [path addLineToPoint:(CGPoint) { width, height } ];
     [path closePath];
     
+    animated = entries != _entries && _entries > 0 && entries > 0;
+    _entries = entries;
+    
+    _gradientLayer.frame = self.bounds;
+    _borderLayer.frame = self.bounds;
+    _mask.frame = self.bounds;
+
     _borderLayer.opacity = allZero ? 0 : 1;
     if (animated) {
         CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"path"];
@@ -103,10 +120,8 @@
         animation.toValue = (id)path.CGPath;
         [_mask addAnimation:animation forKey:@"animatePath"];
     }
-    _mask.frame = self.bounds;
     _mask.path = path.CGPath;
 
-    _gradientLayer.frame = self.bounds;
     CGPoint newStartPoint = (CGPoint) { 0, minY/(height) };
     if (animated) {
         CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"startPoint"];
@@ -127,7 +142,6 @@
     _gradientLayer.endPoint = (CGPoint) { 0, 1 };
     _gradientLayer.colors = newColors;
     
-    _borderLayer.frame = self.bounds;
     if (animated) {
         CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"path"];
         animation.duration = 0.3;
