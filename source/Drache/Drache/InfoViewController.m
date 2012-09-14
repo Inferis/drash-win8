@@ -31,18 +31,18 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    self.viewDeckController.sizeMode = IIViewDeckViewSizeMode;
-    self.viewDeckController.rightSize = 320;
     
+    dispatch_delayed(0.01, ^{
+        self.viewDeckController.sizeMode = IIViewDeckViewSizeMode;
+        self.viewDeckController.rightSize = 320;
+    });
+
     if (IsIPad())
         self.closeButton.alpha = 0;
-    
+    else
+        [self.view.subviews[0] setAutoresizingMask:UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight];
+        
     self.acknowledgmentsTextView.text = @"This app uses free weather data provided by Buienradar.nl (see: http://gratisweerdata.buienradar.nl). Incorrect predictions usually are caused by bad data returned from the weather service. Atmospheric conditions can reduce the effectiveness of the predictions.";
-}
-
-- (BOOL)viewDeckControllerWillOpenRightView:(IIViewDeckController *)viewDeckController animated:(BOOL)animated {
-    self.view.frame = CGRectOffsetLeftAndShrink(self.viewDeckController.view.bounds, self.viewDeckController.view.bounds.size.width-self.viewDeckController.rightSize);
-    return YES;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -54,10 +54,7 @@
         });
     }
     else {
-        UIView* popview = [[[self.view superview] superview] superview];
-        [popview.subviews objectAtIndex:1];
-        CALayer* layer = popview.layer;
-        layer.shadowColor = [[UIColor whiteColor] CGColor];
+        self.view.frame = CGRectOffsetLeftAndShrink(self.viewDeckController.view.bounds, self.viewDeckController.view.bounds.size.width-self.viewDeckController.rightSize);
     }
 }
 
@@ -65,9 +62,12 @@
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-    return (interfaceOrientation == UIInterfaceOrientationPortrait);
+- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
+    [super willRotateToInterfaceOrientation:toInterfaceOrientation duration:duration];
+
+    if (IsIPad()) {
+        self.view.frame = CGRectOffsetLeftAndShrink(self.viewDeckController.view.bounds, self.viewDeckController.view.bounds.size.width-self.viewDeckController.rightSize);
+    }
 }
 
 @end

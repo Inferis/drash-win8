@@ -86,7 +86,7 @@ __typeof__(h) __h = (h);                                    \
 #import <objc/runtime.h>
 #import <QuartzCore/QuartzCore.h>
 #import <objc/message.h>
-#import "WrapController.h"
+#import "IIWrapController.h"
 
 #define DURATION_FAST 0.3
 #define DURATION_SLOW 0.3
@@ -94,8 +94,53 @@ __typeof__(h) __h = (h);                                    \
 #define OPEN_SLIDE_DURATION(animated) SLIDE_DURATION(animated,DURATION_FAST)
 #define CLOSE_SLIDE_DURATION(animated) SLIDE_DURATION(animated,DURATION_SLOW)
 
-@interface IIViewDeckController () <UIGestureRecognizerDelegate> 
+enum {
+    IIViewDeckNoSide = 0,
+    IIViewDeckCenterSide = 5,
+};
 
+enum {
+    IIViewDeckNoOrientation = 0,
+};
+
+inline NSString* NSStringFromIIViewDeckSide(IIViewDeckSide side) {
+    switch (side) {
+        case IIViewDeckLeftSide:
+            return @"left";
+            
+        case IIViewDeckRightSide:
+            return @"right";
+
+        case IIViewDeckTopSide:
+            return @"top";
+
+        case IIViewDeckBottomSide:
+            return @"bottom";
+
+        case IIViewDeckNoSide:
+            return @"no";
+
+        default:
+            return @"unknown";
+    }
+}
+
+inline IIViewDeckOffsetOrientation IIViewDeckOffsetOrientationFromIIViewDeckSide(IIViewDeckSide side) {
+    switch (side) {
+        case IIViewDeckLeftSide:
+        case IIViewDeckRightSide:
+            return IIViewDeckHorizontalOrientation;
+            
+        case IIViewDeckTopSide:
+        case IIViewDeckBottomSide:
+            return IIViewDeckVerticalOrientation;
+            
+        default:
+            return IIViewDeckNoOrientation;
+    }
+}
+
+@interface IIViewDeckController () <UIGestureRecognizerDelegate>
 
 @property (nonatomic, retain) UIView* referenceView;
 @property (nonatomic, readonly) CGRect referenceBounds;
@@ -113,17 +158,15 @@ __typeof__(h) __h = (h);                                    \
 
 - (void)cleanup;
 
-- (BOOL)closeLeftViewAnimated:(BOOL)animated options:(UIViewAnimationOptions)options completion:(void(^)(IIViewDeckController* controller))completed;
-- (void)openLeftViewAnimated:(BOOL)animated options:(UIViewAnimationOptions)options completion:(void(^)(IIViewDeckController* controller))completed;
-- (BOOL)closeRightViewAnimated:(BOOL)animated options:(UIViewAnimationOptions)options completion:(void(^)(IIViewDeckController* controller))completed;
-- (void)openRightViewAnimated:(BOOL)animated options:(UIViewAnimationOptions)options completion:(void(^)(IIViewDeckController* controller))completed;
-
-- (CGRect)slidingRectForOffset:(CGFloat)offset;
-- (CGSize)slidingSizeForOffset:(CGFloat)offset;
-- (void)setSlidingFrameForOffset:(CGFloat)frame;
+- (CGRect)slidingRectForOffset:(CGFloat)offset forOrientation:(IIViewDeckOffsetOrientation)orientation;
+- (CGSize)slidingSizeForOffset:(CGFloat)offset forOrientation:(IIViewDeckOffsetOrientation)orientation;
+- (void)setSlidingFrameForOffset:(CGFloat)frame forOrientation:(IIViewDeckOffsetOrientation)orientation;
+- (void)setSlidingFrameForOffset:(CGFloat)offset limit:(BOOL)limit forOrientation:(IIViewDeckOffsetOrientation)orientation;
+- (void)setSlidingFrameForOffset:(CGFloat)offset limit:(BOOL)limit panning:(BOOL)panning forOrientation:(IIViewDeckOffsetOrientation)orientation;
+- (void)panToSlidingFrameForOffset:(CGFloat)frame forOrientation:(IIViewDeckOffsetOrientation)orientation;
 - (void)hideAppropriateSideViews;
 
-- (void)setSlidingAndReferenceViews;
+- (BOOL)setSlidingAndReferenceViews;
 - (void)applyShadowToSlidingView;
 - (void)restoreShadowToSlidingView;
 - (void)arrangeViewsAfterRotation;
@@ -132,18 +175,25 @@ __typeof__(h) __h = (h);                                    \
 - (void)centerViewVisible;
 - (void)centerViewHidden;
 - (void)centerTapped;
-- (void)applyCenterTapper;
 
 - (void)addPanners;
 - (void)removePanners;
 
 
-- (BOOL)checkDelegate:(SEL)selector animated:(BOOL)animated;
-- (void)performDelegate:(SEL)selector animated:(BOOL)animated;
-- (void)performOffsetDelegate:(SEL)selector offset:(CGFloat)offset;
+- (BOOL)checkCanOpenSide:(IIViewDeckSide)viewDeckSide;
+- (BOOL)checkCanCloseSide:(IIViewDeckSide)viewDeckSide;
+- (void)notifyWillOpenSide:(IIViewDeckSide)viewDeckSide animated:(BOOL)animated;
+- (void)notifyDidOpenSide:(IIViewDeckSide)viewDeckSide animated:(BOOL)animated;
+- (void)notifyWillCloseSide:(IIViewDeckSide)viewDeckSide animated:(BOOL)animated;
+- (void)notifyDidCloseSide:(IIViewDeckSide)viewDeckSide animated:(BOOL)animated;
+- (void)notifyDidChangeOffset:(CGFloat)offset orientation:(IIViewDeckOffsetOrientation)orientation panning:(BOOL)panning;
 
-- (void)relayAppearanceMethod:(void(^)(UIViewController* controller))relay;
-- (void)relayAppearanceMethod:(void(^)(UIViewController* controller))relay forced:(BOOL)forced;
+- (BOOL)checkDelegate:(SEL)selector side:(IIViewDeckSide)viewDeckSize;
+- (void)performDelegate:(SEL)selector side:(IIViewDeckSide)viewDeckSize animated:(BOOL)animated;
+- (void)performDelegate:(SEL)selector side:(IIViewDeckSide)viewDeckSize controller:(UIViewController*)controller;
+- (void)performDelegate:(SEL)selector offset:(CGFloat)offset orientation:(IIViewDeckOffsetOrientation)orientation panning:(BOOL)panning;
+
+- (void)relayRotationMethod:(void(^)(UIViewController* controller))relay;
 
 @end 
 
@@ -162,11 +212,6 @@ __typeof__(h) __h = (h);                                    \
 - (void)willMoveToParentViewController:(UIViewController *)parent;
 - (void)didMoveToParentViewController:(UIViewController *)parent;
 
-- (void)vdc_viewWillAppear:(bool)animated;
-- (void)vdc_viewDidAppear:(bool)animated;
-- (void)vdc_viewWillDisappear:(bool)animated;
-- (void)vdc_viewDidDisappear:(bool)animated;
-
 @end
 
 
@@ -177,8 +222,10 @@ __typeof__(h) __h = (h);                                    \
 @synthesize referenceView = _referenceView;
 @synthesize slidingController = _slidingController;
 @synthesize centerController = _centerController;
-@synthesize leftController = _leftController;
-@synthesize rightController = _rightController;
+@dynamic leftController;
+@dynamic rightController;
+@dynamic topController;
+@dynamic bottomController;
 @synthesize resizesCenterView = _resizesCenterView;
 @synthesize originalShadowOpacity = _originalShadowOpacity;
 @synthesize originalShadowPath = _originalShadowPath;
@@ -186,6 +233,7 @@ __typeof__(h) __h = (h);                                    \
 @synthesize originalShadowColor = _originalShadowColor;
 @synthesize originalShadowOffset = _originalShadowOffset;
 @synthesize delegate = _delegate;
+@synthesize delegateMode = _delegateMode;
 @synthesize navigationControllerBehavior = _navigationControllerBehavior;
 @synthesize panningView = _panningView; 
 @synthesize centerhiddenInteractivity = _centerhiddenInteractivity;
@@ -194,8 +242,16 @@ __typeof__(h) __h = (h);                                    \
 @synthesize sizeMode = _sizeMode;
 @synthesize enabled = _enabled;
 @synthesize elastic = _elastic;
+@synthesize automaticallyUpdateTabBarItems = _automaticallyUpdateTabBarItems;
+@synthesize panningGestureDelegate = _panningGestureDelegate;
+@synthesize bounceDurationFactor = _bounceDurationFactor;
 
 #pragma mark - Initalisation and deallocation
+
+- (id)initWithCoder:(NSCoder *)aDecoder
+{
+    return [self initWithCenterViewController:nil];
+}
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -209,10 +265,18 @@ __typeof__(h) __h = (h);                                    \
         _navigationControllerBehavior = IIViewDeckNavigationControllerContained;
         _centerhiddenInteractivity = IIViewDeckCenterHiddenUserInteractive;
         _sizeMode = IIViewDeckLedgeSizeMode;
-        _viewAppeared = NO;
+        _viewAppeared = 0;
+        _viewFirstAppeared = NO;
         _resizesCenterView = NO;
+        _automaticallyUpdateTabBarItems = NO;
         self.panners = [NSMutableArray array];
         self.enabled = YES;
+        _offset = 0;
+        _bounceDurationFactor = 0.3;
+        _offsetOrientation = IIViewDeckHorizontalOrientation;
+        
+        _delegate = nil;
+        _delegateMode = IIViewDeckDelegateOnly;
         
         self.originalShadowRadius = 0;
         self.originalShadowOffset = CGSizeZero;
@@ -224,8 +288,10 @@ __typeof__(h) __h = (h);                                    \
         self.centerController = centerController;
         self.leftController = nil;
         self.rightController = nil;
-        _leftLedge = 44;
-        _rightLedge = 44;
+        self.topController = nil;
+        self.bottomController = nil;
+
+        _ledge[IIViewDeckLeftSide] = _ledge[IIViewDeckRightSide] = _ledge[IIViewDeckTopSide] = _ledge[IIViewDeckBottomSide] = 44;
     }
     return self;
 }
@@ -251,6 +317,41 @@ __typeof__(h) __h = (h);                                    \
     }
     return self;
 }
+
+- (id)initWithCenterViewController:(UIViewController*)centerController topViewController:(UIViewController*)topController {
+    if ((self = [self initWithCenterViewController:centerController])) {
+        self.topController = topController;
+    }
+    return self;
+}
+
+- (id)initWithCenterViewController:(UIViewController*)centerController bottomViewController:(UIViewController*)bottomController {
+    if ((self = [self initWithCenterViewController:centerController])) {
+        self.bottomController = bottomController;
+    }
+    return self;
+}
+
+- (id)initWithCenterViewController:(UIViewController*)centerController topViewController:(UIViewController*)topController bottomViewController:(UIViewController*)bottomController {
+    if ((self = [self initWithCenterViewController:centerController])) {
+        self.topController = topController;
+        self.bottomController = bottomController;
+    }
+    return self;
+}
+
+- (id)initWithCenterViewController:(UIViewController*)centerController leftViewController:(UIViewController*)leftController rightViewController:(UIViewController*)rightController topViewController:(UIViewController*)topController bottomViewController:(UIViewController*)bottomController {
+    if ((self = [self initWithCenterViewController:centerController])) {
+        self.leftController = leftController;
+        self.rightController = rightController;
+        self.topController = topController;
+        self.bottomController = bottomController;
+    }
+    return self;
+}
+
+
+
 
 - (void)cleanup {
     self.originalShadowRadius = 0;
@@ -295,7 +396,8 @@ __typeof__(h) __h = (h);                                    \
 #pragma mark - Bookkeeping
 
 - (NSArray*)controllers {
-    NSMutableArray* result = [NSMutableArray arrayWithObject:self.centerController];
+    NSMutableArray *result = [NSMutableArray array];
+    if (self.centerController) [result addObject:self.centerController];
     if (self.leftController) [result addObject:self.leftController];
     if (self.rightController) [result addObject:self.rightController];
     return [NSArray arrayWithArray:result];
@@ -332,128 +434,231 @@ __typeof__(h) __h = (h);                                    \
     return II_CGRectOffsetTopAndShrink(self.referenceBounds, [self relativeStatusBarHeight]);
 }
 
-- (CGFloat)limitOffset:(CGFloat)offset {
-    if (_leftController && _rightController) return offset;
-    
-    if (_leftController && _maxLedge > 0) {
-        CGFloat left = self.referenceBounds.size.width - _maxLedge;
-        offset = MIN(offset, left);
+- (CGFloat)limitOffset:(CGFloat)offset forOrientation:(IIViewDeckOffsetOrientation)orientation {
+    if (orientation == IIViewDeckHorizontalOrientation) {
+        if (self.leftController && self.rightController) return offset;
+
+        if (self.leftController && _maxLedge > 0) {
+            CGFloat left = self.referenceBounds.size.width - _maxLedge;
+            offset = MIN(offset, left);
+        }
+        else if (self.rightController && _maxLedge > 0) {
+            CGFloat right = _maxLedge - self.referenceBounds.size.width;
+            offset = MAX(offset, right);
+        }
+        
+        return offset;
     }
-    else if (_rightController && _maxLedge > 0) {
-        CGFloat right = _maxLedge - self.referenceBounds.size.width;
-        offset = MAX(offset, right);
+    else {
+        if (self.topController && self.bottomController) return offset;
+        
+        if (self.topController && _maxLedge > 0) {
+            CGFloat top = self.referenceBounds.size.height - _maxLedge;
+            offset = MIN(offset, top);
+        }
+        else if (self.bottomController && _maxLedge > 0) {
+            CGFloat bottom = _maxLedge - self.referenceBounds.size.height;
+            offset = MAX(offset, bottom);
+        }
+        
+        return offset;
     }
     
-    return offset;
 }
 
-- (CGRect)slidingRectForOffset:(CGFloat)offset {
-    offset = [self limitOffset:offset];
-    return (CGRect) { {self.resizesCenterView && offset < 0 ? 0 : offset, 0}, [self slidingSizeForOffset:offset] };
+- (CGRect)slidingRectForOffset:(CGFloat)offset forOrientation:(IIViewDeckOffsetOrientation)orientation {
+    offset = [self limitOffset:offset forOrientation:orientation];
+    if (orientation == IIViewDeckHorizontalOrientation) {
+        return (CGRect) { {self.resizesCenterView && offset < 0 ? 0 : offset, 0}, [self slidingSizeForOffset:offset forOrientation:orientation] };
+    }
+    else {
+        return (CGRect) { {0, self.resizesCenterView && offset < 0 ? 0 : offset}, [self slidingSizeForOffset:offset forOrientation:orientation] };
+    }
 }
 
-- (CGSize)slidingSizeForOffset:(CGFloat)offset {
+- (CGSize)slidingSizeForOffset:(CGFloat)offset forOrientation:(IIViewDeckOffsetOrientation)orientation {
     if (!self.resizesCenterView) return self.referenceBounds.size;
     
-    offset = [self limitOffset:offset];
-    if (offset < 0) 
-        return (CGSize) { self.centerViewBounds.size.width + offset, self.centerViewBounds.size.height };
-    
-    return (CGSize) { self.centerViewBounds.size.width - offset, self.centerViewBounds.size.height };
+    offset = [self limitOffset:offset forOrientation:orientation];
+    if (orientation == IIViewDeckHorizontalOrientation) {
+        return (CGSize) { self.centerViewBounds.size.width - ABS(offset), self.centerViewBounds.size.height };
+    }
+    else {
+        return (CGSize) { self.centerViewBounds.size.width, self.centerViewBounds.size.height - ABS(offset) };
+    }
 }
 
--(void)setSlidingFrameForOffset:(CGFloat)offset {
-    _offset = [self limitOffset:offset];
-    self.slidingControllerView.frame = [self slidingRectForOffset:_offset];
-    [self performOffsetDelegate:@selector(viewDeckController:slideOffsetChanged:) offset:_offset];
+-(void)setSlidingFrameForOffset:(CGFloat)offset forOrientation:(IIViewDeckOffsetOrientation)orientation {
+    [self setSlidingFrameForOffset:offset limit:YES panning:NO forOrientation:orientation];
+}
+
+-(void)panToSlidingFrameForOffset:(CGFloat)offset forOrientation:(IIViewDeckOffsetOrientation)orientation {
+    [self setSlidingFrameForOffset:offset limit:YES panning:YES forOrientation:orientation];
+}
+
+-(void)setSlidingFrameForOffset:(CGFloat)offset limit:(BOOL)limit forOrientation:(IIViewDeckOffsetOrientation)orientation {
+    [self setSlidingFrameForOffset:offset limit:limit panning:NO forOrientation:orientation];
+}
+
+-(void)setSlidingFrameForOffset:(CGFloat)offset limit:(BOOL)limit panning:(BOOL)panning forOrientation:(IIViewDeckOffsetOrientation)orientation {
+    CGFloat beforeOffset = _offset;
+    if (limit)
+        offset = [self limitOffset:offset forOrientation:orientation];
+    _offset = offset;
+    _offsetOrientation = orientation;
+    self.slidingControllerView.frame = [self slidingRectForOffset:_offset forOrientation:orientation];
+    if (beforeOffset != _offset)
+        [self notifyDidChangeOffset:_offset orientation:orientation panning:panning];
 }
 
 - (void)hideAppropriateSideViews {
     self.leftController.view.hidden = CGRectGetMinX(self.slidingControllerView.frame) <= 0;
     self.rightController.view.hidden = CGRectGetMaxX(self.slidingControllerView.frame) >= self.referenceBounds.size.width;
+    self.topController.view.hidden = CGRectGetMinY(self.slidingControllerView.frame) <= 0;
+    self.bottomController.view.hidden = CGRectGetMaxY(self.slidingControllerView.frame) >= self.referenceBounds.size.height;
 }
 
 #pragma mark - ledges
 
-- (void)setLeftSize:(CGFloat)leftSize {
+- (void)setSize:(CGFloat)size forSide:(IIViewDeckSide)side completion:(void(^)(BOOL finished))completion {
     // we store ledge sizes internally but allow size to be specified depending on size mode.
-    CGFloat leftLedge = [self sizeAsLedge:leftSize];
+    CGFloat ledge = [self sizeAsLedge:size];
     
-    // Compute the final ledge in two steps. This prevents a strange bug where
-    // nesting MAX(X, MIN(Y, Z)) with miniscule referenceBounds returns a bogus near-zero value.
-    CGFloat minLedge = MIN(self.referenceBounds.size.width, leftLedge);
-    leftLedge = MAX(leftLedge, minLedge);
-    if (_viewAppeared && II_FLOAT_EQUAL(self.slidingControllerView.frame.origin.x, self.referenceBounds.size.width - _leftLedge)) {
-        if (leftLedge < _leftLedge) {
-            [UIView animateWithDuration:CLOSE_SLIDE_DURATION(YES) animations:^{
-                [self setSlidingFrameForOffset:self.referenceBounds.size.width - leftLedge];
-            }];
+    CGFloat minLedge;
+    CGFloat(^offsetter)(CGFloat ledge);
+   
+    switch (side) {
+        case IIViewDeckLeftSide: {
+            minLedge = MIN(self.referenceBounds.size.width, ledge);
+            offsetter = ^CGFloat(CGFloat l) { return  self.referenceBounds.size.width - l; };
+            break;
         }
-        else if (leftLedge > _leftLedge) {
+
+        case IIViewDeckRightSide: {
+            minLedge = MIN(self.referenceBounds.size.width, ledge);
+            offsetter = ^CGFloat(CGFloat l) { return l - self.referenceBounds.size.width; };
+            break;
+        }
+
+        case IIViewDeckTopSide: {
+            minLedge = MIN(self.referenceBounds.size.width, ledge);
+            offsetter = ^CGFloat(CGFloat l) { return  self.referenceBounds.size.height - l; };
+            break;
+        }
+
+        case IIViewDeckBottomSide: {
+            minLedge = MIN(self.referenceBounds.size.width, ledge);
+            offsetter = ^CGFloat(CGFloat l) { return l - self.referenceBounds.size.height; };
+            break;
+        }
+            
+        default:
+            return;
+    }
+
+    ledge = MAX(ledge, minLedge);
+    if (_viewFirstAppeared && II_FLOAT_EQUAL(self.slidingControllerView.frame.origin.x, offsetter(_ledge[side]))) {
+        IIViewDeckOffsetOrientation orientation = IIViewDeckOffsetOrientationFromIIViewDeckSide(side);
+        if (ledge < _ledge[side]) {
+            [UIView animateWithDuration:CLOSE_SLIDE_DURATION(YES) animations:^{
+                [self setSlidingFrameForOffset:offsetter(ledge) forOrientation:orientation];
+            } completion:completion];
+        }
+        else if (ledge > _ledge[side]) {
             [UIView animateWithDuration:OPEN_SLIDE_DURATION(YES) animations:^{
-                [self setSlidingFrameForOffset:self.referenceBounds.size.width - leftLedge];
-            }];
+                [self setSlidingFrameForOffset:offsetter(ledge) forOrientation:orientation];
+            } completion:completion];
         }
     }
-    _leftLedge = leftLedge;
+    _ledge[side] = ledge;
+}
+
+- (CGFloat)sizeForSide:(IIViewDeckSide)side {
+    return [self ledgeAsSize:_ledge[side]];
+}
+
+#pragma mark left size
+
+- (void)setLeftSize:(CGFloat)leftSize {
+    [self setLeftSize:leftSize completion:nil];
+}
+
+- (void)setLeftSize:(CGFloat)leftSize completion:(void(^)(BOOL finished))completion {
+    [self setSize:leftSize forSide:IIViewDeckLeftSide completion:completion];
 }
 
 - (CGFloat)leftSize {
-    return [self ledgeAsSize:_leftLedge];
+    return [self sizeForSide:IIViewDeckLeftSide];
 }
 
+#pragma mark right size
 
 - (void)setRightSize:(CGFloat)rightSize {
-    // we store ledge sizes internally but allow size to be specified depending on size mode.
-    CGFloat rightLedge = [self ledgeAsSize:rightSize];
-
-    // Compute the final ledge in two steps. This prevents a strange bug where
-    // nesting MAX(X, MIN(Y, Z)) with miniscule referenceBounds returns a bogus near-zero value.
-    CGFloat minLedge = MIN(self.referenceBounds.size.width, rightLedge);
-    rightLedge = MAX(rightLedge, minLedge);
-    if (_viewAppeared && II_FLOAT_EQUAL(self.slidingControllerView.frame.origin.x, _rightLedge - self.referenceBounds.size.width)) {
-        if (rightLedge < _rightLedge) {
-            [UIView animateWithDuration:CLOSE_SLIDE_DURATION(YES) animations:^{
-                [self setSlidingFrameForOffset:rightLedge - self.referenceBounds.size.width];
-            }];
-        }
-        else if (rightLedge > _rightLedge) {
-            [UIView animateWithDuration:OPEN_SLIDE_DURATION(YES) animations:^{
-                [self setSlidingFrameForOffset:rightLedge - self.referenceBounds.size.width];
-            }];
-        }
-    }
-    _rightLedge = rightLedge;
+    [self setRightSize:rightSize completion:nil];
 }
 
+- (void)setRightSize:(CGFloat)rightSize completion:(void(^)(BOOL finished))completion {
+    [self setSize:rightSize forSide:IIViewDeckRightSide completion:completion];
+}
+    
 - (CGFloat)rightSize {
-    return [self ledgeAsSize:_rightLedge];
+    return [self sizeForSide:IIViewDeckRightSide];
 }
+
+#pragma mark top size
+
+- (void)setTopSize:(CGFloat)leftSize {
+    [self setTopSize:leftSize completion:nil];
+}
+
+- (void)setTopSize:(CGFloat)topSize completion:(void(^)(BOOL finished))completion {
+    [self setSize:topSize forSide:IIViewDeckTopSide completion:completion];
+}
+
+- (CGFloat)topSize {
+    return [self sizeForSide:IIViewDeckTopSide];
+}
+
+#pragma mark Bottom size
+
+- (void)setBottomSize:(CGFloat)bottomSize {
+    [self setBottomSize:bottomSize completion:nil];
+}
+
+- (void)setBottomSize:(CGFloat)bottomSize completion:(void(^)(BOOL finished))completion {
+    [self setSize:bottomSize forSide:IIViewDeckBottomSide completion:completion];
+}
+
+- (CGFloat)bottomSize {
+    return [self sizeForSide:IIViewDeckBottomSide];
+}
+
+#pragma mark max size
 
 - (void)setMaxSize:(CGFloat)maxSize {
-    // we store ledge sizes internally but allow size to be specified depending on size mode.
-    CGFloat maxLedge = [self sizeAsLedge:maxSize];
+    [self setMaxSize:maxSize completion:nil];
+}
 
-    _maxLedge = maxLedge;
-    if (_leftController && _rightController) {
-        NSLog(@"IIViewDeckController: warning: setting maxLedge with 2 side controllers. Value will be ignored.");
+- (void)setMaxSize:(CGFloat)maxSize completion:(void(^)(BOOL finished))completion {
+    int count = (self.leftController ? 1 : 0) + (self.rightController ? 1 : 0) + (self.topController ? 1 : 0) + (self.bottomController ? 1 : 0);
+    
+    if (count > 1) {
+        NSLog(@"IIViewDeckController: warning: setting maxLedge with more than one side controllers. Value will be ignored.");
         return;
     }
     
-    if (_leftController && _leftLedge > _maxLedge) {
-        _leftLedge = _maxLedge;
-    }
-    else if (_rightController && _rightLedge > _maxLedge) {
-        _rightLedge = _maxLedge;
-    }
-    
-    [self setSlidingFrameForOffset:_offset];
+    [self doForControllers:^(UIViewController* controller, IIViewDeckSide side) {
+        if (controller) {
+            if (_ledge[side] > _maxLedge)
+                [self setSize:maxSize forSide:side completion:completion];
+            [self setSlidingFrameForOffset:_offset forOrientation:IIViewDeckOffsetOrientationFromIIViewDeckSide(side)]; // should be animated
+        }
+    }];
 }
 
 - (CGFloat)maxSize {
     return [self ledgeAsSize:_maxLedge];
 }
-
 
 - (CGFloat)sizeAsLedge:(CGFloat)size {
     if (_sizeMode == IIViewDeckLedgeSizeMode)
@@ -474,7 +679,8 @@ __typeof__(h) __h = (h);                                    \
 - (void)loadView
 {
     _offset = 0;
-    _viewAppeared = NO;
+    _viewFirstAppeared = NO;
+    _viewAppeared = 0;
     self.view = II_AUTORELEASE([[UIView alloc] init]);
     self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.view.autoresizesSubviews = YES;
@@ -503,111 +709,144 @@ __typeof__(h) __h = (h);                                    \
     [super viewDidUnload];
 }
 
+#pragma mark - View Containment
 
+- (BOOL)shouldAutomaticallyForwardRotationMethods {
+    return YES;
+}
+
+- (BOOL)shouldAutomaticallyForwardAppearanceMethods {
+    return NO;
+}
+
+- (BOOL)automaticallyForwardAppearanceAndRotationMethodsToChildViewControllers {
+    return NO;
+}
+
+#pragma mark - Appearance
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
-    BOOL wasntAppeared = !_viewAppeared;
     [self.view addObserver:self forKeyPath:@"bounds" options:NSKeyValueChangeSetting context:nil];
 
-    [self setSlidingAndReferenceViews];
+    if (!_viewFirstAppeared) {
+        _viewFirstAppeared = YES;
+        
+        void(^applyViews)(void) = ^{
+            [self.centerController.view removeFromSuperview];
+            [self.centerView addSubview:self.centerController.view];
+            
+            [self doForControllers:^(UIViewController* controller, IIViewDeckSide side) {
+                [controller.view removeFromSuperview];
+                [self.referenceView insertSubview:controller.view belowSubview:self.slidingControllerView];
+            }];
+            
+            [self setSlidingFrameForOffset:_offset forOrientation:_offsetOrientation];
+            self.slidingControllerView.hidden = NO;
+            
+            self.centerView.frame = self.centerViewBounds;
+            self.centerController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+            self.centerController.view.frame = self.centerView.bounds;
+            [self doForControllers:^(UIViewController* controller, IIViewDeckSide side) {
+                controller.view.frame = self.sideViewBounds;
+                controller.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+            }];
+            
+            [self applyShadowToSlidingView];
+        };
+        
+        if ([self setSlidingAndReferenceViews]) {
+            applyViews();
+            applyViews = nil;
+        }
+        
+        // after 0.01 sec, since in certain cases the sliding view is reset.
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.001 * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void){
+            if (applyViews) applyViews();
+            [self setSlidingFrameForOffset:_offset forOrientation:_offsetOrientation];
+            [self hideAppropriateSideViews];
+        });
+        
+        [self addPanners];
+        
+        if ([self isSideClosed:IIViewDeckLeftSide] && [self isSideClosed:IIViewDeckRightSide] && [self isSideClosed:IIViewDeckTopSide] && [self isSideClosed:IIViewDeckBottomSide])
+            [self centerViewVisible];
+        else
+            [self centerViewHidden];
+    }
     
-    [self reapplySideController:&_leftController];
-    [self reapplySideController:&_rightController];
-    
-    [self.centerController.view removeFromSuperview];
-    [self.centerView addSubview:self.centerController.view];
-    [self.leftController.view removeFromSuperview];
-    [self.referenceView insertSubview:self.leftController.view belowSubview:self.slidingControllerView];
-    [self.rightController.view removeFromSuperview];
-    [self.referenceView insertSubview:self.rightController.view belowSubview:self.slidingControllerView];
-    
-    [self setSlidingFrameForOffset:_offset];
-    self.slidingControllerView.hidden = NO;
-    
-    self.centerView.frame = self.centerViewBounds;
-    self.centerController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    self.centerController.view.frame = self.centerView.bounds;
-    self.leftController.view.frame = self.sideViewBounds;
-    self.leftController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    self.rightController.view.frame = self.sideViewBounds;
-    self.rightController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    
-    [self applyShadowToSlidingView];
-    _viewAppeared = YES;
-
-    // after 0.01 sec, since in certain cases the sliding view is reset.
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.001 * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void){
-        [self setSlidingFrameForOffset:_offset];
-        [self hideAppropriateSideViews];
-    });
-    
-    [self addPanners];
-    
-    if (self.slidingControllerView.frame.origin.x == 0.0f) 
-        [self centerViewVisible];
-    else
-        [self centerViewHidden];
-    
-    [self relayAppearanceMethod:^(UIViewController *controller) {
-        [controller viewWillAppear:animated];
-    } forced:wasntAppeared];
-    _shouldViewDidAppear = wasntAppeared;
+    [self.centerController viewWillAppear:animated];
+    [self transitionAppearanceFrom:0 to:1 animated:animated];
+    _viewAppeared = 1;
 }
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     
-    [self relayAppearanceMethod:^(UIViewController *controller) {
-        [controller viewDidAppear:animated];
-    } forced:_shouldViewDidAppear];
-    _shouldViewDidAppear = NO;
+    [self.centerController viewDidAppear:animated];
+    [self transitionAppearanceFrom:1 to:2 animated:animated];
+    _viewAppeared = 2;
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
     
-    [self relayAppearanceMethod:^(UIViewController *controller) {
-        [controller viewWillDisappear:animated];
-    }];
-    
-    [self removePanners];
+    [self.centerController viewWillDisappear:animated];
+    [self transitionAppearanceFrom:2 to:1 animated:animated];
+    _viewAppeared = 1;
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
     [super viewDidDisappear:animated];
     
-    [self.view removeObserver:self forKeyPath:@"bounds"];
+    @try {
+        [self.view removeObserver:self forKeyPath:@"bounds"];
+    } @catch(id anException){
+        //do nothing, obviously it wasn't attached because an exception was thrown
+    }
     
-    [self relayAppearanceMethod:^(UIViewController *controller) {
-        [controller viewDidDisappear:animated];
-    }];
+    [self.centerController viewDidDisappear:animated];
+    [self transitionAppearanceFrom:1 to:0 animated:animated];
+    _viewAppeared = 0;
 }
 
-#pragma mark - rotation
+#pragma mark - Rotation IOS6
+
+- (BOOL)shouldAutorotate {
+    _preRotationSize = self.referenceBounds.size;
+    _preRotationCenterSize = self.centerView.bounds.size;
+    
+    return !self.centerController || [self.centerController shouldAutorotate];
+}
+
+- (NSUInteger)supportedInterfaceOrientations {
+    if (self.centerController)
+        return [self.centerController supportedInterfaceOrientations];
+    
+    return [super supportedInterfaceOrientations];
+}
+
+- (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation {
+    if (self.centerController)
+        return [self.centerController preferredInterfaceOrientationForPresentation];
+    
+    return [super preferredInterfaceOrientationForPresentation];
+}
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
-    _preRotationWidth = self.referenceBounds.size.width;
-    _preRotationCenterWidth = self.centerView.bounds.size.width;
+    _preRotationSize = self.referenceBounds.size;
+    _preRotationCenterSize = self.centerView.bounds.size;
+    _preRotationIsLandscape = UIInterfaceOrientationIsLandscape(self.interfaceOrientation);
     
-//    if (self.rotationBehavior == IIViewDeckRotationKeepsViewSizes) {
-//        _leftWidth = self.leftController.view.frame.size.width;
-//        _rightWidth = self.rightController.view.frame.size.width;
-//    }
-    
-    BOOL should = YES;
-    if (self.centerController)
-        should = [self.centerController shouldAutorotateToInterfaceOrientation:interfaceOrientation];
-    
-    return should;
+    return !self.centerController || [self.centerController shouldAutorotateToInterfaceOrientation:interfaceOrientation];
 }
 
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
     [super willAnimateRotationToInterfaceOrientation:toInterfaceOrientation duration:duration];
     
-    [self relayAppearanceMethod:^(UIViewController *controller) {
+    [self relayRotationMethod:^(UIViewController *controller) {
         [controller willAnimateRotationToInterfaceOrientation:toInterfaceOrientation duration:duration];
     }];
     
@@ -619,7 +858,11 @@ __typeof__(h) __h = (h);                                    \
     [super willRotateToInterfaceOrientation:toInterfaceOrientation duration:duration];
     [self restoreShadowToSlidingView];
     
-    [self relayAppearanceMethod:^(UIViewController *controller) {
+    _preRotationSize = self.referenceBounds.size;
+    _preRotationCenterSize = self.centerView.bounds.size;
+    _preRotationIsLandscape = UIInterfaceOrientationIsLandscape(self.interfaceOrientation);
+    
+    [self relayRotationMethod:^(UIViewController *controller) {
         [controller willRotateToInterfaceOrientation:toInterfaceOrientation duration:duration];
     }];
 }
@@ -628,337 +871,870 @@ __typeof__(h) __h = (h);                                    \
     [super didRotateFromInterfaceOrientation:fromInterfaceOrientation];
     [self applyShadowToSlidingView];
     
-    [self relayAppearanceMethod:^(UIViewController *controller) {
+    [self relayRotationMethod:^(UIViewController *controller) {
         [controller didRotateFromInterfaceOrientation:fromInterfaceOrientation];
     }];
 }
 
 - (void)arrangeViewsAfterRotation {
-    if (_preRotationWidth <= 0) return;
+    if (_preRotationSize.width <= 0 || _preRotationSize.height <= 0) return;
     
-    NSLog(@"arrange scf=%@ rb=%@ vb=%@", NSStringFromCGRect(self.slidingControllerView.frame), NSStringFromCGRect(self.referenceBounds), NSStringFromCGRect(self.view.bounds));
-    CGFloat offset = self.slidingControllerView.frame.origin.x;
-    if (self.resizesCenterView && offset == 0) {
-        offset = offset + (_preRotationCenterWidth - _preRotationWidth);
-    }
+    if (UIInterfaceOrientationIsLandscape(self.interfaceOrientation) == _preRotationIsLandscape)
+        return;
     
-    if (self.sizeMode == IIViewDeckLedgeSizeMode) {
-        if (offset > 0) {
-            offset = self.referenceBounds.size.width - _preRotationWidth + offset;
-        }
-        else if (offset < 0) {
-            offset = offset + _preRotationWidth - self.referenceBounds.size.width;
+    CGFloat offset, max, preSize;
+    if (_offsetOrientation == IIViewDeckVerticalOrientation) {
+        offset = self.slidingControllerView.frame.origin.y;
+        max = self.referenceBounds.size.height;
+        preSize = _preRotationSize.height;
+        if (self.resizesCenterView && II_FLOAT_EQUAL(offset, 0)) {
+            offset = offset + (_preRotationCenterSize.height - _preRotationSize.height);
         }
     }
     else {
-        _leftLedge = _leftLedge + self.referenceBounds.size.width - _preRotationWidth; 
-        _rightLedge = _rightLedge + self.referenceBounds.size.width - _preRotationWidth; 
-        _maxLedge = _maxLedge + self.referenceBounds.size.width - _preRotationWidth;
+        offset = self.slidingControllerView.frame.origin.x;
+        max = self.referenceBounds.size.width;
+        preSize = _preRotationSize.width;
+        if (self.resizesCenterView && II_FLOAT_EQUAL(offset, 0)) {
+            offset = offset + (_preRotationCenterSize.width - _preRotationSize.width);
+        }
     }
-    [self setSlidingFrameForOffset:offset];
     
-    _preRotationWidth = 0;
+    if (self.sizeMode != IIViewDeckLedgeSizeMode) {
+        _ledge[IIViewDeckLeftSide] = _ledge[IIViewDeckLeftSide] + self.referenceBounds.size.width - _preRotationSize.width;
+        _ledge[IIViewDeckRightSide] = _ledge[IIViewDeckRightSide] + self.referenceBounds.size.width - _preRotationSize.width;
+        _ledge[IIViewDeckTopSide] = _ledge[IIViewDeckTopSide] + self.referenceBounds.size.height - _preRotationSize.height;
+        _ledge[IIViewDeckBottomSide] = _ledge[IIViewDeckBottomSide] + self.referenceBounds.size.height - _preRotationSize.height;
+        _maxLedge = _maxLedge + max - preSize;
+    }
+    else {
+        if (offset > 0) {
+            offset = max - preSize + offset;
+        }
+        else if (offset < 0) {
+            offset = offset + preSize - max;
+        }
+    }
+    [self setSlidingFrameForOffset:offset forOrientation:_offsetOrientation];
+    
+    _preRotationSize = CGSizeZero;
 }
+
+#pragma mark - Notify
+
+- (CGFloat)ledgeOffsetForSide:(IIViewDeckSide)viewDeckSide {
+    switch (viewDeckSide) {
+        case IIViewDeckLeftSide:
+            return self.referenceBounds.size.width - _ledge[viewDeckSide];
+            break;
+            
+        case IIViewDeckRightSide:
+            return _ledge[viewDeckSide] - self.referenceBounds.size.width;
+            break;
+            
+        case IIViewDeckTopSide:
+            return self.referenceBounds.size.height - _ledge[viewDeckSide];
+            
+        case IIViewDeckBottomSide:
+            return _ledge[viewDeckSide] - self.referenceBounds.size.height;
+    }
+    
+    return 0;
+}
+
+- (void)doForControllers:(void(^)(UIViewController* controller, IIViewDeckSide side))action {
+    if (!action) return;
+    for (IIViewDeckSide side=IIViewDeckLeftSide; side<=IIViewDeckBottomSide; side++) {
+        action(_controllers[side], side);
+    }
+}
+
+- (UIViewController*)controllerForSide:(IIViewDeckSide)viewDeckSide {
+    return viewDeckSide == IIViewDeckNoSide ? nil : _controllers[viewDeckSide];
+}
+
+- (IIViewDeckSide)oppositeOfSide:(IIViewDeckSide)viewDeckSide {
+    switch (viewDeckSide) {
+        case IIViewDeckLeftSide:
+            return IIViewDeckRightSide;
+            
+        case IIViewDeckRightSide:
+            return IIViewDeckLeftSide;
+            
+        case IIViewDeckTopSide:
+            return IIViewDeckBottomSide;
+            
+        case IIViewDeckBottomSide:
+            return IIViewDeckTopSide;
+            
+        default:
+            return IIViewDeckNoSide;
+    }
+}
+
+- (IIViewDeckSide)sideForController:(UIViewController*)controller {
+    for (IIViewDeckSide side=IIViewDeckLeftSide; side<=IIViewDeckBottomSide; side++) {
+        if (_controllers[side] == controller) return side;
+    }
+    
+    return NSNotFound;
+}
+
+
+
+
+- (BOOL)checkCanOpenSide:(IIViewDeckSide)viewDeckSide {
+    return ![self isSideOpen:viewDeckSide] && [self checkDelegate:@selector(viewDeckController:shouldOpenViewSide:) side:viewDeckSide];
+}
+
+- (BOOL)checkCanCloseSide:(IIViewDeckSide)viewDeckSide {
+    return ![self isSideClosed:viewDeckSide] && [self checkDelegate:@selector(viewDeckController:shouldCloseViewSide:) side:viewDeckSide];
+}
+
+- (void)notifyWillOpenSide:(IIViewDeckSide)viewDeckSide animated:(BOOL)animated {
+    if (viewDeckSide == IIViewDeckNoSide) return;
+    [self notifyAppearanceForSide:viewDeckSide animated:animated from:0 to:1];
+
+    if ([self isSideClosed:viewDeckSide]) {
+        [self performDelegate:@selector(viewDeckController:willOpenViewSide:animated:) side:viewDeckSide animated:animated];
+    }
+}
+
+- (void)notifyDidOpenSide:(IIViewDeckSide)viewDeckSide animated:(BOOL)animated {
+    if (viewDeckSide == IIViewDeckNoSide) return;
+    [self notifyAppearanceForSide:viewDeckSide animated:animated from:1 to:2];
+
+    if ([self isSideOpen:viewDeckSide]) {
+        [self performDelegate:@selector(viewDeckController:didOpenViewSide:animated:) side:viewDeckSide animated:animated];
+    }
+}
+
+- (void)notifyWillCloseSide:(IIViewDeckSide)viewDeckSide animated:(BOOL)animated {
+    if (viewDeckSide == IIViewDeckNoSide) return;
+    [self notifyAppearanceForSide:viewDeckSide animated:animated from:2 to:1];
+
+    if (![self isSideClosed:viewDeckSide]) {
+        [self performDelegate:@selector(viewDeckController:willCloseViewSide:animated:) side:viewDeckSide animated:animated];
+    }
+}
+
+- (void)notifyDidCloseSide:(IIViewDeckSide)viewDeckSide animated:(BOOL)animated {
+    if (viewDeckSide == IIViewDeckNoSide) return;
+
+    [self notifyAppearanceForSide:viewDeckSide animated:animated from:1 to:0];
+    if ([self isSideClosed:viewDeckSide]) {
+        [self performDelegate:@selector(viewDeckController:didCloseViewSide:animated:) side:viewDeckSide animated:animated];
+        [self performDelegate:@selector(viewDeckController:didShowCenterViewFromSide:animated:) side:viewDeckSide animated:animated];
+    }
+}
+
+- (void)notifyDidChangeOffset:(CGFloat)offset orientation:(IIViewDeckOffsetOrientation)orientation panning:(BOOL)panning {
+    [self performDelegate:@selector(viewDeckController:didChangeOffset:orientation:panning:) offset:offset orientation:orientation panning:panning];
+}
+
+- (void)notifyAppearanceForSide:(IIViewDeckSide)viewDeckSide animated:(BOOL)animated from:(int)from to:(int)to {
+    if (viewDeckSide == IIViewDeckNoSide)
+        return;
+    
+    if (_viewAppeared < to) {
+        _sideAppeared[viewDeckSide] = to;
+        return;
+    }
+
+    SEL selector = nil;
+    if (from < to) {
+        if (_sideAppeared[viewDeckSide] > from)
+            return;
+        
+        if (to == 1)
+            selector = @selector(viewWillAppear:);
+        else if (to == 2)
+            selector = @selector(viewDidAppear:);
+    }
+    else {
+        if (_sideAppeared[viewDeckSide] < from)
+            return;
+
+        if (to == 1)
+            selector = @selector(viewWillDisappear:);
+        else if (to == 0)
+            selector = @selector(viewDidDisappear:);
+    }
+    
+    _sideAppeared[viewDeckSide] = to;
+    
+    if (selector) {
+        UIViewController* controller = [self controllerForSide:viewDeckSide];
+        BOOL (*objc_msgSendTyped)(id self, SEL _cmd, BOOL animated) = (void*)objc_msgSend;
+        objc_msgSendTyped(controller, selector, animated);
+    }
+}
+
+- (void)transitionAppearanceFrom:(int)from to:(int)to animated:(BOOL)animated {
+    SEL selector = nil;
+    if (from < to) {
+        if (to == 1)
+            selector = @selector(viewWillAppear:);
+        else if (to == 2)
+            selector = @selector(viewDidAppear:);
+    }
+    else {
+        if (to == 1)
+            selector = @selector(viewWillDisappear:);
+        else if (to == 0)
+            selector = @selector(viewDidDisappear:);
+    }
+    
+    [self doForControllers:^(UIViewController *controller, IIViewDeckSide side) {
+        if (from < to && _sideAppeared[side] <= from)
+            return;
+        else if (from > to && _sideAppeared[side] >= from)
+            return;
+        
+        if (selector && controller) {
+            BOOL (*objc_msgSendTyped)(id self, SEL _cmd, BOOL animated) = (void*)objc_msgSend;
+            objc_msgSendTyped(controller, selector, animated);
+        }
+    }];
+}
+
+
 
 #pragma mark - controller state
 
-- (BOOL)leftControllerIsClosed {
-    return !self.leftController || CGRectGetMinX(self.slidingControllerView.frame) <= 0;
-}
-
-- (BOOL)rightControllerIsClosed {
-    return !self.rightController || CGRectGetMaxX(self.slidingControllerView.frame) >= self.referenceBounds.size.width;
-}
-
-- (BOOL)leftControllerIsOpen {
-    return self.leftController && CGRectGetMinX(self.slidingControllerView.frame) > 0 && CGRectGetMinX(self.slidingControllerView.frame) <= _leftLedge;
-}
-
-- (BOOL)rightControllerIsOpen {
-    return self.rightController && CGRectGetMaxX(self.slidingControllerView.frame) < self.referenceBounds.size.width && CGRectGetMaxX(self.slidingControllerView.frame) >= _leftLedge;
-}
-
-- (void)showCenterView {
-    [self showCenterView:YES];
-}
-
-- (void)showCenterView:(BOOL)animated {
-    [self showCenterView:animated completion:nil];
-}
-
-- (void)showCenterView:(BOOL)animated  completion:(void(^)(IIViewDeckController* controller))completed {
-    BOOL mustRunCompletion = completed != nil;
-    if (self.leftController && !self.leftController.view.hidden) {
-        [self closeLeftViewAnimated:animated completion:completed];
-        mustRunCompletion = NO;
-    }
+- (BOOL)isSideClosed:(IIViewDeckSide)viewDeckSize {
+    if (![self controllerForSide:viewDeckSize])
+        return YES;
     
-    if (self.rightController && !self.rightController.view.hidden) {
-        [self closeRightViewAnimated:animated completion:completed];
-        mustRunCompletion = NO;
+    switch (viewDeckSize) {
+        case IIViewDeckLeftSide:
+            return CGRectGetMinX(self.slidingControllerView.frame) <= 0;
+            
+        case IIViewDeckRightSide:
+            return CGRectGetMaxX(self.slidingControllerView.frame) >= self.referenceBounds.size.width;
+            
+        case IIViewDeckTopSide:
+            return CGRectGetMinY(self.slidingControllerView.frame) <= 0;
+            
+        case IIViewDeckBottomSide:
+            return CGRectGetMaxY(self.slidingControllerView.frame) >= self.referenceBounds.size.height;
+            
+        default:
+            return YES;
     }
+}
+
+
+- (BOOL)isSideOpen:(IIViewDeckSide)viewDeckSize {
+    if (![self controllerForSide:viewDeckSize])
+        return NO;
     
-    if (mustRunCompletion)
-        completed(self);
+    switch (viewDeckSize) {
+        case IIViewDeckLeftSide:
+            return II_FLOAT_EQUAL(CGRectGetMinX(self.slidingControllerView.frame), self.referenceBounds.size.width - _ledge[IIViewDeckLeftSide]);
+            
+        case IIViewDeckRightSide: {
+            return II_FLOAT_EQUAL(CGRectGetMaxX(self.slidingControllerView.frame), _ledge[IIViewDeckRightSide]);
+        }
+
+        case IIViewDeckTopSide:
+            return II_FLOAT_EQUAL(CGRectGetMinY(self.slidingControllerView.frame), self.referenceBounds.size.height - _ledge[IIViewDeckTopSide]);
+
+        case IIViewDeckBottomSide:
+            return II_FLOAT_EQUAL(CGRectGetMaxY(self.slidingControllerView.frame), _ledge[IIViewDeckBottomSide]);
+
+        default:
+            return NO;
+    }
 }
 
-- (void)toggleLeftView {
-    [self toggleLeftViewAnimated:YES];
+- (BOOL)isSideTransitioning:(IIViewDeckSide)viewDeckSide {
+    return ![self isSideClosed:viewDeckSide] && ![self isSideOpen:viewDeckSide];
 }
 
-- (void)openLeftView {
-    [self openLeftViewAnimated:YES];
-}
-
-- (void)closeLeftView {
-    [self closeLeftViewAnimated:YES];
-}
-
-- (void)toggleLeftViewAnimated:(BOOL)animated {
-    [self toggleLeftViewAnimated:animated completion:nil];
-}
-
-- (void)toggleLeftViewAnimated:(BOOL)animated completion:(void (^)(IIViewDeckController *))completed {
-    if ([self leftControllerIsClosed]) 
-        [self openLeftViewAnimated:animated completion:completed];
-    else
-        [self closeLeftViewAnimated:animated completion:completed];
-}
-
-- (void)openLeftViewAnimated:(BOOL)animated {
-    [self openLeftViewAnimated:animated completion:nil];
-}
-
-- (void)openLeftViewAnimated:(BOOL)animated completion:(void (^)(IIViewDeckController *))completed {
-    [self openLeftViewAnimated:animated options:UIViewAnimationOptionCurveEaseInOut completion:completed];
-}
-
-- (void)openLeftViewAnimated:(BOOL)animated options:(UIViewAnimationOptions)options completion:(void (^)(IIViewDeckController *))completed {
-    if (!self.leftController || II_FLOAT_EQUAL(CGRectGetMinX(self.slidingControllerView.frame), _leftLedge)) return;
+- (BOOL)openSideView:(IIViewDeckSide)side animated:(BOOL)animated completion:(IIViewDeckControllerBlock)completed {
+    // if there's no controller or we're already open, just run the completion and say we're done.
+    if (![self controllerForSide:side] || [self isSideOpen:side]) {
+        if (completed) completed(self, YES);
+        return YES;
+    }
     
     // check the delegate to allow opening
-    if (![self checkDelegate:@selector(viewDeckControllerWillOpenLeftView:animated:) animated:animated]) return;
-    // also close the right view if it's open. Since the delegate can cancel the close, check the result.
-    if (![self closeRightViewAnimated:animated options:options completion:completed]) return;
+    if (![self checkCanOpenSide:side]) {
+        if (completed) completed(self, NO);
+        return NO;
+    };
     
-    [UIView animateWithDuration:OPEN_SLIDE_DURATION(animated) delay:0 options:options | UIViewAnimationOptionLayoutSubviews | UIViewAnimationOptionBeginFromCurrentState animations:^{
-        self.leftController.view.hidden = NO;
-        [self setSlidingFrameForOffset:self.referenceBounds.size.width - _leftLedge];
-        [self centerViewHidden];
-    } completion:^(BOOL finished) {
-        if (completed) completed(self);
-        [self performDelegate:@selector(viewDeckControllerDidOpenLeftView:animated:) animated:animated];
+    if (![self isSideClosed:[self oppositeOfSide:side]]) {
+        return [self toggleOpenViewAnimated:animated completion:completed];
+    }
+    
+    __block UIViewAnimationOptions options = UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionLayoutSubviews | UIViewAnimationOptionBeginFromCurrentState;
+
+    IIViewDeckControllerBlock finish = ^(IIViewDeckController *controller, BOOL success) {
+        if (!success) {
+            if (completed) completed(self, NO);
+            return;
+        }
+        
+        [UIView animateWithDuration:OPEN_SLIDE_DURATION(animated) delay:0 options:options animations:^{
+            [self notifyWillOpenSide:side animated:animated];
+            [self controllerForSide:side].view.hidden = NO;
+            [self setSlidingFrameForOffset:[self ledgeOffsetForSide:side] forOrientation:IIViewDeckOffsetOrientationFromIIViewDeckSide(side)];
+            [self centerViewHidden];
+        } completion:^(BOOL finished) {
+            if (completed) completed(self, YES);
+            [self notifyDidOpenSide:side animated:animated];
+        }];
+    };
+
+    if ([self isSideClosed:side]) {
+        options |= UIViewAnimationOptionCurveEaseIn;
+        // try to close any open view first
+        return [self closeOpenViewAnimated:animated completion:finish];
+    }
+    else {
+        finish(self, YES);
+        return YES;
+    }
+}
+
+- (BOOL)openSideView:(IIViewDeckSide)side bounceOffset:(CGFloat)bounceOffset targetOffset:(CGFloat)targetOffset bounced:(IIViewDeckControllerBounceBlock)bounced completion:(IIViewDeckControllerBlock)completed {
+    BOOL animated = YES;
+    
+    // if there's no controller or we're already open, just run the completion and say we're done.
+    if (![self controllerForSide:side] || [self isSideOpen:side]) {
+        if (completed) completed(self, YES);
+        return YES;
+    }
+    
+    // check the delegate to allow opening
+    if (![self checkCanOpenSide:side]) {
+        if (completed) completed(self, NO);
+        return NO;
+    };
+    
+    UIViewAnimationOptions options = UIViewAnimationOptionLayoutSubviews | UIViewAnimationOptionBeginFromCurrentState;
+    if ([self isSideClosed:side]) options |= UIViewAnimationCurveEaseIn;
+
+    return [self closeOpenViewAnimated:animated completion:^(IIViewDeckController *controller, BOOL success) {
+        if (!success) {
+            if (completed) completed(self, NO);
+            return;
+        }
+        
+        CGFloat longFactor = _bounceDurationFactor ? 1-_bounceDurationFactor : 1;
+        CGFloat shortFactor = _bounceDurationFactor ? _bounceDurationFactor : 1;
+        
+        // first open the view completely, run the block (to allow changes)
+        [UIView animateWithDuration:OPEN_SLIDE_DURATION(YES)*longFactor delay:0 options:options animations:^{
+            [self notifyWillOpenSide:side animated:animated];
+            [self controllerForSide:side].view.hidden = NO;
+            [self setSlidingFrameForOffset:bounceOffset forOrientation:IIViewDeckOffsetOrientationFromIIViewDeckSide(side)];
+        } completion:^(BOOL finished) {
+            [self centerViewHidden];
+            // run block if it's defined
+            if (bounced) bounced(self);
+            [self performDelegate:@selector(viewDeckController:didBounceViewSide:openingController:) side:side controller:self.leftController];
+            
+            // now slide the view back to the ledge position
+            [UIView animateWithDuration:OPEN_SLIDE_DURATION(YES)*shortFactor delay:0 options:UIViewAnimationCurveEaseInOut | UIViewAnimationOptionLayoutSubviews | UIViewAnimationOptionBeginFromCurrentState animations:^{
+                [self setSlidingFrameForOffset:targetOffset forOrientation:IIViewDeckOffsetOrientationFromIIViewDeckSide(side)];
+            } completion:^(BOOL finished) {
+                if (completed) completed(self, YES);
+                [self notifyDidOpenSide:side animated:animated];
+            }];
+        }];
     }];
 }
 
-- (void)closeLeftViewAnimated:(BOOL)animated {
-    [self closeLeftViewAnimated:animated completion:nil];
-}
 
-- (void)closeLeftViewAnimated:(BOOL)animated completion:(void (^)(IIViewDeckController *))completed {
-    [self closeLeftViewAnimated:animated options:UIViewAnimationOptionCurveEaseInOut completion:completed];
-}
-
-- (BOOL)closeLeftViewAnimated:(BOOL)animated options:(UIViewAnimationOptions)options completion:(void (^)(IIViewDeckController *))completed {
-    if (self.leftControllerIsClosed) {
-        if (completed) completed(self);
+- (BOOL)closeSideView:(IIViewDeckSide)side animated:(BOOL)animated completion:(IIViewDeckControllerBlock)completed {
+    if ([self isSideClosed:side]) {
+        if (completed) completed(self, YES);
         return YES;
     }
     
     // check the delegate to allow closing
-    if (![self checkDelegate:@selector(viewDeckControllerWillCloseLeftView:animated:) animated:animated]) return NO;
+    if (![self checkCanCloseSide:side]) {
+        if (completed) completed(self, NO);
+        return NO;
+    }
     
-    [UIView animateWithDuration:CLOSE_SLIDE_DURATION(animated) delay:0 options:options | UIViewAnimationOptionLayoutSubviews animations:^{
-        [self setSlidingFrameForOffset:0];
+    UIViewAnimationOptions options = UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionLayoutSubviews | UIViewAnimationOptionBeginFromCurrentState;
+    if ([self isSideOpen:side]) options |= UIViewAnimationOptionCurveEaseIn;
+
+    [UIView animateWithDuration:CLOSE_SLIDE_DURATION(animated) delay:0 options:options animations:^{
+        [self notifyWillCloseSide:side animated:animated];
+        [self setSlidingFrameForOffset:0 forOrientation:IIViewDeckOffsetOrientationFromIIViewDeckSide(side)];
         [self centerViewVisible];
     } completion:^(BOOL finished) {
         [self hideAppropriateSideViews];
-        if (completed) completed(self);
-        [self performDelegate:@selector(viewDeckControllerDidCloseLeftView:animated:) animated:animated];
-        [self performDelegate:@selector(viewDeckControllerDidShowCenterView:animated:) animated:animated];
+        if (completed) completed(self, YES);
+        [self notifyDidCloseSide:side animated:animated];
     }];
     
     return YES;
 }
 
-- (void)closeLeftViewBouncing:(void(^)(IIViewDeckController* controller))bounced {
-    [self closeLeftViewBouncing:bounced completion:nil];
-}
 
-- (void)closeLeftViewBouncing:(void(^)(IIViewDeckController* controller))bounced completion:(void (^)(IIViewDeckController *))completed {
-    if (self.leftControllerIsClosed) {
-        if (completed) completed(self);
-        return;
+- (BOOL)closeSideView:(IIViewDeckSide)side bounceOffset:(CGFloat)bounceOffset bounced:(IIViewDeckControllerBounceBlock)bounced completion:(IIViewDeckControllerBlock)completed {
+    if ([self isSideClosed:side]) {
+        if (completed) completed(self, YES);
+        return YES;
     }
     
     // check the delegate to allow closing
-    if (![self checkDelegate:@selector(viewDeckControllerWillCloseLeftView:animated:) animated:YES]) return;
+    if (![self checkCanCloseSide:side]) {
+        if (completed) completed(self, NO);
+        return NO;
+    }
     
+    UIViewAnimationOptions options = UIViewAnimationOptionLayoutSubviews | UIViewAnimationOptionBeginFromCurrentState;
+    if ([self isSideOpen:side]) options |= UIViewAnimationCurveEaseIn;
+    
+    BOOL animated = YES;
+    
+    CGFloat longFactor = _bounceDurationFactor ? 1-_bounceDurationFactor : 1;
+    CGFloat shortFactor = _bounceDurationFactor ? _bounceDurationFactor : 1;
+
     // first open the view completely, run the block (to allow changes) and close it again.
-    [UIView animateWithDuration:OPEN_SLIDE_DURATION(YES) delay:0 options:UIViewAnimationOptionCurveEaseIn | UIViewAnimationOptionLayoutSubviews animations:^{
-        [self setSlidingFrameForOffset:self.referenceBounds.size.width];
+    [UIView animateWithDuration:OPEN_SLIDE_DURATION(YES)*shortFactor delay:0 options:options animations:^{
+        [self notifyWillCloseSide:side animated:animated];
+        [self setSlidingFrameForOffset:bounceOffset forOrientation:IIViewDeckOffsetOrientationFromIIViewDeckSide(side)];
     } completion:^(BOOL finished) {
         // run block if it's defined
         if (bounced) bounced(self);
-        if (self.delegate && [self.delegate respondsToSelector:@selector(viewDeckController:didBounceWithClosingController:)]) 
-            [self.delegate viewDeckController:self didBounceWithClosingController:self.leftController];
+        [self performDelegate:@selector(viewDeckController:didBounceViewSide:closingController:) side:side controller:self.leftController];
         
-        [UIView animateWithDuration:CLOSE_SLIDE_DURATION(YES) delay:0 options:UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionLayoutSubviews animations:^{
-            [self setSlidingFrameForOffset:0];
+        [UIView animateWithDuration:CLOSE_SLIDE_DURATION(YES)*longFactor delay:0 options:UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionLayoutSubviews animations:^{
+            [self setSlidingFrameForOffset:0 forOrientation:IIViewDeckOffsetOrientationFromIIViewDeckSide(side)];
             [self centerViewVisible];
         } completion:^(BOOL finished2) {
             [self hideAppropriateSideViews];
-            if (completed) completed(self);
-            [self performDelegate:@selector(viewDeckControllerDidCloseLeftView:animated:) animated:YES];
-            [self performDelegate:@selector(viewDeckControllerDidShowCenterView:animated:) animated:YES];
+            if (completed) completed(self, YES);
+            [self notifyDidCloseSide:side animated:animated];
         }];
-    }];
-}
-
-
-- (void)toggleRightView {
-    [self toggleRightViewAnimated:YES];
-}
-
-- (void)openRightView {
-    [self openRightViewAnimated:YES];
-}
-
-- (void)closeRightView {
-    [self closeRightViewAnimated:YES];
-}
-
-- (void)toggleRightViewAnimated:(BOOL)animated {
-    [self toggleRightViewAnimated:animated completion:nil];
-}
-
-- (void)toggleRightViewAnimated:(BOOL)animated completion:(void (^)(IIViewDeckController *))completed {
-    if ([self rightControllerIsClosed]) 
-        [self openRightViewAnimated:animated completion:completed];
-    else
-        [self closeRightViewAnimated:animated completion:completed];
-}
-
-- (void)openRightViewAnimated:(BOOL)animated {
-    [self openRightViewAnimated:animated completion:nil];
-}
-
-- (void)openRightViewAnimated:(BOOL)animated completion:(void (^)(IIViewDeckController *))completed {
-    [self openRightViewAnimated:animated options:UIViewAnimationOptionCurveEaseInOut completion:completed];
-}
-
-- (void)openRightViewAnimated:(BOOL)animated options:(UIViewAnimationOptions)options completion:(void (^)(IIViewDeckController *))completed {
-    if (!self.rightController || II_FLOAT_EQUAL(CGRectGetMaxX(self.slidingControllerView.frame), _rightLedge)) return;
-    
-    // check the delegate to allow opening
-    if (![self checkDelegate:@selector(viewDeckControllerWillOpenRightView:animated:) animated:animated]) return;
-    // also close the left view if it's open. Since the delegate can cancel the close, check the result.
-    if (![self closeLeftViewAnimated:animated options:options completion:completed]) return;
-    
-    [UIView animateWithDuration:OPEN_SLIDE_DURATION(animated) delay:0 options:options | UIViewAnimationOptionLayoutSubviews animations:^{
-        self.rightController.view.hidden = NO;
-        [self setSlidingFrameForOffset:_rightLedge - self.referenceBounds.size.width];
-        [self centerViewHidden];
-    } completion:^(BOOL finished) {
-        if (completed) completed(self);
-        [self performDelegate:@selector(viewDeckControllerDidOpenRightView:animated:) animated:animated];
-    }];
-}
-
-- (void)closeRightViewAnimated:(BOOL)animated {
-    [self closeRightViewAnimated:animated completion:nil];
-}
-
-- (void)closeRightViewAnimated:(BOOL)animated completion:(void (^)(IIViewDeckController *))completed {
-    [self closeRightViewAnimated:animated options:UIViewAnimationOptionCurveEaseInOut completion:completed];
-}
-
-- (BOOL)closeRightViewAnimated:(BOOL)animated options:(UIViewAnimationOptions)options completion:(void (^)(IIViewDeckController *))completed {
-    if (self.rightControllerIsClosed) {
-        if (completed) completed(self);
-        return YES;
-    }
-    
-    // check the delegate to allow closing
-    if (![self checkDelegate:@selector(viewDeckControllerWillCloseRightView:animated:) animated:animated]) return NO;
-    
-    [UIView animateWithDuration:CLOSE_SLIDE_DURATION(animated) delay:0 options:options | UIViewAnimationOptionLayoutSubviews animations:^{
-        [self setSlidingFrameForOffset:0];
-        [self centerViewVisible];
-    } completion:^(BOOL finished) {
-        if (completed) completed(self);
-        [self hideAppropriateSideViews];
-        [self performDelegate:@selector(viewDeckControllerDidCloseRightView:animated:) animated:animated];
-        [self performDelegate:@selector(viewDeckControllerDidShowCenterView:animated:) animated:animated];
     }];
     
     return YES;
 }
 
-- (void)closeRightViewBouncing:(void(^)(IIViewDeckController* controller))bounced {
-    [self closeRightViewBouncing:bounced completion:nil];
+
+#pragma mark - Left Side
+
+- (BOOL)toggleLeftView {
+    return [self toggleLeftViewAnimated:YES];
 }
 
-- (void)closeRightViewBouncing:(void(^)(IIViewDeckController* controller))bounced completion:(void (^)(IIViewDeckController *))completed {
-    if (self.rightControllerIsClosed) {
-        if (completed) completed(self);
-        return;
+- (BOOL)openLeftView {
+    return [self openLeftViewAnimated:YES];
+}
+
+- (BOOL)closeLeftView {
+    return [self closeLeftViewAnimated:YES];
+}
+
+- (BOOL)toggleLeftViewAnimated:(BOOL)animated {
+    return [self toggleLeftViewAnimated:animated completion:nil];
+}
+
+- (BOOL)toggleLeftViewAnimated:(BOOL)animated completion:(IIViewDeckControllerBlock)completed {
+    if ([self isSideClosed:IIViewDeckLeftSide]) 
+        return [self openLeftViewAnimated:animated completion:completed];
+    else
+        return [self closeLeftViewAnimated:animated completion:completed];
+}
+
+- (BOOL)openLeftViewAnimated:(BOOL)animated {
+    return [self openLeftViewAnimated:animated completion:nil];
+}
+
+- (BOOL)openLeftViewAnimated:(BOOL)animated completion:(IIViewDeckControllerBlock)completed {
+    return [self openSideView:IIViewDeckLeftSide animated:animated completion:completed];
+}
+
+- (BOOL)openLeftViewBouncing:(IIViewDeckControllerBounceBlock)bounced {
+    return [self openLeftViewBouncing:bounced completion:nil];
+}
+
+- (BOOL)openLeftViewBouncing:(IIViewDeckControllerBounceBlock)bounced completion:(IIViewDeckControllerBlock)completed {
+    return [self openSideView:IIViewDeckLeftSide bounceOffset:self.referenceBounds.size.width targetOffset:self.referenceBounds.size.width - _ledge[IIViewDeckLeftSide] bounced:bounced completion:completed];
+}
+
+- (BOOL)closeLeftViewAnimated:(BOOL)animated {
+    return [self closeLeftViewAnimated:animated completion:nil];
+}
+
+- (BOOL)closeLeftViewAnimated:(BOOL)animated completion:(IIViewDeckControllerBlock)completed {
+    return [self closeSideView:IIViewDeckLeftSide animated:animated completion:completed];
+}
+
+- (BOOL)closeLeftViewBouncing:(IIViewDeckControllerBounceBlock)bounced {
+    return [self closeLeftViewBouncing:bounced completion:nil];
+}
+
+- (BOOL)closeLeftViewBouncing:(IIViewDeckControllerBounceBlock)bounced completion:(IIViewDeckControllerBlock)completed {
+    return [self closeSideView:IIViewDeckLeftSide bounceOffset:self.referenceBounds.size.width bounced:bounced completion:completed];
+}
+
+#pragma mark - Right Side
+
+- (BOOL)toggleRightView {
+    return [self toggleRightViewAnimated:YES];
+}
+
+- (BOOL)openRightView {
+    return [self openRightViewAnimated:YES];
+}
+
+- (BOOL)closeRightView {
+    return [self closeRightViewAnimated:YES];
+}
+
+- (BOOL)toggleRightViewAnimated:(BOOL)animated {
+    return [self toggleRightViewAnimated:animated completion:nil];
+}
+
+- (BOOL)toggleRightViewAnimated:(BOOL)animated completion:(IIViewDeckControllerBlock)completed {
+    if ([self isSideClosed:IIViewDeckRightSide]) 
+        return [self openRightViewAnimated:animated completion:completed];
+    else
+        return [self closeRightViewAnimated:animated completion:completed];
+}
+
+- (BOOL)openRightViewAnimated:(BOOL)animated {
+    return [self openRightViewAnimated:animated completion:nil];
+}
+
+- (BOOL)openRightViewAnimated:(BOOL)animated completion:(IIViewDeckControllerBlock)completed {
+    return [self openSideView:IIViewDeckRightSide animated:animated completion:completed];
+}
+
+- (BOOL)openRightViewBouncing:(IIViewDeckControllerBounceBlock)bounced {
+    return [self openRightViewBouncing:bounced completion:nil];
+}
+
+- (BOOL)openRightViewBouncing:(IIViewDeckControllerBounceBlock)bounced completion:(IIViewDeckControllerBlock)completed {
+    return [self openSideView:IIViewDeckRightSide bounceOffset:-self.referenceBounds.size.width targetOffset:_ledge[IIViewDeckRightSide] - self.referenceBounds.size.width bounced:bounced completion:completed];
+}
+
+- (BOOL)closeRightViewAnimated:(BOOL)animated {
+    return [self closeRightViewAnimated:animated completion:nil];
+}
+
+- (BOOL)closeRightViewAnimated:(BOOL)animated completion:(IIViewDeckControllerBlock)completed {
+    return [self closeSideView:IIViewDeckRightSide animated:animated completion:completed];
+}
+
+- (BOOL)closeRightViewBouncing:(IIViewDeckControllerBounceBlock)bounced {
+    return [self closeRightViewBouncing:bounced completion:nil];
+}
+
+- (BOOL)closeRightViewBouncing:(IIViewDeckControllerBounceBlock)bounced completion:(IIViewDeckControllerBlock)completed {
+    return [self closeSideView:IIViewDeckRightSide bounceOffset:-self.referenceBounds.size.width bounced:bounced completion:completed];
+}
+
+#pragma mark - right view, special case for navigation stuff
+
+- (BOOL)canRightViewPushViewControllerOverCenterController {
+    return [self.centerController isKindOfClass:[UINavigationController class]];
+}
+
+- (void)rightViewPushViewControllerOverCenterController:(UIViewController*)controller {
+    NSAssert([self.centerController isKindOfClass:[UINavigationController class]], @"cannot rightViewPushViewControllerOverCenterView when center controller is not a navigation controller");
+
+    UIView* view = self.view;
+    UIGraphicsBeginImageContextWithOptions(view.bounds.size, YES, 0.0);
+
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    [view.layer renderInContext:context];
+    UIImage *deckshot = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
+    UIImageView* shotView = [[UIImageView alloc] initWithImage:deckshot];
+    shotView.frame = view.frame; 
+    [view.superview addSubview:shotView];
+    CGRect targetFrame = view.frame; 
+    view.frame = CGRectOffset(view.frame, view.frame.size.width, 0);
+    
+    [self closeRightViewAnimated:NO];
+    UINavigationController* navController = self.centerController.navigationController ? self.centerController.navigationController :(UINavigationController*)self.centerController;
+    [navController pushViewController:controller animated:NO];
+    
+    [UIView animateWithDuration:0.3 delay:0 options:0 animations:^{
+        shotView.frame = CGRectOffset(shotView.frame, -view.frame.size.width, 0);
+        view.frame = targetFrame;
+    } completion:^(BOOL finished) {
+        [shotView removeFromSuperview];
+    }];
+}
+
+#pragma mark - Top Side
+
+- (BOOL)toggleTopView {
+    return [self toggleTopViewAnimated:YES];
+}
+
+- (BOOL)openTopView {
+    return [self openTopViewAnimated:YES];
+}
+
+- (BOOL)closeTopView {
+    return [self closeTopViewAnimated:YES];
+}
+
+- (BOOL)toggleTopViewAnimated:(BOOL)animated {
+    return [self toggleTopViewAnimated:animated completion:nil];
+}
+
+- (BOOL)toggleTopViewAnimated:(BOOL)animated completion:(IIViewDeckControllerBlock)completed {
+    if ([self isSideClosed:IIViewDeckTopSide])
+        return [self openTopViewAnimated:animated completion:completed];
+    else
+        return [self closeTopViewAnimated:animated completion:completed];
+}
+
+- (BOOL)openTopViewAnimated:(BOOL)animated {
+    return [self openTopViewAnimated:animated completion:nil];
+}
+
+- (BOOL)openTopViewAnimated:(BOOL)animated completion:(IIViewDeckControllerBlock)completed {
+    return [self openSideView:IIViewDeckTopSide animated:animated completion:completed];
+}
+
+- (BOOL)openTopViewBouncing:(IIViewDeckControllerBounceBlock)bounced {
+    return [self openTopViewBouncing:bounced completion:nil];
+}
+
+- (BOOL)openTopViewBouncing:(IIViewDeckControllerBounceBlock)bounced completion:(IIViewDeckControllerBlock)completed {
+    return [self openSideView:IIViewDeckTopSide bounceOffset:self.referenceBounds.size.height targetOffset:self.referenceBounds.size.height - _ledge[IIViewDeckTopSide] bounced:bounced completion:completed];
+}
+
+- (BOOL)closeTopViewAnimated:(BOOL)animated {
+    return [self closeTopViewAnimated:animated completion:nil];
+}
+
+- (BOOL)closeTopViewAnimated:(BOOL)animated completion:(IIViewDeckControllerBlock)completed {
+    return [self closeSideView:IIViewDeckTopSide animated:animated completion:completed];
+}
+
+- (BOOL)closeTopViewBouncing:(IIViewDeckControllerBounceBlock)bounced {
+    return [self closeTopViewBouncing:bounced completion:nil];
+}
+
+- (BOOL)closeTopViewBouncing:(IIViewDeckControllerBounceBlock)bounced completion:(IIViewDeckControllerBlock)completed {
+    return [self closeSideView:IIViewDeckTopSide bounceOffset:self.referenceBounds.size.height bounced:bounced completion:completed];
+}
+
+
+#pragma mark - Bottom Side
+
+- (BOOL)toggleBottomView {
+    return [self toggleBottomViewAnimated:YES];
+}
+
+- (BOOL)openBottomView {
+    return [self openBottomViewAnimated:YES];
+}
+
+- (BOOL)closeBottomView {
+    return [self closeBottomViewAnimated:YES];
+}
+
+- (BOOL)toggleBottomViewAnimated:(BOOL)animated {
+    return [self toggleBottomViewAnimated:animated completion:nil];
+}
+
+- (BOOL)toggleBottomViewAnimated:(BOOL)animated completion:(IIViewDeckControllerBlock)completed {
+    if ([self isSideClosed:IIViewDeckBottomSide])
+        return [self openBottomViewAnimated:animated completion:completed];
+    else
+        return [self closeBottomViewAnimated:animated completion:completed];
+}
+
+- (BOOL)openBottomViewAnimated:(BOOL)animated {
+    return [self openBottomViewAnimated:animated completion:nil];
+}
+
+- (BOOL)openBottomViewAnimated:(BOOL)animated completion:(IIViewDeckControllerBlock)completed {
+    return [self openSideView:IIViewDeckBottomSide animated:animated completion:completed];
+}
+
+- (BOOL)openBottomViewBouncing:(IIViewDeckControllerBounceBlock)bounced {
+    return [self openBottomViewBouncing:bounced completion:nil];
+}
+
+- (BOOL)openBottomViewBouncing:(IIViewDeckControllerBounceBlock)bounced completion:(IIViewDeckControllerBlock)completed {
+    return [self openSideView:IIViewDeckBottomSide bounceOffset:-self.referenceBounds.size.height targetOffset:_ledge[IIViewDeckBottomSide] - self.referenceBounds.size.height bounced:bounced completion:completed];
+}
+
+- (BOOL)closeBottomViewAnimated:(BOOL)animated {
+    return [self closeBottomViewAnimated:animated completion:nil];
+}
+
+- (BOOL)closeBottomViewAnimated:(BOOL)animated completion:(IIViewDeckControllerBlock)completed {
+    return [self closeSideView:IIViewDeckBottomSide animated:animated completion:completed];
+}
+
+- (BOOL)closeBottomViewBouncing:(IIViewDeckControllerBounceBlock)bounced {
+    return [self closeBottomViewBouncing:bounced completion:nil];
+}
+
+- (BOOL)closeBottomViewBouncing:(IIViewDeckControllerBounceBlock)bounced completion:(IIViewDeckControllerBlock)completed {
+    return [self closeSideView:IIViewDeckBottomSide bounceOffset:-self.referenceBounds.size.height bounced:bounced completion:completed];
+}
+
+
+#pragma mark - toggling open view
+
+- (BOOL)toggleOpenView {
+    return [self toggleOpenViewAnimated:YES];
+}
+
+- (BOOL)toggleOpenViewAnimated:(BOOL)animated {
+    return [self toggleOpenViewAnimated:animated completion:nil];
+}
+
+- (BOOL)toggleOpenViewAnimated:(BOOL)animated completion:(IIViewDeckControllerBlock)completed {
+    IIViewDeckSide fromSide, toSide;
+    CGFloat targetOffset;
+    
+    if ([self isSideOpen:IIViewDeckLeftSide]) {
+        fromSide = IIViewDeckLeftSide;
+        toSide = IIViewDeckRightSide;
+        targetOffset = _ledge[IIViewDeckRightSide] - self.referenceBounds.size.width;
+    }
+    else if (([self isSideOpen:IIViewDeckRightSide])) {
+        fromSide = IIViewDeckRightSide;
+        toSide = IIViewDeckLeftSide;
+        targetOffset = self.referenceBounds.size.width - _ledge[IIViewDeckLeftSide];
+    }
+    else if (([self isSideOpen:IIViewDeckTopSide])) {
+        fromSide = IIViewDeckTopSide;
+        toSide = IIViewDeckBottomSide;
+        targetOffset = _ledge[IIViewDeckBottomSide] - self.referenceBounds.size.height;
+    }
+    else if (([self isSideOpen:IIViewDeckBottomSide])) {
+        fromSide = IIViewDeckBottomSide;
+        toSide = IIViewDeckTopSide;
+        targetOffset = self.referenceBounds.size.height - _ledge[IIViewDeckTopSide];
+    }
+    else
+        return NO;
+
+    // check the delegate to allow closing and opening
+    if (![self checkCanCloseSide:fromSide] && ![self checkCanOpenSide:toSide]) return NO;
+    
+    [UIView animateWithDuration:CLOSE_SLIDE_DURATION(animated) delay:0 options:UIViewAnimationOptionCurveEaseIn | UIViewAnimationOptionLayoutSubviews animations:^{
+        [self notifyWillCloseSide:fromSide animated:animated];
+        [self setSlidingFrameForOffset:0 forOrientation:IIViewDeckOffsetOrientationFromIIViewDeckSide(fromSide)];
+    } completion:^(BOOL finished) {
+        [UIView animateWithDuration:OPEN_SLIDE_DURATION(animated) delay:0 options:UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionLayoutSubviews animations:^{
+            [self notifyWillOpenSide:toSide animated:animated];
+            [self setSlidingFrameForOffset:targetOffset forOrientation:IIViewDeckOffsetOrientationFromIIViewDeckSide(toSide)];
+        } completion:^(BOOL finished) {
+            [self notifyDidOpenSide:toSide animated:animated];
+        }];
+        [self hideAppropriateSideViews];
+        [self notifyDidCloseSide:fromSide animated:animated];
+    }];
+    
+    return YES;
+}
+
+
+- (BOOL)closeOpenView {
+    return [self closeOpenViewAnimated:YES];
+}
+
+- (BOOL)closeOpenViewAnimated:(BOOL)animated {
+    return [self closeOpenViewAnimated:animated completion:nil];
+}
+
+- (BOOL)closeOpenViewAnimated:(BOOL)animated completion:(IIViewDeckControllerBlock)completed {
+    if (![self isSideClosed:IIViewDeckLeftSide]) {
+        return [self closeLeftViewAnimated:animated completion:completed];
+    }
+    else if (![self isSideClosed:IIViewDeckRightSide]) {
+        return [self closeRightViewAnimated:animated completion:completed];
+    }
+    else if (![self isSideClosed:IIViewDeckTopSide]) {
+        return [self closeTopViewAnimated:animated completion:completed];
+    }
+    else if (![self isSideClosed:IIViewDeckBottomSide]) {
+        return [self closeBottomViewAnimated:animated completion:completed];
     }
     
-    // check the delegate to allow closing
-    if (![self checkDelegate:@selector(viewDeckControllerWillCloseRightView:animated:) animated:YES]) return;
+    if (completed) completed(self, YES);
+    return YES;
+}
+
+
+- (BOOL)closeOpenViewBouncing:(IIViewDeckControllerBounceBlock)bounced {
+    return [self closeOpenViewBouncing:bounced completion:nil];
+}
+
+- (BOOL)closeOpenViewBouncing:(IIViewDeckControllerBounceBlock)bounced completion:(IIViewDeckControllerBlock)completed {
+    if ([self isSideOpen:IIViewDeckLeftSide]) {
+        return [self closeLeftViewBouncing:bounced completion:completed];
+    }
+    else if (([self isSideOpen:IIViewDeckRightSide])) {
+        return [self closeRightViewBouncing:bounced completion:completed];
+    }
+    else if (([self isSideOpen:IIViewDeckTopSide])) {
+        return [self closeTopViewBouncing:bounced completion:completed];
+    }
+    else if (([self isSideOpen:IIViewDeckBottomSide])) {
+        return [self closeBottomViewBouncing:bounced completion:completed];
+    }
     
-    [UIView animateWithDuration:OPEN_SLIDE_DURATION(YES) delay:0 options:UIViewAnimationOptionCurveEaseIn | UIViewAnimationOptionLayoutSubviews animations:^{
-        [self setSlidingFrameForOffset:-self.referenceBounds.size.width];
-    } completion:^(BOOL finished) {
-        if (bounced)  bounced(self);
-        if (self.delegate && [self.delegate respondsToSelector:@selector(viewDeckController:didBounceWithClosingController:)]) 
-            [self.delegate viewDeckController:self didBounceWithClosingController:self.rightController];
-        
-        [UIView animateWithDuration:CLOSE_SLIDE_DURATION(YES) delay:0 options:UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionLayoutSubviews animations:^{
-            [self setSlidingFrameForOffset:0];
-            [self centerViewVisible];
-        } completion:^(BOOL finished2) {
-            [self hideAppropriateSideViews];
-            if (completed) completed(self);
-            [self performDelegate:@selector(viewDeckControllerDidCloseRightView:animated:) animated:YES];
-            [self performDelegate:@selector(viewDeckControllerDidShowCenterView:animated:) animated:YES];
-        }];
-    }];
+    if (completed) completed(self, YES);
+    return YES;
 }
 
 
 #pragma mark - Pre iOS5 message relaying
 
-- (void)relayAppearanceMethod:(void(^)(UIViewController* controller))relay forced:(BOOL)forced {
-    bool shouldRelay = ![self respondsToSelector:@selector(automaticallyForwardAppearanceAndRotationMethodsToChildViewControllers)] || ![self performSelector:@selector(automaticallyForwardAppearanceAndRotationMethodsToChildViewControllers)];
+- (void)relayRotationMethod:(void(^)(UIViewController* controller))relay {
+    // first check ios6. we return yes in the method, so don't bother
+    BOOL ios6 = [self respondsToSelector:@selector(shouldAutomaticallyForwardAppearanceMethods)];
+    if (ios6) return;
     
-    // don't relay if the controller supports automatic relaying
-    if (!shouldRelay && !forced) 
-        return;                                                                                                                                       
-    
+    // no need to check for ios5, since we already said that we'd handle it ourselves.
     relay(self.centerController);
     relay(self.leftController);
     relay(self.rightController);
-}
-
-- (void)relayAppearanceMethod:(void(^)(UIViewController* controller))relay {
-    [self relayAppearanceMethod:relay forced:NO];
+    relay(self.topController);
+    relay(self.bottomController);
 }
 
 #pragma mark - center view hidden stuff
 
 - (void)centerViewVisible {
     [self removePanners];
-    _centerViewVisible = YES;
-    [self applyCenterTapper];
+    if (self.centerTapper) {
+        [self.centerTapper removeTarget:self action:@selector(centerTapped) forControlEvents:UIControlEventTouchUpInside];
+        [self.centerTapper removeFromSuperview];
+    }
+    self.centerTapper = nil;
     [self addPanners];
 }
 
 - (void)centerViewHidden {
+    if (IIViewDeckCenterHiddenIsInteractive(self.centerhiddenInteractivity)) 
+        return;
+    
     [self removePanners];
-    _centerViewVisible = NO;
-    [self applyCenterTapper];
+    if (!self.centerTapper) {
+        self.centerTapper = [UIButton buttonWithType:UIButtonTypeCustom];
+        self.centerTapper.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        self.centerTapper.frame = [self.centerView bounds];
+        [self.centerView addSubview:self.centerTapper];
+        [self.centerTapper addTarget:self action:@selector(centerTapped) forControlEvents:UIControlEventTouchUpInside];
+        self.centerTapper.backgroundColor = [UIColor clearColor];
+    }
+    self.centerTapper.frame = [self.centerView bounds];
     [self addPanners];
 }
 
@@ -976,128 +1752,241 @@ __typeof__(h) __h = (h);                                    \
             else
                 [self closeRightViewBouncing:nil];
         }
+        
     }
-}
-
-- (void)applyCenterTapper {
-    // if the center view is visible, remove the tapper
-    if (_centerViewVisible) {
-        if (self.centerTapper) {
-            [self.centerTapper removeTarget:self action:@selector(centerTapped) forControlEvents:UIControlEventTouchUpInside];
-            [self.centerTapper removeFromSuperview];
-        }
-        self.centerTapper = nil;
-        return;
-    }
-    
-    // centerview is hidden...
-    // if the interactivity mode is set to interactive, don't add a tapper
-    if (IIViewDeckCenterHiddenIsInteractive(self.centerhiddenInteractivity)) 
-        return;
-    
-    if (!self.centerTapper) {
-        self.centerTapper = [UIButton buttonWithType:UIButtonTypeCustom];
-        self.centerTapper.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        [self.centerView addSubview:self.centerTapper];
-        [self.centerTapper addTarget:self action:@selector(centerTapped) forControlEvents:UIControlEventTouchUpInside];
-        self.centerTapper.backgroundColor = [UIColor colorWithWhite:1 alpha:0.01];
-        self.centerTapper.exclusiveTouch = YES;
-    }
-    self.centerTapper.frame = [self.centerView bounds];
 }
 
 #pragma mark - Panning
 
+- (BOOL)gestureRecognizerShouldBegin:(UIPanGestureRecognizer *)panner {
+    if (self.panningGestureDelegate && [self.panningGestureDelegate respondsToSelector:@selector(gestureRecognizerShouldBegin:)]) {
+        BOOL result = [self.panningGestureDelegate gestureRecognizerShouldBegin:panner];
+        if (!result) return result;
+    }
+    
+    IIViewDeckOffsetOrientation orientation;
+    CGPoint velocity = [panner velocityInView:self.referenceView];
+    if (ABS(velocity.x) >= ABS(velocity.y))
+        orientation = IIViewDeckHorizontalOrientation;
+    else
+        orientation = IIViewDeckVerticalOrientation;
+
+    CGFloat pv;
+    IIViewDeckSide minSide, maxSide;
+    if (orientation == IIViewDeckHorizontalOrientation) {
+        minSide = IIViewDeckLeftSide;
+        maxSide = IIViewDeckRightSide;
+        pv = self.slidingControllerView.frame.origin.x;
+    }
+    else {
+        minSide = IIViewDeckTopSide;
+        maxSide = IIViewDeckBottomSide;
+        pv = self.slidingControllerView.frame.origin.y;
+    }
+    
+    if (self.panningMode == IIViewDeckDelegatePanning && [self.delegate respondsToSelector:@selector(viewDeckController:shouldPan:)]) {
+        if (![self.delegate viewDeckController:self shouldPan:panner])
+            return NO;
+    }
+    
+    if (pv != 0) return YES;
+        
+    CGFloat v = [self locationOfPanner:panner orientation:orientation];
+    BOOL ok = YES;
+
+    if (v > 0) {
+        ok = [self checkCanOpenSide:minSide];
+        if (!ok)
+            [self closeSideView:minSide animated:NO completion:nil];
+    }
+    else if (v < 0) {
+        ok = [self checkCanOpenSide:maxSide];
+        if (!ok)
+            [self closeSideView:maxSide animated:NO completion:nil];
+    }
+    
+    return ok;
+}
+
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch {
-    _panOrigin = self.slidingControllerView.frame.origin.x;
+    if (self.panningGestureDelegate && [self.panningGestureDelegate respondsToSelector:@selector(gestureRecognizer:shouldReceiveTouch:)]) {
+        BOOL result = [self.panningGestureDelegate gestureRecognizer:gestureRecognizer
+                                                  shouldReceiveTouch:touch];
+        if (!result) return result;
+    }
+
+    if ([[touch view] isKindOfClass:[UISlider class]])
+        return NO;
+
+    _panOrigin = self.slidingControllerView.frame.origin;
     return YES;
 }
+
+-(BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
+    if (self.panningGestureDelegate && [self.panningGestureDelegate respondsToSelector:@selector(gestureRecognizer:shouldRecognizeSimultaneouslyWithGestureRecognizer:)]) {
+        return [self.panningGestureDelegate gestureRecognizer:gestureRecognizer
+           shouldRecognizeSimultaneouslyWithGestureRecognizer:otherGestureRecognizer];
+    }
+    
+    return NO;
+}
+
+- (CGFloat)locationOfPanner:(UIPanGestureRecognizer*)panner orientation:(IIViewDeckOffsetOrientation)orientation {
+    CGPoint pan = [panner translationInView:self.referenceView];
+    CGFloat ofs = orientation == IIViewDeckHorizontalOrientation ? (pan.x+_panOrigin.x) : (pan.y + _panOrigin.y);
+    
+    IIViewDeckSide minSide, maxSide;
+    CGFloat max;
+    if (orientation == IIViewDeckHorizontalOrientation) {
+        minSide = IIViewDeckLeftSide;
+        maxSide = IIViewDeckRightSide;
+        max = self.referenceBounds.size.width;
+    }
+    else {
+        minSide = IIViewDeckTopSide;
+        maxSide = IIViewDeckBottomSide;
+        max = self.referenceBounds.size.height;
+    }
+    if (!_controllers[minSide]) ofs = MIN(0, ofs);
+    if (!_controllers[maxSide]) ofs = MAX(0, ofs);
+    
+    CGFloat lofs = MAX(MIN(ofs, max-_ledge[minSide]), -max+_ledge[maxSide]);
+    
+    if (self.elastic) {
+        CGFloat dofs = ABS(ofs) - ABS(lofs);
+        if (dofs > 0) {
+            dofs = dofs / logf(dofs + 1) * 2;
+            ofs = lofs + (ofs < 0 ? -dofs : dofs);
+        }
+    }
+    else {
+        ofs = lofs;
+    }
+    
+    return [self limitOffset:ofs forOrientation:orientation]; 
+}
+
 
 - (void)panned:(UIPanGestureRecognizer*)panner {
     if (!_enabled) return;
     
-    CGPoint pan = [panner translationInView:self.referenceView];
-    CGFloat x = pan.x + _panOrigin;
-    
-    if (!self.leftController) x = MIN(0, x);
-    if (!self.rightController) x = MAX(0, x);
-    
-    CGFloat w = self.referenceBounds.size.width;
-    CGFloat lx = MAX(MIN(x, w-_leftLedge), -w+_rightLedge);
-    
-    if (self.elastic) {
-        CGFloat dx = ABS(x) - ABS(lx);
-        if (dx > 0) {
-            dx = dx / logf(dx + 1) * 2;
-            x = lx + (x < 0 ? -dx : dx);
-        }
+    if (_offset == 0 && panner.state == UIGestureRecognizerStateBegan) {
+        CGPoint velocity = [panner velocityInView:self.referenceView];
+        if (ABS(velocity.x) >= ABS(velocity.y))
+            [self panned:panner orientation:IIViewDeckHorizontalOrientation];
+        else
+            [self panned:panner orientation:IIViewDeckVerticalOrientation];
     }
     else {
-        x = lx;
+        [self panned:panner orientation:_offsetOrientation];
     }
-    x = [self limitOffset:x];
-    [self setSlidingFrameForOffset:x];
-    
-    BOOL rightWasHidden = self.rightController.view.hidden;
-    BOOL leftWasHidden = self.leftController.view.hidden;
-    
-    [self performOffsetDelegate:@selector(viewDeckController:didPanToOffset:) offset:x];
-    
-    if (panner.state == UIGestureRecognizerStateBegan) {
-        if (x > 0) {
-            [self checkDelegate:@selector(viewDeckControllerWillOpenLeftView:animated:) animated:NO];
-        }
-        else if (x < 0) {
-            [self checkDelegate:@selector(viewDeckControllerWillOpenRightView:animated:) animated:NO];
-        }
+}
+
+- (void)panned:(UIPanGestureRecognizer*)panner orientation:(IIViewDeckOffsetOrientation)orientation {
+    CGFloat pv, m;
+    IIViewDeckSide minSide, maxSide;
+    if (orientation == IIViewDeckHorizontalOrientation) {
+        pv = self.slidingControllerView.frame.origin.x;
+        m = self.referenceBounds.size.width;
+        minSide = IIViewDeckLeftSide;
+        maxSide = IIViewDeckRightSide;
     }
+    else {
+        pv = self.slidingControllerView.frame.origin.y;
+        m = self.referenceBounds.size.height;
+        minSide = IIViewDeckTopSide;
+        maxSide = IIViewDeckBottomSide;
+    }
+    CGFloat v = [self locationOfPanner:panner orientation:orientation];
+
+    IIViewDeckSide closeSide = IIViewDeckNoSide;
+    IIViewDeckSide openSide = IIViewDeckNoSide;
     
-    BOOL animated = NO;
-    if (panner.state == UIGestureRecognizerStateEnded) {    
-        if ((self.leftController.view.hidden && !leftWasHidden) || (self.rightController.view.hidden && !rightWasHidden)) {
-            [self centerViewVisible];
+    // if we move over a boundary while dragging, ... 
+    if (pv <= 0 && v >= 0 && pv != v) {
+        // ... then we need to check if the other side can open.
+        if (pv < 0) {
+            if (![self checkCanCloseSide:maxSide])
+                return;
+            [self notifyWillCloseSide:maxSide animated:NO];
+            closeSide = maxSide;
         }
-        else if (leftWasHidden && rightWasHidden && (!self.leftController.view.hidden || !self.rightController.view.hidden)) {
-            [self centerViewHidden];
-        }
-        
-        CGFloat lw3 = (w-_leftLedge) / 3.0;
-        CGFloat rw3 = (w-_rightLedge) / 3.0;
-        CGFloat velocity = [panner velocityInView:self.referenceView].x;
-        if (ABS(velocity) < 500) {
-            // small velocity, no movement
-            if (x >= w - _leftLedge - lw3) {
-                [self openLeftViewAnimated:YES options:UIViewAnimationOptionCurveEaseOut completion:nil];
-                animated = YES;
+
+        if (v > 0) {
+            if (![self checkCanOpenSide:minSide]) {
+                [self closeSideView:maxSide animated:NO completion:nil];
+                return;
             }
-            else if (x <= _rightLedge + rw3 - w) {
-                [self openRightViewAnimated:YES options:UIViewAnimationOptionCurveEaseOut completion:nil];
-                animated = YES;
+            [self notifyWillOpenSide:minSide animated:NO];
+            openSide = minSide;
+        }
+    }
+    else if (pv >= 0 && v <= 0 && pv != v) {
+        if (pv > 0) {
+            if (![self checkCanCloseSide:minSide])
+                return;
+            [self notifyWillCloseSide:minSide animated:NO];
+            closeSide = minSide;
+        }
+
+        if (v < 0) {
+            if (![self checkCanOpenSide:maxSide]) {
+                [self closeSideView:minSide animated:NO completion:nil];
+                return;
+            }
+            [self notifyWillOpenSide:maxSide animated:NO];
+            openSide = maxSide;
+        }
+    }
+    
+    [self panToSlidingFrameForOffset:v forOrientation:orientation];
+    
+    if (panner.state == UIGestureRecognizerStateEnded ||
+        panner.state == UIGestureRecognizerStateCancelled ||
+        panner.state == UIGestureRecognizerStateFailed) {
+        CGFloat sv = orientation == IIViewDeckHorizontalOrientation ? self.slidingControllerView.frame.origin.x : self.slidingControllerView.frame.origin.y;
+        if (II_FLOAT_EQUAL(sv, 0.0f))
+            [self centerViewVisible];
+        else
+            [self centerViewHidden];
+        
+        CGFloat lm3 = (m-_ledge[minSide]) / 3.0;
+        CGFloat rm3 = (m-_ledge[maxSide]) / 3.0;
+        CGPoint velocity = [panner velocityInView:self.referenceView];
+        CGFloat orientationVelocity = orientation == IIViewDeckHorizontalOrientation ? velocity.x : velocity.y;
+        if (ABS(orientationVelocity) < 500) {
+            // small velocity, no movement
+            if (v >= m - _ledge[minSide] - lm3) {
+                [self openSideView:minSide animated:YES completion:nil];
+            }
+            else if (v <= _ledge[maxSide] + rm3 - m) {
+                [self openSideView:maxSide animated:YES completion:nil];
             }
             else
-                [self showCenterView:YES];
+                [self closeOpenView];
         }
-        else if (velocity < 0) {
+        else if (orientationVelocity < 0) {
             // swipe to the left
-            if (x < 0) {
-                [self openRightViewAnimated:YES options:UIViewAnimationOptionCurveEaseOut completion:nil];
-                animated = YES;
+            if (v < 0) {
+                [self openSideView:maxSide animated:YES completion:nil];
             }
             else 
-                [self showCenterView:YES];
+                [self closeOpenView];
         }
-        else if (velocity > 0) {
+        else if (orientationVelocity > 0) {
             // swipe to the right
-            if (x > 0) {
-                [self openLeftViewAnimated:YES options:UIViewAnimationOptionCurveEaseOut completion:nil];
-                animated = YES;
+            if (v > 0) {
+                [self openSideView:minSide animated:YES completion:nil];
             }
             else 
-                [self showCenterView:YES];
+                [self closeOpenView];
         }
     }
     else
         [self hideAppropriateSideViews];
+
+    [self notifyDidCloseSide:closeSide animated:NO];
+    [self notifyDidOpenSide:openSide animated:NO];
 }
 
 
@@ -1120,6 +2009,7 @@ __typeof__(h) __h = (h);                                    \
             break;
             
         case IIViewDeckFullViewPanning:
+        case IIViewDeckDelegatePanning:
             [self addPanner:self.slidingControllerView];
             // also add to disabled center
             if (self.centerTapper)
@@ -1158,65 +2048,107 @@ __typeof__(h) __h = (h);                                    \
     [self.panners removeAllObjects];
 }
 
-
 #pragma mark - Delegate convenience methods
 
-- (BOOL)checkDelegate:(SEL)selector animated:(BOOL)animated {
+- (BOOL)checkDelegate:(SEL)selector side:(IIViewDeckSide)viewDeckSide {
     BOOL ok = YES;
-    if (self.delegate && [self.delegate respondsToSelector:selector]) 
-        ok = ok & (BOOL)(int)objc_msgSend(self.delegate, selector, self, animated);
+    // used typed message send to properly pass values
+    BOOL (*objc_msgSendTyped)(id self, SEL _cmd, IIViewDeckController* foo, IIViewDeckSide viewDeckSide) = (void*)objc_msgSend;
     
-    for (UIViewController* controller in self.controllers) {
-        // check controller first
-        if ([controller respondsToSelector:selector]) 
-            ok = ok & (BOOL)(int)objc_msgSend(controller, selector, self, animated);
-        // if that fails, check if it's a navigation controller and use the top controller
-        else if ([controller isKindOfClass:[UINavigationController class]]) {
-            UIViewController* topController = ((UINavigationController*)controller).topViewController;
-            if ([topController respondsToSelector:selector]) 
-                ok = ok & (BOOL)(int)objc_msgSend(topController, selector, self, animated);
+    if (self.delegate && [self.delegate respondsToSelector:selector]) 
+        ok = ok & objc_msgSendTyped(self.delegate, selector, self, viewDeckSide);
+    
+    if (_delegateMode != IIViewDeckDelegateOnly) {
+        for (UIViewController* controller in self.controllers) {
+            // check controller first
+            if ([controller respondsToSelector:selector] && (id)controller != (id)self.delegate)
+                ok = ok & objc_msgSendTyped(controller, selector, self, viewDeckSide);
+            // if that fails, check if it's a navigation controller and use the top controller
+            else if ([controller isKindOfClass:[UINavigationController class]]) {
+                UIViewController* topController = ((UINavigationController*)controller).topViewController;
+                if ([topController respondsToSelector:selector] && (id)topController != (id)self.delegate)
+                    ok = ok & objc_msgSendTyped(topController, selector, self, viewDeckSide);
+            }
         }
     }
     
     return ok;
 }
 
-- (void)performDelegate:(SEL)selector animated:(BOOL)animated {
-    if (self.delegate && [self.delegate respondsToSelector:selector]) 
-        objc_msgSend(self.delegate, selector, self, animated);
+- (void)performDelegate:(SEL)selector side:(IIViewDeckSide)viewDeckSide animated:(BOOL)animated {
+    // used typed message send to properly pass values
+    void (*objc_msgSendTyped)(id self, SEL _cmd, IIViewDeckController* foo, IIViewDeckSide viewDeckSide, BOOL animated) = (void*)objc_msgSend;
+    
+    if (self.delegate && [self.delegate respondsToSelector:selector])
+        objc_msgSendTyped(self.delegate, selector, self, viewDeckSide, animated);
+    
+    if (_delegateMode == IIViewDeckDelegateOnly)
+        return;
     
     for (UIViewController* controller in self.controllers) {
         // check controller first
-        if ([controller respondsToSelector:selector]) 
-            objc_msgSend(controller, selector, self, animated);
+        if ([controller respondsToSelector:selector] && (id)controller != (id)self.delegate)
+            objc_msgSendTyped(controller, selector, self, viewDeckSide, animated);
         // if that fails, check if it's a navigation controller and use the top controller
         else if ([controller isKindOfClass:[UINavigationController class]]) {
             UIViewController* topController = ((UINavigationController*)controller).topViewController;
-            if ([topController respondsToSelector:selector]) 
-                objc_msgSend(topController, selector, self, animated);
+            if ([topController respondsToSelector:selector] && (id)topController != (id)self.delegate)
+                objc_msgSendTyped(topController, selector, self, viewDeckSide, animated);
         }
     }
 }
 
-- (void)performOffsetDelegate:(SEL)selector offset:(CGFloat)offset {
-    if (self.delegate && [self.delegate respondsToSelector:selector]) 
-        objc_msgSend(self.delegate, selector, self, offset);
+- (void)performDelegate:(SEL)selector side:(IIViewDeckSide)viewDeckSide controller:(UIViewController*)controller {
+    // used typed message send to properly pass values
+    void (*objc_msgSendTyped)(id self, SEL _cmd, IIViewDeckController* foo, IIViewDeckSide viewDeckSide, UIViewController* controller) = (void*)objc_msgSend;
+    
+    if (self.delegate && [self.delegate respondsToSelector:selector])
+        objc_msgSendTyped(self.delegate, selector, self, viewDeckSide, controller);
+    
+    if (_delegateMode == IIViewDeckDelegateOnly)
+        return;
     
     for (UIViewController* controller in self.controllers) {
         // check controller first
-        if ([controller respondsToSelector:selector]) 
-            objc_msgSend(controller, selector, self, offset);
+        if ([controller respondsToSelector:selector] && (id)controller != (id)self.delegate)
+            objc_msgSendTyped(controller, selector, self, viewDeckSide, controller);
         // if that fails, check if it's a navigation controller and use the top controller
         else if ([controller isKindOfClass:[UINavigationController class]]) {
             UIViewController* topController = ((UINavigationController*)controller).topViewController;
-            if ([topController respondsToSelector:selector]) 
-                objc_msgSend(topController, selector, self, offset);
+            if ([topController respondsToSelector:selector] && (id)topController != (id)self.delegate)
+                objc_msgSendTyped(topController, selector, self, viewDeckSide, controller);
+        }
+    }
+}
+
+- (void)performDelegate:(SEL)selector offset:(CGFloat)offset orientation:(IIViewDeckOffsetOrientation)orientation panning:(BOOL)panning {
+    void (*objc_msgSendTyped)(id self, SEL _cmd, IIViewDeckController* foo, CGFloat offset, IIViewDeckOffsetOrientation orientation, BOOL panning) = (void*)objc_msgSend;
+    if (self.delegate && [self.delegate respondsToSelector:selector]) 
+        objc_msgSendTyped(self.delegate, selector, self, offset, orientation, panning);
+    
+    if (_delegateMode == IIViewDeckDelegateOnly)
+        return;
+    
+    for (UIViewController* controller in self.controllers) {
+        // check controller first
+        if ([controller respondsToSelector:selector] && (id)controller != (id)self.delegate) 
+            objc_msgSendTyped(controller, selector, self, offset, orientation, panning);
+        
+        // if that fails, check if it's a navigation controller and use the top controller
+        else if ([controller isKindOfClass:[UINavigationController class]]) {
+            UIViewController* topController = ((UINavigationController*)controller).topViewController;
+            if ([topController respondsToSelector:selector] && (id)topController != (id)self.delegate) 
+                objc_msgSendTyped(topController, selector, self, offset, orientation, panning);
         }
     }
 }
 
 
 #pragma mark - Properties
+
+- (void)setBounceDurationFactor:(CGFloat)bounceDurationFactor {
+    _bounceDurationFactor = MIN(MAX(0, bounceDurationFactor), 0.99f);
+}
 
 - (void)setTitle:(NSString *)title {
     if (!II_STRING_EQUAL(title, self.title)) [super setTitle:title];
@@ -1228,7 +2160,7 @@ __typeof__(h) __h = (h);                                    \
 }
 
 - (void)setPanningMode:(IIViewDeckPanningMode)panningMode {
-    if (_viewAppeared) {
+    if (_viewFirstAppeared) {
         [self removePanners];
         _panningMode = panningMode;
         [self addPanners];
@@ -1243,13 +2175,13 @@ __typeof__(h) __h = (h);                                    \
         _panningView = panningView;
         II_RETAIN(_panningView);
         
-        if (_viewAppeared && _panningMode == IIViewDeckPanningViewPanning)
+        if (_viewFirstAppeared && _panningMode == IIViewDeckPanningViewPanning)
             [self addPanners];
     }
 }
 
 - (void)setNavigationControllerBehavior:(IIViewDeckNavigationControllerBehavior)navigationControllerBehavior {
-    if (!_viewAppeared) {
+    if (!_viewFirstAppeared) {
         _navigationControllerBehavior = navigationControllerBehavior;
     }
     else {
@@ -1257,76 +2189,99 @@ __typeof__(h) __h = (h);                                    \
     }
 }
 
-- (void)setCenterhiddenInteractivity:(IIViewDeckCenterHiddenInteractivity)centerhiddenInteractivity {
-    _centerhiddenInteractivity = centerhiddenInteractivity;
-    [self applyCenterTapper];
-}
+- (void)setController:(UIViewController *)controller forSide:(IIViewDeckSide)side {
+    UIViewController* prevController = _controllers[side];
+    if (controller == prevController)
+        return;
 
-- (void)applySideController:(__strong UIViewController **)controllerStore to:(UIViewController *)newController otherSideController:(UIViewController *)otherController clearOtherController:(void(^)())clearOtherController {
-    void(^beforeBlock)(UIViewController* controller) = ^(UIViewController* controller){};
+    __block IIViewDeckSide currentSide = IIViewDeckNoSide;
+    [self doForControllers:^(UIViewController* sideController, IIViewDeckSide side) {
+        if (controller == sideController)
+            currentSide = side;
+    }];
+    void(^beforeBlock)() = ^{};
     void(^afterBlock)(UIViewController* controller) = ^(UIViewController* controller){};
     
-    if (_viewAppeared) {
-        beforeBlock = ^(UIViewController* controller) {
-            [controller vdc_viewWillDisappear:NO];
-            [controller.view removeFromSuperview];
-            [controller vdc_viewDidDisappear:NO];
+    if (_viewFirstAppeared) {
+        beforeBlock = ^{
+            [self notifyAppearanceForSide:side animated:NO from:2 to:1];
+            [[self controllerForSide:side].view removeFromSuperview];
+            [self notifyAppearanceForSide:side animated:NO from:1 to:0];
         };
         afterBlock = ^(UIViewController* controller) {
-            [controller vdc_viewWillAppear:NO];
-            controller.view.hidden = self.slidingControllerView.frame.origin.x <= 0;
+            [self notifyAppearanceForSide:side animated:NO from:0 to:1];
+            [self hideAppropriateSideViews];
             controller.view.frame = self.referenceBounds;
             controller.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
             if (self.slidingController)
                 [self.referenceView insertSubview:controller.view belowSubview:self.slidingControllerView];
             else
                 [self.referenceView addSubview:controller.view];
-            [controller vdc_viewDidAppear:NO];
+            [self notifyAppearanceForSide:side animated:NO from:1 to:2];
         };
     }
     
     // start the transition
-    if (*controllerStore) {
-        [*controllerStore willMoveToParentViewController:nil];
-        if (newController == self.centerController) self.centerController = nil;
-        if (newController == otherController && clearOtherController) clearOtherController();
-        beforeBlock(*controllerStore);
-        [*controllerStore setViewDeckController:nil];
-        [*controllerStore removeFromParentViewController];
-        [*controllerStore didMoveToParentViewController:nil];
-        II_RELEASE(*controllerStore);
+    if (prevController) {
+        [prevController willMoveToParentViewController:nil];
+        if (controller == self.centerController) self.centerController = nil;
+        beforeBlock();
+        if (currentSide != IIViewDeckNoSide) _controllers[currentSide] = nil;
+        [prevController setViewDeckController:nil];
+        [prevController removeFromParentViewController];
+        [prevController didMoveToParentViewController:nil];
     }
     
     // make the switch
-    *controllerStore = newController;
+    if (prevController != controller) {
+        II_RELEASE(prevController);
+        _controllers[side] = controller;
+        II_RETAIN(controller);
+    }
     
-    if (*controllerStore) {
-        [newController willMoveToParentViewController:nil];
-        [newController removeFromParentViewController];
-        [newController didMoveToParentViewController:nil];
-        
+    if (controller) {
         // and finish the transition
         UIViewController* parentController = (self.referenceView == self.view) ? self : [[self parentViewController] parentViewController];
-        II_RETAIN(*controllerStore);
-        [parentController addChildViewController:*controllerStore];
-        [*controllerStore setViewDeckController:self];
-        afterBlock(*controllerStore);
-        [*controllerStore didMoveToParentViewController:parentController];
+        if (!parentController)
+            parentController = self;
+        
+        [parentController addChildViewController:controller];
+        [controller setViewDeckController:self];
+        afterBlock(controller);
+        [controller didMoveToParentViewController:parentController];
     }
 }
 
-- (void)reapplySideController:(__strong UIViewController **)controllerStore {
-    [self applySideController:controllerStore to:*controllerStore otherSideController:nil clearOtherController:nil];
+- (UIViewController *)leftController {
+    return [self controllerForSide:IIViewDeckLeftSide];
 }
 
 - (void)setLeftController:(UIViewController *)leftController {
-    if (_leftController == leftController) return;
-    [self applySideController:&_leftController to:leftController otherSideController:_rightController clearOtherController:^() { self.rightController = nil; }];
+    [self setController:leftController forSide:IIViewDeckLeftSide];
+}
+
+- (UIViewController *)rightController {
+    return [self controllerForSide:IIViewDeckRightSide];
 }
 
 - (void)setRightController:(UIViewController *)rightController {
-    if (_rightController == rightController) return;
-    [self applySideController:&_rightController to:rightController otherSideController:_leftController clearOtherController:^() { self.leftController = nil; }];
+    [self setController:rightController forSide:IIViewDeckRightSide];
+}
+
+- (UIViewController *)topController {
+    return [self controllerForSide:IIViewDeckTopSide];
+}
+
+- (void)setTopController:(UIViewController *)topController {
+    [self setController:topController forSide:IIViewDeckTopSide];
+}
+
+- (UIViewController *)bottomController {
+    return [self controllerForSide:IIViewDeckBottomSide];
+}
+
+- (void)setBottomController:(UIViewController *)bottomController {
+    [self setController:bottomController forSide:IIViewDeckBottomSide];
 }
 
 
@@ -1337,19 +2292,21 @@ __typeof__(h) __h = (h);                                    \
     void(^afterBlock)(UIViewController* controller) = ^(UIViewController* controller){};
     
     __block CGRect currentFrame = self.referenceBounds;
-    if (_viewAppeared) {
+    if (_viewFirstAppeared) {
         beforeBlock = ^(UIViewController* controller) {
-            [controller vdc_viewWillDisappear:NO];
+            [controller viewWillDisappear:NO];
             [self restoreShadowToSlidingView];
             [self removePanners];
             [controller.view removeFromSuperview];
-            [controller vdc_viewDidDisappear:NO];
+            [controller viewDidDisappear:NO];
+            [self.centerView removeFromSuperview];
         };
         afterBlock = ^(UIViewController* controller) {
-            [controller vdc_viewWillAppear:NO];
+            [self.view addSubview:self.centerView];
+            [controller viewWillAppear:NO];
             UINavigationController* navController = [centerController isKindOfClass:[UINavigationController class]] 
-            ? (UINavigationController*)centerController 
-            : nil;
+                ? (UINavigationController*)centerController 
+                : nil;
             BOOL barHidden = NO;
             if (navController != nil && !navController.navigationBarHidden) {
                 barHidden = YES;
@@ -1367,7 +2324,7 @@ __typeof__(h) __h = (h);                                    \
             
             [self addPanners];
             [self applyShadowToSlidingView];
-            [controller vdc_viewDidAppear:NO];
+            [controller viewDidAppear:NO];
         };
     }
     
@@ -1377,10 +2334,22 @@ __typeof__(h) __h = (h);                                    \
         [_centerController willMoveToParentViewController:nil];
         if (centerController == self.leftController) self.leftController = nil;
         if (centerController == self.rightController) self.rightController = nil;
+        if (centerController == self.topController) self.topController = nil;
+        if (centerController == self.bottomController) self.bottomController = nil;
         beforeBlock(_centerController);
-        [_centerController removeObserver:self forKeyPath:@"title"];
+        @try {
+            [_centerController removeObserver:self forKeyPath:@"title"];
+            if (self.automaticallyUpdateTabBarItems) {
+                [_centerController removeObserver:self forKeyPath:@"tabBarItem.title"];
+                [_centerController removeObserver:self forKeyPath:@"tabBarItem.image"];
+                [_centerController removeObserver:self forKeyPath:@"hidesBottomBarWhenPushed"];
+            }
+        }
+        @catch (NSException *exception) {}
         [_centerController setViewDeckController:nil];
         [_centerController removeFromParentViewController];
+
+        
         [_centerController didMoveToParentViewController:nil];
         II_RELEASE(_centerController);
     }
@@ -1394,21 +2363,58 @@ __typeof__(h) __h = (h);                                    \
         [self addChildViewController:_centerController];
         [_centerController setViewDeckController:self];
         [_centerController addObserver:self forKeyPath:@"title" options:0 context:nil];
+        self.title = _centerController.title;
+        if (self.automaticallyUpdateTabBarItems) {
+            [_centerController addObserver:self forKeyPath:@"tabBarItem.title" options:0 context:nil];
+            [_centerController addObserver:self forKeyPath:@"tabBarItem.image" options:0 context:nil];
+            [_centerController addObserver:self forKeyPath:@"hidesBottomBarWhenPushed" options:0 context:nil];
+            self.tabBarItem.title = _centerController.tabBarItem.title;
+            self.tabBarItem.image = _centerController.tabBarItem.image;
+            self.hidesBottomBarWhenPushed = _centerController.hidesBottomBarWhenPushed;
+        }
+        
         afterBlock(_centerController);
         [_centerController didMoveToParentViewController:self];
     }    
 }
 
+- (void)setAutomaticallyUpdateTabBarItems:(BOOL)automaticallyUpdateTabBarItems {
+    if (_automaticallyUpdateTabBarItems) {
+        @try {
+            [_centerController removeObserver:self forKeyPath:@"tabBarItem.title"];
+            [_centerController removeObserver:self forKeyPath:@"tabBarItem.image"];
+            [_centerController removeObserver:self forKeyPath:@"hidesBottomBarWhenPushed"];
+        }
+        @catch (NSException *exception) {}
+    }
+    
+    _automaticallyUpdateTabBarItems = automaticallyUpdateTabBarItems;
 
-- (void)setSlidingAndReferenceViews {
+    if (_automaticallyUpdateTabBarItems) {
+        [_centerController addObserver:self forKeyPath:@"tabBarItem.title" options:0 context:nil];
+        [_centerController addObserver:self forKeyPath:@"tabBarItem.image" options:0 context:nil];
+        [_centerController addObserver:self forKeyPath:@"hidesBottomBarWhenPushed" options:0 context:nil];
+        self.tabBarItem.title = _centerController.tabBarItem.title;
+        self.tabBarItem.image = _centerController.tabBarItem.image;
+    }
+}
+
+
+- (BOOL)setSlidingAndReferenceViews {
     if (self.navigationController && self.navigationControllerBehavior == IIViewDeckNavigationControllerIntegrated) {
-        _slidingController = self.navigationController;
-        self.referenceView = [self.navigationController.view superview];
+        if ([self.navigationController.view superview]) {
+            _slidingController = self.navigationController;
+            self.referenceView = [self.navigationController.view superview];
+            return YES;
+        }
     }
     else {
         _slidingController = self.centerController;
         self.referenceView = self.view;
+        return YES;
     }
+    
+    return NO;
 }
 
 - (UIView*)slidingControllerView {
@@ -1423,14 +2429,33 @@ __typeof__(h) __h = (h);                                    \
 #pragma mark - observation
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    if (object == _centerController) {
+        if ([@"tabBarItem.title" isEqualToString:keyPath]) {
+            self.tabBarItem.title = _centerController.tabBarItem.title;
+            return;
+        }
+        
+        if ([@"tabBarItem.image" isEqualToString:keyPath]) {
+            self.tabBarItem.image = _centerController.tabBarItem.image;
+            return;
+        }
+
+        if ([@"hidesBottomBarWhenPushed" isEqualToString:keyPath]) {
+            self.hidesBottomBarWhenPushed = _centerController.hidesBottomBarWhenPushed;
+            self.tabBarController.hidesBottomBarWhenPushed = _centerController.hidesBottomBarWhenPushed;
+            return;
+        }
+    }
+
     if ([@"title" isEqualToString:keyPath]) {
         if (!II_STRING_EQUAL([super title], self.centerController.title)) {
             self.title = self.centerController.title;
         }
+        return;
     }
-    else if ([keyPath isEqualToString:@"bounds"]) {
-        CGFloat offset = self.slidingControllerView.frame.origin.x;
-        [self setSlidingFrameForOffset:offset];
+    
+    if ([keyPath isEqualToString:@"bounds"]) {
+        [self setSlidingFrameForOffset:_offset forOrientation:_offsetOrientation];
         self.slidingControllerView.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.referenceBounds].CGPath;
         UINavigationController* navController = [self.centerController isKindOfClass:[UINavigationController class]] 
         ? (UINavigationController*)self.centerController 
@@ -1439,6 +2464,7 @@ __typeof__(h) __h = (h);                                    \
             navController.navigationBarHidden = YES;
             navController.navigationBarHidden = NO;
         }
+        return;
     }
 }
 
@@ -1479,11 +2505,6 @@ __typeof__(h) __h = (h);                                    \
 }
 
 
-- (BOOL)hidesBottomBarWhenPushed {
-    return self.centerController.hidesBottomBarWhenPushed;
-}
-
-
 @end
 
 #pragma mark -
@@ -1502,7 +2523,7 @@ static const char* viewDeckControllerKey = "ViewDeckController";
     id result = [self viewDeckController_core];
     if (!result && self.navigationController) 
         result = [self.navigationController viewDeckController];
-    if (!result && self.wrapController) 
+    if (!result && [self respondsToSelector:@selector(wrapController)] && self.wrapController) 
         result = [self.wrapController viewDeckController];
     
     return result;
@@ -1513,7 +2534,7 @@ static const char* viewDeckControllerKey = "ViewDeckController";
 }
 
 - (void)vdc_presentModalViewController:(UIViewController *)modalViewController animated:(BOOL)animated {
-    UIViewController* controller = self.viewDeckController ? self.viewDeckController : self;
+    UIViewController* controller = self.viewDeckController && (self.viewDeckController.navigationControllerBehavior == IIViewDeckNavigationControllerIntegrated || ![self.viewDeckController.centerController isKindOfClass:[UINavigationController class]]) ? self.viewDeckController : self;
     [controller vdc_presentModalViewController:modalViewController animated:animated]; // when we get here, the vdc_ method is actually the old, real method
 }
 
@@ -1525,7 +2546,7 @@ static const char* viewDeckControllerKey = "ViewDeckController";
 #ifdef __IPHONE_5_0
 
 - (void)vdc_presentViewController:(UIViewController *)viewControllerToPresent animated:(BOOL)animated completion:(void (^)(void))completion {
-    UIViewController* controller = self.viewDeckController ? self.viewDeckController : self;
+    UIViewController* controller = self.viewDeckController && (self.viewDeckController.navigationControllerBehavior == IIViewDeckNavigationControllerIntegrated || ![self.viewDeckController.centerController isKindOfClass:[UINavigationController class]]) ? self.viewDeckController : self;
     [controller vdc_presentViewController:viewControllerToPresent animated:animated completion:completion]; // when we get here, the vdc_ method is actually the old, real method
 }
 
@@ -1551,17 +2572,9 @@ static const char* viewDeckControllerKey = "ViewDeckController";
     SEL vdcPresentModal = @selector(vdc_presentModalViewController:animated:);
     method_exchangeImplementations(class_getInstanceMethod(self, presentModal), class_getInstanceMethod(self, vdcPresentModal));
     
-    SEL dismissModal = @selector(dismissModalViewControllerAnimated:);
-    SEL vdcDismissModal = @selector(vdc_dismissModalViewControllerAnimated:);
-    method_exchangeImplementations(class_getInstanceMethod(self, dismissModal), class_getInstanceMethod(self, vdcDismissModal));
-    
     SEL presentVC = @selector(presentViewController:animated:completion:);
     SEL vdcPresentVC = @selector(vdc_presentViewController:animated:completion:);
     method_exchangeImplementations(class_getInstanceMethod(self, presentVC), class_getInstanceMethod(self, vdcPresentVC));
-    
-    SEL dismissVC = @selector(dismissViewControllerAnimated:completion:);
-    SEL vdcDismissVC = @selector(vdc_dismissViewControllerAnimated:completion:);
-    method_exchangeImplementations(class_getInstanceMethod(self, dismissVC), class_getInstanceMethod(self, vdcDismissVC));
     
     SEL nc = @selector(navigationController);
     SEL vdcnc = @selector(vdc_navigationController);
@@ -1611,13 +2624,6 @@ static const char* viewDeckControllerKey = "ViewDeckController";
 
 @implementation UIViewController (UIViewDeckController_ViewContainmentEmulation_Fakes) 
 
-- (BOOL)vdc_shouldRelay {
-    if (self.viewDeckController)
-        return [self.viewDeckController vdc_shouldRelay];
-    
-    return ![self respondsToSelector:@selector(automaticallyForwardAppearanceAndRotationMethodsToChildViewControllers)] || ![self performSelector:@selector(automaticallyForwardAppearanceAndRotationMethodsToChildViewControllers)];
-}
-
 - (void)vdc_addChildViewController:(UIViewController *)childController {
     // intentionally empty
 }
@@ -1634,33 +2640,7 @@ static const char* viewDeckControllerKey = "ViewDeckController";
     // intentionally empty
 }
 
-- (void)vdc_viewWillAppear:(bool)animated {
-    if (![self vdc_shouldRelay])
-        return;
-    
-    [self viewWillAppear:animated];
-}
 
-- (void)vdc_viewDidAppear:(bool)animated{
-    if (![self vdc_shouldRelay])
-        return;
-    
-    [self viewDidAppear:animated];
-}
-
-- (void)vdc_viewWillDisappear:(bool)animated{
-    if (![self vdc_shouldRelay])
-        return;
-    
-    [self viewWillDisappear:animated];
-}
-
-- (void)vdc_viewDidDisappear:(bool)animated{
-    if (![self vdc_shouldRelay])
-        return;
-    
-    [self viewDidDisappear:animated];
-}
 
 
 @end

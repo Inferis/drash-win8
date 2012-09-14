@@ -18,6 +18,8 @@
 #import "RainData.h"
 #import "NSUserDefaults+Settings.h"
 #import "IIViewDeckController.h"
+#import "WBNoticeView.h"
+#import "TestFlight.h"
 
 @interface ViewController () <CLLocationManagerDelegate>
 
@@ -88,6 +90,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reachabilityChanged:) name:kReachabilityChangedNotification object:nil];
     
     UIImageView* splash = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"Default.png"]];
+    splash.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
     splash.tag = 998811;
     [self.view addSubview:splash];
 }
@@ -95,14 +98,20 @@
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
+    [self setSplashFrame];
+    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackOpaque animated:YES];
+}
+
+- (void)setSplashFrame {
     UIImageView* splash = (UIImageView*)[self.view viewWithTag:998811];
+    if (!splash) return;
+    
     if (IsIPad()) {
         splash.frame = (CGRect) { (self.view.bounds.size.width - splash.frame.size.width)/2.0, (self.view.bounds.size.height - splash.frame.size.height)/2.0, splash.frame.size };
     }
     else {
-        splash.frame = (CGRect) { 0, -[UIApplication sharedApplication].statusBarFrame.size.height, splash.frame.size };
+        splash.frame = (CGRect) { 0, (self.view.bounds.size.height - [UIApplication sharedApplication].statusBarFrame.size.height - splash.frame.size.height)/2.0, splash.frame.size };
     }
-    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackOpaque animated:YES];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -110,12 +119,7 @@
     
     UIImageView* splash = (UIImageView*)[self.view viewWithTag:998811];
     if (splash) {
-        if (IsIPad()) {
-            splash.frame = (CGRect) { (self.view.bounds.size.width - splash.frame.size.width)/2.0, (self.view.bounds.size.height - splash.frame.size.height)/2.0, splash.frame.size };
-        }
-        else {
-            splash.frame = (CGRect) { 0, -[UIApplication sharedApplication].statusBarFrame.size.height, splash.frame.size };
-        }
+        [self setSplashFrame];
 
         splash.tag = 0;
         [UIView animateWithDuration:0.3 delay:0 options:UIViewAnimationOptionCurveEaseIn animations:^{
@@ -438,7 +442,6 @@
         NSString* query = [NSString stringWithFormat:@"lat=%f&lon=%f",
                            _locationManager.location.coordinate.latitude,
                            _locationManager.location.coordinate.longitude];
-        NSLog(@"%@", query);
         Tin* tin = [Tin new];
         [tin setTimeoutSeconds:30];
         [tin get:@"http://gps.buienradar.nl/getrr.php" query:query success:^(TinResponse *response) {
@@ -447,6 +450,12 @@
             RainData* result = nil;
             if (!response.error)
                 result = [RainData rainDataFromString:response.bodyString];
+            else {
+                [[WBNoticeView defaultManager] showErrorNoticeInView:self.view
+                                                               title:@"Network issue"
+                                                             message:@"Could not fetch rain prediction data at this moment."];
+                TFLog(@"fetchrain error: %@", response.error);
+            }
             
             _fetchingRain = NO;
             _timer = [NSTimer scheduledTimerWithTimeInterval:3*60 target:self selector:@selector(fetchRain) userInfo:nil repeats:NO];

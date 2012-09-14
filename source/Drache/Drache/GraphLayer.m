@@ -13,6 +13,8 @@
 #import "Coby.h"
 #import "NSUserDefaults+Settings.h"
 
+#define BORDERCOLOR [UIColor colorWithHex:0x40a1d9].CGColor;
+
 @implementation GraphLayer {
     NSArray* _points;
     CAShapeLayer* _borderLayer;
@@ -27,7 +29,7 @@
         self.backgroundColor = [UIColor clearColor].CGColor;
         
         _borderLayer = [CAShapeLayer new];
-        _borderLayer.strokeColor = [UIColor colorWithHex:0x40a1d9].CGColor;
+        _borderLayer.strokeColor = BORDERCOLOR;
         _borderLayer.lineWidth = 2;
         _borderLayer.backgroundColor = [UIColor clearColor].CGColor;
         _borderLayer.opaque = NO;
@@ -56,6 +58,8 @@
     [self generateMaskAnimated:animated];
 }
 
+#define DURATION 0.3
+
 - (void)generateMaskAnimated:(BOOL)animated {
     CGFloat width = self.bounds.size.width;
     CGFloat height = self.bounds.size.height;
@@ -74,7 +78,7 @@
     
     NSArray* points = _points;
     if (points) {
-        allZero = ![points any:^BOOL(RainPoint* point) {
+        allZero = ![[points take:entries] any:^BOOL(RainPoint* point) {
             return point.adjustedValue > 0;
         }];
 
@@ -90,18 +94,23 @@
     }
     
     NSArray* newColors;
+    CGColorRef newBorderColor;
     if (allZero) {
         for (int i=0; i<points.count; ++i) {
             [path addLineToPoint:(CGPoint) { x, 0 }];
             x += width/entries;
         }
+        [path addLineToPoint:(CGPoint) { x, 0 }];
         minY = (height-bottom)/2.0;
         newColors = [NSArray arrayWithObjects:(id)[UIColor clearColor].CGColor, [UIColor colorWithHex:0x991e4c67].CGColor, nil];
+        newBorderColor = [[UIColor clearColor] CGColor];
     }
-    else
+    else {
+        newBorderColor = BORDERCOLOR;
         newColors = [NSArray arrayWithObjects:(id)[UIColor colorWithHex:0x9980ccff].CGColor, [UIColor colorWithHex:0x991e4c67].CGColor, nil];
+    }
 
-    [path addLineToPoint:(CGPoint) { width, height } ];
+    [path addLineToPoint:(CGPoint) { width/entries*_points.count, height } ];
     [path closePath];
     
     animated = entries != _entries && _entries > 0 && entries > 0;
@@ -114,7 +123,7 @@
     _borderLayer.opacity = allZero ? 0 : 1;
     if (animated) {
         CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"path"];
-        animation.duration = 0.3;
+        animation.duration = DURATION;
         animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
         animation.fromValue = (id)_mask.path;
         animation.toValue = (id)path.CGPath;
@@ -125,14 +134,14 @@
     CGPoint newStartPoint = (CGPoint) { 0, minY/(height) };
     if (animated) {
         CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"startPoint"];
-        animation.duration = 0.3;
+        animation.duration = DURATION;
         animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
         animation.fromValue = [NSValue valueWithCGPoint:_gradientLayer.startPoint];
         animation.toValue = [NSValue valueWithCGPoint:newStartPoint];
         [_gradientLayer addAnimation:animation forKey:@"animateStartPoint"];
 
         animation = [CABasicAnimation animationWithKeyPath:@"colors"];
-        animation.duration = 0.3;
+        animation.duration = DURATION;
         animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
         animation.fromValue = _gradientLayer.colors;
         animation.toValue = newColors;
@@ -144,12 +153,19 @@
     
     if (animated) {
         CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"path"];
-        animation.duration = 0.3;
+        animation.duration = DURATION;
         animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
         animation.fromValue = (id)_borderLayer.path;
         animation.toValue = (id)path.CGPath;
         [_borderLayer addAnimation:animation forKey:@"animatePath"];
-    }
+
+        animation = [CABasicAnimation animationWithKeyPath:@"strokeColor"];
+        animation.duration = DURATION;
+        animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+        animation.fromValue = (__bridge id)_borderLayer.strokeColor;
+        animation.toValue = (__bridge id)newBorderColor;
+        [_borderLayer addAnimation:animation forKey:@"animateStrokeColor"];
+}
     _borderLayer.path = path.CGPath;
 }
 
