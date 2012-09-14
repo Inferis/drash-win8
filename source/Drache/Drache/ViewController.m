@@ -89,6 +89,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reachabilityChanged:) name:kReachabilityChangedNotification object:nil];
     
     UIImageView* splash = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"Default.png"]];
+    splash.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
     splash.tag = 998811;
     [self.view addSubview:splash];
 }
@@ -96,14 +97,20 @@
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
+    [self setSplashFrame];
+    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackOpaque animated:YES];
+}
+
+- (void)setSplashFrame {
     UIImageView* splash = (UIImageView*)[self.view viewWithTag:998811];
+    if (!splash) return;
+    
     if (IsIPad()) {
         splash.frame = (CGRect) { (self.view.bounds.size.width - splash.frame.size.width)/2.0, (self.view.bounds.size.height - splash.frame.size.height)/2.0, splash.frame.size };
     }
     else {
-        splash.frame = (CGRect) { 0, -[UIApplication sharedApplication].statusBarFrame.size.height, splash.frame.size };
+        splash.frame = (CGRect) { 0, (self.view.bounds.size.height - [UIApplication sharedApplication].statusBarFrame.size.height - splash.frame.size.height)/2.0, splash.frame.size };
     }
-    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackOpaque animated:YES];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -111,12 +118,7 @@
     
     UIImageView* splash = (UIImageView*)[self.view viewWithTag:998811];
     if (splash) {
-        if (IsIPad()) {
-            splash.frame = (CGRect) { (self.view.bounds.size.width - splash.frame.size.width)/2.0, (self.view.bounds.size.height - splash.frame.size.height)/2.0, splash.frame.size };
-        }
-        else {
-            splash.frame = (CGRect) { 0, -[UIApplication sharedApplication].statusBarFrame.size.height, splash.frame.size };
-        }
+        [self setSplashFrame];
 
         splash.tag = 0;
         [UIView animateWithDuration:0.3 delay:0 options:UIViewAnimationOptionCurveEaseIn animations:^{
