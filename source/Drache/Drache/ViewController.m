@@ -18,6 +18,7 @@
 #import "RainData.h"
 #import "NSUserDefaults+Settings.h"
 #import "IIViewDeckController.h"
+#import "WBNoticeView.h"
 
 @interface ViewController () <CLLocationManagerDelegate>
 
@@ -438,7 +439,6 @@
         NSString* query = [NSString stringWithFormat:@"lat=%f&lon=%f",
                            _locationManager.location.coordinate.latitude,
                            _locationManager.location.coordinate.longitude];
-        NSLog(@"%@", query);
         Tin* tin = [Tin new];
         [tin setTimeoutSeconds:30];
         [tin get:@"http://gps.buienradar.nl/getrr.php" query:query success:^(TinResponse *response) {
@@ -447,6 +447,12 @@
             RainData* result = nil;
             if (!response.error)
                 result = [RainData rainDataFromString:response.bodyString];
+            else {
+                [[WBNoticeView defaultManager] showErrorNoticeInView:self.view
+                                                               title:@"Network issue"
+                                                             message:@"Could not fetch rain prediction data at this moment."];
+                NSLog(@"fetchrain error: %@", response.error);
+            }
             
             _fetchingRain = NO;
             _timer = [NSTimer scheduledTimerWithTimeInterval:3*60 target:self selector:@selector(fetchRain) userInfo:nil repeats:NO];
