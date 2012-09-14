@@ -65,6 +65,16 @@
 		E228307A15F0C3D500D53481 /* IIViewDeckController.m in Sources */ = {isa = PBXBuildFile; fileRef = E228307715F0C3D500D53481 /* IIViewDeckController.m */; };
 		E2288E7F15B5F298000598A6 /* DotsLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = E2288E7E15B5F298000598A6 /* DotsLayer.m */; };
 		E230F00F1603B76200C7543B /* IIWrapController.m in Sources */ = {isa = PBXBuildFile; fileRef = E230F00E1603B76200C7543B /* IIWrapController.m */; };
+		E230F0251603DA2000C7543B /* NoticeView.bundle in Resources */ = {isa = PBXBuildFile; fileRef = E230F0111603DA2000C7543B /* NoticeView.bundle */; };
+		E230F0261603DA2000C7543B /* UILabel+WBExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = E230F0131603DA2000C7543B /* UILabel+WBExtensions.m */; };
+		E230F0271603DA2000C7543B /* WBBaseNoticeView.m in Sources */ = {isa = PBXBuildFile; fileRef = E230F0151603DA2000C7543B /* WBBaseNoticeView.m */; };
+		E230F0281603DA2000C7543B /* WBBlueGradientView.m in Sources */ = {isa = PBXBuildFile; fileRef = E230F0171603DA2000C7543B /* WBBlueGradientView.m */; };
+		E230F0291603DA2000C7543B /* WBErrorNoticeView.m in Sources */ = {isa = PBXBuildFile; fileRef = E230F0191603DA2000C7543B /* WBErrorNoticeView.m */; };
+		E230F02A1603DA2000C7543B /* WBGrayGradientView.m in Sources */ = {isa = PBXBuildFile; fileRef = E230F01B1603DA2000C7543B /* WBGrayGradientView.m */; };
+		E230F02B1603DA2000C7543B /* WBNoticeView.m in Sources */ = {isa = PBXBuildFile; fileRef = E230F01D1603DA2000C7543B /* WBNoticeView.m */; };
+		E230F02C1603DA2000C7543B /* WBRedGradientView.m in Sources */ = {isa = PBXBuildFile; fileRef = E230F0201603DA2000C7543B /* WBRedGradientView.m */; };
+		E230F02D1603DA2000C7543B /* WBStickyNoticeView.m in Sources */ = {isa = PBXBuildFile; fileRef = E230F0221603DA2000C7543B /* WBStickyNoticeView.m */; };
+		E230F02E1603DA2000C7543B /* WBSuccessNoticeView.m in Sources */ = {isa = PBXBuildFile; fileRef = E230F0241603DA2000C7543B /* WBSuccessNoticeView.m */; };
 		E2494F1115B56B8000D18128 /* DataView.m in Sources */ = {isa = PBXBuildFile; fileRef = E2494F1015B56B8000D18128 /* DataView.m */; };
 		E2494F1615B56B9500D18128 /* ErrorView.m in Sources */ = {isa = PBXBuildFile; fileRef = E2494F1515B56B9500D18128 /* ErrorView.m */; };
 		E2494F1A15B571AE00D18128 /* UIView+Pop.m in Sources */ = {isa = PBXBuildFile; fileRef = E2494F1915B571AE00D18128 /* UIView+Pop.m */; };
@@ -206,6 +216,26 @@
 		E2288E7E15B5F298000598A6 /* DotsLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DotsLayer.m; sourceTree = "<group>"; };
 		E230F00D1603B76200C7543B /* IIWrapController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IIWrapController.h; sourceTree = "<group>"; };
 		E230F00E1603B76200C7543B /* IIWrapController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IIWrapController.m; sourceTree = "<group>"; };
+		E230F0111603DA2000C7543B /* NoticeView.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = NoticeView.bundle; sourceTree = "<group>"; };
+		E230F0121603DA2000C7543B /* UILabel+WBExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UILabel+WBExtensions.h"; sourceTree = "<group>"; };
+		E230F0131603DA2000C7543B /* UILabel+WBExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UILabel+WBExtensions.m"; sourceTree = "<group>"; };
+		E230F0141603DA2000C7543B /* WBBaseNoticeView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WBBaseNoticeView.h; sourceTree = "<group>"; };
+		E230F0151603DA2000C7543B /* WBBaseNoticeView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WBBaseNoticeView.m; sourceTree = "<group>"; };
+		E230F0161603DA2000C7543B /* WBBlueGradientView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WBBlueGradientView.h; sourceTree = "<group>"; };
+		E230F0171603DA2000C7543B /* WBBlueGradientView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WBBlueGradientView.m; sourceTree = "<group>"; };
+		E230F0181603DA2000C7543B /* WBErrorNoticeView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WBErrorNoticeView.h; sourceTree = "<group>"; };
+		E230F0191603DA2000C7543B /* WBErrorNoticeView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WBErrorNoticeView.m; sourceTree = "<group>"; };
+		E230F01A1603DA2000C7543B /* WBGrayGradientView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WBGrayGradientView.h; sourceTree = "<group>"; };
+		E230F01B1603DA2000C7543B /* WBGrayGradientView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WBGrayGradientView.m; sourceTree = "<group>"; };
+		E230F01C1603DA2000C7543B /* WBNoticeView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WBNoticeView.h; sourceTree = "<group>"; };
+		E230F01D1603DA2000C7543B /* WBNoticeView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WBNoticeView.m; sourceTree = "<group>"; };
+		E230F01E1603DA2000C7543B /* WBNoticeView_Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WBNoticeView_Private.h; sourceTree = "<group>"; };
+		E230F01F1603DA2000C7543B /* WBRedGradientView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WBRedGradientView.h; sourceTree = "<group>"; };
+		E230F0201603DA2000C7543B /* WBRedGradientView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WBRedGradientView.m; sourceTree = "<group>"; };
+		E230F0211603DA2000C7543B /* WBStickyNoticeView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WBStickyNoticeView.h; sourceTree = "<group>"; };
+		E230F0221603DA2000C7543B /* WBStickyNoticeView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WBStickyNoticeView.m; sourceTree = "<group>"; };
+		E230F0231603DA2000C7543B /* WBSuccessNoticeView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WBSuccessNoticeView.h; sourceTree = "<group>"; };
+		E230F0241603DA2000C7543B /* WBSuccessNoticeView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WBSuccessNoticeView.m; sourceTree = "<group>"; };
 		E2494F0F15B56B8000D18128 /* DataView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataView.h; sourceTree = "<group>"; };
 		E2494F1015B56B8000D18128 /* DataView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataView.m; sourceTree = "<group>"; };
 		E2494F1415B56B9500D18128 /* ErrorView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ErrorView.h; sourceTree = "<group>"; };
@@ -360,6 +390,7 @@
 		E209A00115B053E000C3B56C /* vendor */ = {
 			isa = PBXGroup;
 			children = (
+				E230F0101603DA2000C7543B /* WBNoticeView */,
 				E228307515F0C3D500D53481 /* ViewDeck */,
 				E250170E15EF759C0022072E /* PocketSVG */,
 				E209A00215B053E000C3B56C /* AFNetworking */,
@@ -520,6 +551,33 @@
 			path = ViewDeck;
 			sourceTree = "<group>";
 		};
+		E230F0101603DA2000C7543B /* WBNoticeView */ = {
+			isa = PBXGroup;
+			children = (
+				E230F0111603DA2000C7543B /* NoticeView.bundle */,
+				E230F0121603DA2000C7543B /* UILabel+WBExtensions.h */,
+				E230F0131603DA2000C7543B /* UILabel+WBExtensions.m */,
+				E230F0141603DA2000C7543B /* WBBaseNoticeView.h */,
+				E230F0151603DA2000C7543B /* WBBaseNoticeView.m */,
+				E230F0161603DA2000C7543B /* WBBlueGradientView.h */,
+				E230F0171603DA2000C7543B /* WBBlueGradientView.m */,
+				E230F0181603DA2000C7543B /* WBErrorNoticeView.h */,
+				E230F0191603DA2000C7543B /* WBErrorNoticeView.m */,
+				E230F01A1603DA2000C7543B /* WBGrayGradientView.h */,
+				E230F01B1603DA2000C7543B /* WBGrayGradientView.m */,
+				E230F01C1603DA2000C7543B /* WBNoticeView.h */,
+				E230F01D1603DA2000C7543B /* WBNoticeView.m */,
+				E230F01E1603DA2000C7543B /* WBNoticeView_Private.h */,
+				E230F01F1603DA2000C7543B /* WBRedGradientView.h */,
+				E230F0201603DA2000C7543B /* WBRedGradientView.m */,
+				E230F0211603DA2000C7543B /* WBStickyNoticeView.h */,
+				E230F0221603DA2000C7543B /* WBStickyNoticeView.m */,
+				E230F0231603DA2000C7543B /* WBSuccessNoticeView.h */,
+				E230F0241603DA2000C7543B /* WBSuccessNoticeView.m */,
+			);
+			path = WBNoticeView;
+			sourceTree = "<group>";
+		};
 		E2494F1315B56B8400D18128 /* views */ = {
 			isa = PBXGroup;
 			children = (
@@ -661,6 +719,7 @@
 				E22354CC15FF653400A3EEFC /* Icon@2x~ipad.png in Resources */,
 				E22354CD15FF653400A3EEFC /* Icon~ipad.png in Resources */,
 				E256691E1601CC72009624BE /* Default-568h@2x.png in Resources */,
+				E230F0251603DA2000C7543B /* NoticeView.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -714,6 +773,15 @@
 				E255990515F032780023962D /* NSUserDefaults+Settings.m in Sources */,
 				E228307A15F0C3D500D53481 /* IIViewDeckController.m in Sources */,
 				E230F00F1603B76200C7543B /* IIWrapController.m in Sources */,
+				E230F0261603DA2000C7543B /* UILabel+WBExtensions.m in Sources */,
+				E230F0271603DA2000C7543B /* WBBaseNoticeView.m in Sources */,
+				E230F0281603DA2000C7543B /* WBBlueGradientView.m in Sources */,
+				E230F0291603DA2000C7543B /* WBErrorNoticeView.m in Sources */,
+				E230F02A1603DA2000C7543B /* WBGrayGradientView.m in Sources */,
+				E230F02B1603DA2000C7543B /* WBNoticeView.m in Sources */,
+				E230F02C1603DA2000C7543B /* WBRedGradientView.m in Sources */,
+				E230F02D1603DA2000C7543B /* WBStickyNoticeView.m in Sources */,
+				E230F02E1603DA2000C7543B /* WBSuccessNoticeView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
