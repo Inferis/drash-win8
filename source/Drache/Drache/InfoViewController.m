@@ -32,10 +32,16 @@
 {
     [super viewDidLoad];
     
-    self.viewDeckController.rightSize = 320;
+    dispatch_delayed(0.01, ^{
+        self.viewDeckController.sizeMode = IIViewDeckViewSizeMode;
+        self.viewDeckController.rightSize = 320;
+    });
+
     if (IsIPad())
         self.closeButton.alpha = 0;
-    
+    else
+        [self.view.subviews[0] setAutoresizingMask:UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight];
+        
     self.acknowledgmentsTextView.text = @"This app uses free weather data provided by Buienradar.nl (see: http://gratisweerdata.buienradar.nl). Incorrect predictions usually are caused by bad data returned from the weather service. Atmospheric conditions can reduce the effectiveness of the predictions.";
 }
 
