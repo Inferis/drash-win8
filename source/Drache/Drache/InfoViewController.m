@@ -48,7 +48,6 @@
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
-    NSLog(@"maagd");
     if (!IsIPad()) {
         dispatch_delayed(0.15, ^{
             [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:YES];
