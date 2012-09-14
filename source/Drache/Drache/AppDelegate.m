@@ -33,6 +33,8 @@
         InfoViewController* infoController = [[InfoViewController alloc] initWithNibName:@"InfoViewController" bundle:nil];
         IIViewDeckController* deckController = [[IIViewDeckController alloc] initWithCenterViewController:_viewController rightViewController:infoController];
         deckController.panningMode = IIViewDeckNoPanning;
+        deckController.sizeMode = IIViewDeckViewSizeMode;
+        deckController.rightSize = 320;
         self.window.rootViewController = deckController;
     }
     else {
