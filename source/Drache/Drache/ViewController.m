@@ -19,6 +19,7 @@
 #import "NSUserDefaults+Settings.h"
 #import "IIViewDeckController.h"
 #import "WBNoticeView.h"
+#import "TestFlight.h"
 
 @interface ViewController () <CLLocationManagerDelegate>
 
@@ -453,7 +454,7 @@
                 [[WBNoticeView defaultManager] showErrorNoticeInView:self.view
                                                                title:@"Network issue"
                                                              message:@"Could not fetch rain prediction data at this moment."];
-                NSLog(@"fetchrain error: %@", response.error);
+                TFLog(@"fetchrain error: %@", response.error);
             }
             
             _fetchingRain = NO;
