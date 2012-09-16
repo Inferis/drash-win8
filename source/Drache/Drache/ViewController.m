@@ -188,7 +188,8 @@
 }
 
 - (IBAction)zoomTapped:(id)sender {
-    if (self.zoomInfo.alpha > 0) {
+    NSLog(@"tapper = %@", _tapper);
+    if (_tapper) {
         [self removeTapper:NO];
         return;
     }
@@ -204,6 +205,10 @@
 
 - (void)removeTapper:(BOOL)delayed {
     [self.view removeGestureRecognizer:_tapper];
+    
+    dispatch_delayed(0.1, ^{
+        _tapper = nil;
+    });
     if (delayed) {
         dispatch_delayed(0.5, ^{
             [self.zoomInfo popOutCompletion:nil];
@@ -291,7 +296,6 @@
     }
     
     int delay = (_firstFetch || !_location || [_location distanceFromLocation:location] > 500) ? 0 : 2;
-    NSLog(@"delay = %d", delay);
     
     [_locationTimer invalidate];
     _locationTimer = [NSTimer scheduledTimerWithTimeInterval:delay target:self selector:@selector(updateLocation2:) userInfo:location repeats:NO];

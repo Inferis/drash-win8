@@ -119,10 +119,12 @@
 
         int value = MAX(0, [[parts objectAtIndex:0] intValue]);
 //        value = 130 + arc4random() % 50;
-        CGFloat part = arc4random() % 25 / 100.0;
-        value = (1-part) * (arc4random() % 40 + arc4random() % 40) + (lastValue * part);
-        lastValue = value;
+        CGFloat part = arc4random() % 75 / 100.0;
+//
+//        value = (1-part) * (30 + arc4random() % 60 - arc4random() % 20) + (lastValue * part);
 //        value = arc4random() % 120;
+//        value = lastValue + arc4random() % 20;
+        lastValue = value;
         NSDate* time = [self scanDate:[parts objectAtIndex:1]];
 
         if ([time timeIntervalSinceDate:now] > -300) {
