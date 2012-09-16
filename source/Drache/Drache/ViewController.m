@@ -34,7 +34,6 @@
 @end
 
 @implementation ViewController {
-    CLLocationManager* _locationManager;
     CLLocation* _location;
     CLGeocoder* _geocoder;
     NSTimer* _timer;
@@ -50,6 +49,7 @@
     BOOL _firstFetch;
     int _entries;
     UIPopoverController* _infoController;
+    CLLocationManager* _locationManager;
 }
 
 - (void)viewDidLoad
@@ -77,7 +77,7 @@
     UIPanGestureRecognizer* zoomer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(zoomed:)];
     [self.view addGestureRecognizer:zoomer];
 
-    _locationManager = [CLLocationManager new];
+    _locationManager = SharedLocationManager;
     _locationManager.delegate = self;
     _locationManager.distanceFilter = 500;
     _locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters;

@@ -8,6 +8,8 @@
 
 #import "PadPrecipitationView.h"
 #import "UIView+Pop.h"
+#import <CoreLocation/CoreLocation.h>
+#import "NSDate+SolarInfo.h"
 
 #define DISABLEDALPHA 0.2
 
@@ -15,6 +17,7 @@
     NSArray* _cloudViews;
     UILabel* _mmLabel;
     int _currentIntensity;
+    NSString* _night;
 }
 
 - (void)setupViews {
@@ -22,9 +25,11 @@
     
     _currentIntensity = 0;
     
+    [self detectNight];
+
     NSMutableArray* clouds = [NSMutableArray arrayWithCapacity:5];
     for (int i=0; i<5; ++i) {
-        UIImage* cloudImage = [UIImage imageNamed:[NSString stringWithFormat:@"intensity%d.png", i]];
+        UIImage* cloudImage = [UIImage imageNamed:[NSString stringWithFormat:@"intensity%d%@.png", i, i == 0 ? _night : @""]];
         UIImageView* cloudView = [[UIImageView alloc] initWithFrame:(CGRect) { 0, 0, cloudImage.size }];
         cloudView.contentMode = UIViewContentModeCenter;
         cloudView.opaque = NO;
@@ -45,6 +50,15 @@
     _mmLabel.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:35];
     _mmLabel.text = @"mm";
     [self addSubview:_mmLabel];
+}
+
+- (void)detectNight {
+    if (SharedLocationManager && SharedLocationManager.location) {
+        CLLocationCoordinate2D coord = SharedLocationManager.location.coordinate;
+        _night = [[NSDate date] isSunSetAtLatitude:coord.latitude longitude:coord.longitude] ? @"n" : @"";
+    }
+    else
+        _night = @"";
 }
 
 - (void)layoutSubviews {
@@ -69,6 +83,9 @@
 }
 
 - (void)setIntensity:(int)intensity formattedPrecipitation:(NSString*)precipitation animated:(BOOL)animated {
+    NSString* wasNight = _night;
+    [self detectNight];
+
     NSString* text = [precipitation stringByAppendingString:@"mm"];
     UIView* cloud = [_cloudViews objectAtIndex:intensity];
     CGSize sz = [text sizeWithFont:_mmLabel.font];
@@ -78,7 +95,14 @@
     x = MIN(x, max-sz.width);
     CGRect frame = (CGRect) { x, CGRectGetMaxY(cloud.frame) - 5.0f, sz };
 
-    if ( animated) {
+    if (animated) {
+        if (![_night isEqualToString:wasNight]) {
+            [[_cloudViews objectAtIndex:0] popOutThen:^(UIView *view) {
+                UIImage* cloudImage = [UIImage imageNamed:[NSString stringWithFormat:@"intensity0%@.png", _night]];
+                ((UIImageView*)view).image = cloudImage;
+            } popInCompletion:nil];
+        }
+        
         if (_currentIntensity != intensity) {
             [UIView animateWithDuration:0.15 animations:^{
                 [[_cloudViews objectAtIndex:_currentIntensity] setAlpha:DISABLEDALPHA];
@@ -99,6 +123,10 @@
         [cloud setAlpha:1];
         _mmLabel.text = text;
         _mmLabel.frame = frame;
+        if (![_night isEqualToString:wasNight]) {
+            UIImage* cloudImage = [UIImage imageNamed:[NSString stringWithFormat:@"intensity0%@.png", _night]];
+            ((UIImageView*)[_cloudViews objectAtIndex:0]).image = cloudImage;
+        }
     }
     
     _currentIntensity = intensity;

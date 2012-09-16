@@ -11,9 +11,11 @@
 #import "InfoViewController.h"
 #import "TestFlight.h"
 #import "IIViewDeckController.h"
+#import <CoreLocation/CoreLocation.h>
 
 @implementation AppDelegate {
     ViewController* _viewController;
+    CLLocationManager* _locationManager;
 }
 
 
@@ -23,6 +25,7 @@
     [TestFlight takeOff:@"95c7c2a7e1a1929c69c4f452f3b85108_MjQyNjIwMTItMDctMDMgMTc6MzU6NTQuNTc0NzYw"];
 #endif
 
+    self.locationManager = [CLLocationManager new];
     _network = [Reachability reachabilityForInternetConnection];
     [_network startNotifier];
 
