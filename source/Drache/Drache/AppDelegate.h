@@ -10,10 +10,12 @@
 #import "Reachability.h"
 
 @class ViewController;
+@class CLLocationManager;
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic, readonly) Reachability* network;
 @property (strong, nonatomic) UIWindow *window;
+@property (strong, nonatomic) CLLocationManager *locationManager;
 
 @end

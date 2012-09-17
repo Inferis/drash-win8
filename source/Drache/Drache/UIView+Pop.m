@@ -21,6 +21,7 @@
         self.alpha = 1;
         self.transform = transform;
     } completion:^(BOOL finished) {
+        if (completion) completion();
     }];
 }
 

@@ -21,20 +21,20 @@
 #import "WBNoticeView.h"
 #import "TestFlight.h"
 
-@interface ViewController () <CLLocationManagerDelegate>
+@interface ViewController () <CLLocationManagerDelegate, UIGestureRecognizerDelegate>
 
 @property (nonatomic, strong) IBOutlet DataView* dataView;
 @property (nonatomic, strong) IBOutlet ErrorView* errorView;
 @property (nonatomic, strong) IBOutlet UIActivityIndicatorView* smallSpinner;
 @property (nonatomic, strong) IBOutlet UIButton* infoButton;
 @property (nonatomic, strong) IBOutlet UIButton* refreshButton;
-@property (nonatomic, strong) IBOutlet UIImageView* zoomImageView;
+@property (nonatomic, strong) IBOutlet UIButton* zoomButton;
 @property (nonatomic, strong) IBOutlet UILabel* zoomLabel;
+@property (nonatomic, strong) IBOutlet UIImageView* zoomInfo;
 
 @end
 
 @implementation ViewController {
-    CLLocationManager* _locationManager;
     CLLocation* _location;
     CLGeocoder* _geocoder;
     NSTimer* _timer;
@@ -50,6 +50,8 @@
     BOOL _firstFetch;
     int _entries;
     UIPopoverController* _infoController;
+    CLLocationManager* _locationManager;
+    UITapGestureRecognizer* _tapper;
 }
 
 - (void)viewDidLoad
@@ -62,12 +64,13 @@
     _locationName = @"";
     _error = nil;
     _reachable = [Drache.network isReachable];
+    _tapper = nil;
     
     self.errorView.alpha = 0;
     self.dataView.alpha = 0;
     self.smallSpinner.alpha = 0;
     
-    self.zoomImageView.image = [UIImage imageNamed:[NSString stringWithFormat:@"dial%d.png", _entries*5]];
+    [self.zoomButton setImage:[UIImage imageNamed:[NSString stringWithFormat:@"dial%d.png", _entries*5]] forState:UIControlStateNormal];
     self.zoomLabel.text = [NSString stringWithFormat:@"%dmin", (_entries*5)];
   
     UILongPressGestureRecognizer* longTapper = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(forcedRefresh:)];
@@ -77,7 +80,7 @@
     UIPanGestureRecognizer* zoomer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(zoomed:)];
     [self.view addGestureRecognizer:zoomer];
 
-    _locationManager = [CLLocationManager new];
+    _locationManager = SharedLocationManager;
     _locationManager.delegate = self;
     _locationManager.distanceFilter = 500;
     _locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters;
@@ -93,6 +96,11 @@
     splash.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
     splash.tag = 998811;
     [self.view addSubview:splash];
+    
+    if (IsIPad()) {
+        self.zoomInfo.image = [UIImage imageNamed:@"swipe-ipad.png"];
+        self.zoomInfo.frame = CGRectOffsetTopAndShrink(self.zoomInfo.frame, -self.zoomInfo.frame.size.height);
+    }
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -161,12 +169,58 @@
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
     [super willAnimateRotationToInterfaceOrientation:toInterfaceOrientation duration:duration];
     
+    [self removeTapper:NO];
+}
+
+- (BOOL)shouldAutorotate {
+    return YES;
+}
+
+- (NSUInteger)supportedInterfaceOrientations {
+    if (IsIPad()) return UIInterfaceOrientationMaskAll;
+    return UIInterfaceOrientationMaskAllButUpsideDown;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
-    if (IsIPad()) return YES;             
+    if (IsIPad()) return YES;
     return (interfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);
+}
+
+- (IBAction)zoomTapped:(id)sender {
+    NSLog(@"tapper = %@", _tapper);
+    if (_tapper) {
+        [self removeTapper:NO];
+        return;
+    }
+    
+    [self.zoomInfo popInCompletion:^{
+        _tapper = [UITapGestureRecognizer new];
+        _tapper.numberOfTapsRequired = 1;
+        _tapper.numberOfTouchesRequired = 1;
+        [self.view addGestureRecognizer:_tapper];
+        _tapper.delegate = self;
+    }];
+}
+
+- (void)removeTapper:(BOOL)delayed {
+    [self.view removeGestureRecognizer:_tapper];
+    
+    dispatch_delayed(0.1, ^{
+        _tapper = nil;
+    });
+    if (delayed) {
+        dispatch_delayed(0.5, ^{
+            [self.zoomInfo popOutCompletion:nil];
+        });
+    }
+    else
+        [self.zoomInfo popOutCompletion:nil];
+}
+
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
+    [self removeTapper:[otherGestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]]];
+    return YES;
 }
 
 - (IBAction)forcedRefresh {
@@ -190,7 +244,7 @@
         entries = MIN(MAX(6, entries), 24);
         
         if (_entries != entries) {
-            self.zoomImageView.image = [UIImage imageNamed:[NSString stringWithFormat:@"dial%d.png", entries*5]];
+            [self.zoomButton setImage:[UIImage imageNamed:[NSString stringWithFormat:@"dial%d.png", entries*5]] forState:UIControlStateNormal];
             self.zoomLabel.text = [NSString stringWithFormat:@"%dmin", (entries*5)];
             
             _entries = entries;
@@ -242,7 +296,6 @@
     }
     
     int delay = (_firstFetch || !_location || [_location distanceFromLocation:location] > 500) ? 0 : 2;
-    NSLog(@"delay = %d", delay);
     
     [_locationTimer invalidate];
     _locationTimer = [NSTimer scheduledTimerWithTimeInterval:delay target:self selector:@selector(updateLocation2:) userInfo:location repeats:NO];
