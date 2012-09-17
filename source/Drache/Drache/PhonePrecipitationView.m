@@ -77,7 +77,7 @@
 
 - (void)setIntensity:(int)intensity formattedPrecipitation:(NSString*)precipitation animated:(BOOL)animated {
     CLLocationCoordinate2D coord = SharedLocationManager.location.coordinate;
-    NSString* night = intensity == 0 && [[[NSDate date] dateByAddingTimeInterval:60*60*6] isSunSetAtLatitude:coord.latitude longitude:coord.longitude] ? @"n" : @"";
+    NSString* night = intensity == 0 && [[NSDate date] isSunSetAtLatitude:coord.latitude longitude:coord.longitude] ? @"n" : @"";
     UIImage* cloudImage = [UIImage imageNamed:[NSString stringWithFormat:@"intensity%d%@.png", intensity, night]];
     
     void(^setValues)() = ^{
