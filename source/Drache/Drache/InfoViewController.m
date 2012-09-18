@@ -7,10 +7,13 @@
 //
 
 #import "InfoViewController.h"
+#import <QuartzCore/QuartzCore.h>
+#import "IIViewDeckController.h"
 
-@interface InfoViewController ()
+@interface InfoViewController () <IIViewDeckControllerDelegate>
 
 @property (nonatomic, strong) IBOutlet UITextView* acknowledgmentsTextView;
+@property (nonatomic, strong) IBOutlet UIButton* closeButton;
 
 @end
 
@@ -28,23 +31,43 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    self.acknowledgmentsTextView.text = @"Free weather data:\r\n  http://gratisweerdata.buienradar.nl/\r\nCoby by @junkiesxl:\r\n  http://github.com/pjaspers/coby\r\nTin by @junkiesxl:\r\n  http://github.com/pjaspers/tin\r\nAFNetworking by Github:\r\n  http://github.com/AFNetworking/AFNetworking/";
+    
+    dispatch_delayed(0.01, ^{
+        self.viewDeckController.sizeMode = IIViewDeckViewSizeMode;
+        self.viewDeckController.rightSize = 320;
+    });
+
+    if (IsIPad())
+        self.closeButton.alpha = 0;
+    else
+        [self.view.subviews[0] setAutoresizingMask:UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight];
+        
+    self.acknowledgmentsTextView.text = @"This app uses free weather data provided by Buienradar.nl (see: http://gratisweerdata.buienradar.nl). Incorrect predictions usually are caused by bad data returned from the weather service. Atmospheric conditions can reduce the effectiveness of the predictions.";
 }
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    dispatch_delayed(0.15, ^{
-        [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:YES];
-    });
+    
+    if (!IsIPad()) {
+        dispatch_delayed(0.15, ^{
+            [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:YES];
+        });
+    }
+    else {
+        self.view.frame = CGRectOffsetLeftAndShrink(self.viewDeckController.view.bounds, self.viewDeckController.view.bounds.size.width-self.viewDeckController.rightSize);
+    }
 }
 
 - (IBAction)closeTapped:(id)sender {
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-    return (interfaceOrientation == UIInterfaceOrientationPortrait);
+- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
+    [super willRotateToInterfaceOrientation:toInterfaceOrientation duration:duration];
+
+    if (IsIPad()) {
+        self.view.frame = CGRectOffsetLeftAndShrink(self.viewDeckController.view.bounds, self.viewDeckController.view.bounds.size.width-self.viewDeckController.rightSize);
+    }
 }
 
 @end

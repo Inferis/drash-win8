@@ -11,12 +11,17 @@
 @implementation UIView (Pop)
 
 - (void)popInCompletion:(void(^)(void))completion {
+    [self popInCompletion:completion fast:NO];
+}
+
+- (void)popInCompletion:(void(^)(void))completion fast:(BOOL)fast {
     CGAffineTransform transform = self.transform;
     self.transform = CGAffineTransformMakeScale(0.9, 0.9);
-    [UIView animateWithDuration:0.30 animations:^{
+    [UIView animateWithDuration:(fast ? 0.15 : 0.30) animations:^{
         self.alpha = 1;
         self.transform = transform;
     } completion:^(BOOL finished) {
+        if (completion) completion();
     }];
 }
 
@@ -36,15 +41,19 @@
     }];
 }
 
-- (void)popOutCompletion:(void(^)(void))completion {
+- (void)popOutCompletion:(void(^)(void))completion fast:(BOOL)fast {
     CGAffineTransform transform = self.transform;
-    [UIView animateWithDuration:0.30 animations:^{
+    [UIView animateWithDuration:(fast ? 0.15 : 0.30) animations:^{
         self.alpha = 0;
         self.transform = CGAffineTransformMakeScale(0.9, 0.9);
     } completion:^(BOOL finished) {
         self.transform = transform;
         if (completion) completion();
     }];
+}
+
+- (void)popOutCompletion:(void(^)(void))completion {
+    [self popOutCompletion:completion fast:NO];
 }
 
 @end

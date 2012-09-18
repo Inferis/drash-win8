@@ -8,9 +8,15 @@
 
 #import "AppDelegate.h"
 #import "ViewController.h"
+#import "InfoViewController.h"
 #import "TestFlight.h"
+#import "IIViewDeckController.h"
+#import <CoreLocation/CoreLocation.h>
 
-@implementation AppDelegate
+@implementation AppDelegate {
+    ViewController* _viewController;
+    CLLocationManager* _locationManager;
+}
 
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
@@ -19,14 +25,25 @@
     [TestFlight takeOff:@"95c7c2a7e1a1929c69c4f452f3b85108_MjQyNjIwMTItMDctMDMgMTc6MzU6NTQuNTc0NzYw"];
 #endif
 
+    self.locationManager = [CLLocationManager new];
     _network = [Reachability reachabilityForInternetConnection];
     [_network startNotifier];
 
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
 
-    // Override point for customization after application launch.
-    self.viewController = [[ViewController alloc] initWithNibName:@"ViewController" bundle:nil];
-    self.window.rootViewController = self.viewController;
+    _viewController = [[ViewController alloc] initWithNibName:@"ViewController" bundle:nil];
+    if (IsIPad()) {
+        InfoViewController* infoController = [[InfoViewController alloc] initWithNibName:@"InfoViewController" bundle:nil];
+        IIViewDeckController* deckController = [[IIViewDeckController alloc] initWithCenterViewController:_viewController rightViewController:infoController];
+        deckController.panningMode = IIViewDeckNoPanning;
+        deckController.sizeMode = IIViewDeckViewSizeMode;
+        deckController.rightSize = 320;
+        self.window.rootViewController = deckController;
+    }
+    else {
+        self.window.rootViewController = _viewController;
+    }
+    
     [self.window makeKeyAndVisible];
     
     return YES;

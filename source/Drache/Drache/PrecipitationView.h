@@ -14,4 +14,7 @@
 
 - (void)setRain:(RainData*)rain animated:(BOOL)animated;
 
+- (void)setupViews;
+- (void)setIntensity:(int)intensity formattedPrecipitation:(NSString*)precipitation animated:(BOOL)animated;
+
 @end
