@@ -206,7 +206,7 @@ namespace Drash
             UpdateSpinner();
             fetchingRain = true;
             firstFetch = false;
-            var uri = string.Format("http://gps.buienradar.nl/getrr.php?lat={0:0.000000}&lon={1:0.000000}&stamp={2}", Model.Location.Latitude, Model.Location.Longitude, DateTime.UtcNow.Ticks);
+            var uri = string.Format(CultureInfo.InvariantCulture, "http://gps.buienradar.nl/getrr.php?lat={0:0.000000}&lon={1:0.000000}&stamp={2}", Model.Location.Latitude, Model.Location.Longitude, DateTime.UtcNow.Ticks);
 
             var wc = new WebClient();
             wc.DownloadStringCompleted += (sender, args) => {

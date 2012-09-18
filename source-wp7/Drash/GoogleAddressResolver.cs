@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Device.Location;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -103,7 +104,7 @@ namespace Drash
             if (coordinate == null)
                 throw new ArgumentNullException("coordinate");
 
-            var url = string.Format("http://maps.googleapis.com/maps/api/geocode/xml?latlng={0},{1}&sensor=true", coordinate.Latitude, coordinate.Longitude);
+            var url = string.Format(CultureInfo.InvariantCulture, "http://maps.googleapis.com/maps/api/geocode/xml?latlng={0},{1}&sensor=true", coordinate.Latitude, coordinate.Longitude);
             var wc = new WebClient();
             var timeout = new ManualResetEvent(false);
             wc.DownloadStringCompleted += (sender, args) => {
