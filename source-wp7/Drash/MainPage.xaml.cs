@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Device.Location;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -26,6 +27,7 @@ namespace Drash
         private bool firstFetch;
         private readonly Color graphStrokeColor;
         private readonly Color graphFillFrom;
+        private PageOrientation lastOrientation;
 
         private bool loaded;
         private bool updatingLocation = false;
@@ -81,6 +83,7 @@ namespace Drash
         {
             var asked = DrashSettings.LocationAllowedAsked;
             var allowed = DrashSettings.LocationAllowed;
+            lastOrientation = Orientation;
 
             SplashFadeout.Begin(() => {
                 loaded = true;
@@ -104,6 +107,59 @@ namespace Drash
                 Forward = new TurnstileTransition() { Mode = TurnstileTransitionMode.ForwardIn }
             });
 
+        }
+
+        protected override void OnOrientationChanged(OrientationChangedEventArgs e)
+        {
+            var newOrientation = e.Orientation;
+            var transitionElement = new RotateTransition();
+
+            switch (newOrientation) {
+                case PageOrientation.Landscape:
+                case PageOrientation.LandscapeRight:
+                    // Come here from PortraitUp (i.e. clockwise) or LandscapeLeft?
+                    if (lastOrientation == PageOrientation.PortraitUp)
+                        transitionElement.Mode = RotateTransitionMode.In90Counterclockwise;
+                    else
+                        transitionElement.Mode = RotateTransitionMode.In180Clockwise;
+                    break;
+                case PageOrientation.LandscapeLeft:
+                    // Come here from LandscapeRight or PortraitUp?
+                    if (lastOrientation == PageOrientation.LandscapeRight)
+                        transitionElement.Mode = RotateTransitionMode.In180Counterclockwise;
+                    else
+                        transitionElement.Mode = RotateTransitionMode.In90Clockwise;
+                    break;
+                case PageOrientation.Portrait:
+                case PageOrientation.PortraitUp:
+                    // Come here from LandscapeLeft or LandscapeRight?
+                    if (lastOrientation == PageOrientation.LandscapeLeft)
+                        transitionElement.Mode = RotateTransitionMode.In90Counterclockwise;
+                    else
+                        transitionElement.Mode = RotateTransitionMode.In90Clockwise;
+                    break;
+                default:
+                    break;
+            }
+
+            // Execute the transition
+            var page = (PhoneApplicationPage)(((PhoneApplicationFrame)Application.Current.RootVisual)).Content;
+            var transition = transitionElement.GetTransition(page);
+            transition.Completed += (sender, args) => {
+                transition.Stop();
+                graphSize = new Size(0, 0);
+                UpdateVisuals();
+            };
+            transition.Begin();
+
+            if (newOrientation == PageOrientation.LandscapeLeft || newOrientation == PageOrientation.LandscapeRight) {
+                DataRoot.Margin = new Thickness(70, 0, 70, 0);
+            }
+            else {
+                DataRoot.Margin = new Thickness(0);
+            }
+            lastOrientation = newOrientation;
+            base.OnOrientationChanged(e);
         }
 
         private bool UpdateLocation(GeoCoordinate newLocation)
@@ -164,7 +220,7 @@ namespace Drash
                 updatingLocation = false;
                 if (args.Address == null || args.Address.IsUnknown) {
                     if (Model.Location != null && !Model.Location.IsUnknown) {
-                        Model.LocationName = string.Format("{0:0.000000}, {1:0.000000}", Model.Location.Latitude, Model.Location.Longitude);
+                        Model.LocationName = string.Format(CultureInfo.InvariantCulture, "{0:0.000000}, {1:0.000000}", Model.Location.Latitude, Model.Location.Longitude);
                         Model.GoodLocationName = false;
                     }
                 }
@@ -389,6 +445,7 @@ namespace Drash
             if (Graph.ActualWidth == 0 || Graph.ActualHeight == 0)
                 return;
 
+            Debug.WriteLine("{0},{1}", Graph.ActualWidth, Graph.ActualHeight);
             List<int> pointValues;
             if (rainData == null || rainData.Points == null)
                 pointValues = new List<int>();
@@ -400,10 +457,11 @@ namespace Drash
 
             var path = Graph.Data as PathGeometry;
             if (graphSize.Width == 0 && graphSize.Height == 0) {
-                graphSize = new Size(Graph.ActualWidth, Graph.ActualHeight);
+                graphSize = new Size(GraphContainer.ActualWidth, GraphContainer.ActualHeight);
+                Debug.WriteLine("# {0},{1}", graphSize.Width, graphSize.Height);
             }
 
-            var step = graphSize.Width / (pointValues.Count-1);
+            var step = graphSize.Width / (pointValues.Count - 1);
             Func<int, double> xForIndex = idx => idx == 0 ? -2 : idx == pointValues.Count - 1 ? graphSize.Width + 2 : idx * step;
 
             var x = 0;
@@ -429,6 +487,7 @@ namespace Drash
                 Graph.Data = path;
             }
 
+            Debug.WriteLine("{0}, {1},{2}", points, Graph.ActualWidth, Graph.ActualHeight);
             var ms300 = TimeSpan.FromMilliseconds(animated ? 300 : 0);
             var storyboard = new Storyboard() { Duration = ms300 };
 
@@ -568,5 +627,6 @@ namespace Drash
                 }
             }
         }
+
     }
 }
