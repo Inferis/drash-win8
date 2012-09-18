@@ -77,10 +77,10 @@
     [_dataView addSubview:_mmView];
     
     _graphLayer = [GraphLayer new];
-    [self.layer addSublayer:_graphLayer];
+    [self.layer insertSublayer:_graphLayer atIndex:0];
     
     _dotsLayer = [DotsLayer new];
-    [self.layer addSublayer:_dotsLayer];
+    [self.layer insertSublayer:_dotsLayer above:_graphLayer];
     
     self.clipsToBounds = YES;
     
