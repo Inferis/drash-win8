@@ -460,7 +460,11 @@ namespace Drash
                     mmText = "0";
                     mmImage = "0";
                 }
-                mmImage = string.Format("Resources/intensity{0}.png", mmImage);
+
+                var solarinfo = SolarInfo.ForDate(Model.Location.Latitude, Model.Location.Longitude, DateTime.Now);
+                var sunrisen = solarinfo.Sunrise < DateTime.UtcNow && DateTime.UtcNow < solarinfo.Sunset;
+                var night = intensity == 0 && !sunrisen ? "n" : "";
+                mmImage = string.Format("Resources/intensity{0}{1}.png", mmImage, night);
 
                 Action setter = () => {
                     Chance.Text = chanceText;

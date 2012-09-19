@@ -83,6 +83,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RainData.cs" />
     <Compile Include="RainPoint.cs" />
+    <Compile Include="SolarInfo.cs" />
     <Compile Include="StoryBoardExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -125,6 +126,7 @@
     <Resource Include="Resources\dial60.png" />
     <Resource Include="Resources\dial75.png" />
     <Resource Include="Resources\dial90.png" />
+    <Resource Include="Resources\intensity0n.png" />
     <Content Include="SubmissionInfo\ManualTestResults.xml" />
     <Resource Include="SubmissionInfo\MarketPlaceTile.png" />
     <Resource Include="SubmissionInfo\Screenshot1.png" />
