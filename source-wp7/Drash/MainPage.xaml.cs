@@ -530,9 +530,9 @@ namespace Drash
                 Graph.Data = path;
             }
 
-            animated = animated || graphEntries != Model.Entries && graphEntries > 0 && Model.Entries > 0;
+            var entriesAnimated = graphEntries != Model.Entries && graphEntries > 0 && Model.Entries > 0;
             graphEntries = Model.Entries;
-            var ms300 = TimeSpan.FromMilliseconds(animated ? 300 : 0);
+            var ms300 = TimeSpan.FromMilliseconds(entriesAnimated ? 150 : animated ? 300 : 0);
             var storyboard = new Storyboard() { Duration = ms300 };
 
             figure = path.Figures[0];
