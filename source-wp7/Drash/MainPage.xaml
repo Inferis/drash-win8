@@ -33,6 +33,7 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="1"/>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="70"/>
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="0">
@@ -78,7 +79,7 @@
                   Grid.RowSpan="2"
 				  Opacity="0.6" />
 
-            <Grid Grid.Row="4" x:Name="GraphContainer">
+            <Grid Grid.Row="4" x:Name="GraphContainer" Grid.RowSpan="2">
                 <Path x:Name="Graph" Stroke="#40a1d9" StrokeThickness="3">
                     <Path.Fill>
                         <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -89,6 +90,11 @@
                         </LinearGradientBrush>
                     </Path.Fill>
                 </Path>
+            </Grid>
+            
+            <Grid Grid.Row="5">
+                <Image x:Name="ZoomImage" Source="Resources/dial105.png" Width="70" Height="70" HorizontalAlignment="Left" />
+                <TextBlock x:Name="ZoomText" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="70" FontSize="18" Margin="0,0,0,4" TextAlignment="Center">120min</TextBlock>
             </Grid>
         </Grid>
 
@@ -107,7 +113,7 @@
 
     <!--Sample code showing usage of ApplicationBar-->
     <phone:PhoneApplicationPage.ApplicationBar>
-        <shell:ApplicationBar  IsVisible="True" Mode="Minimized" IsMenuEnabled="False" BackgroundColor="Transparent" ForegroundColor="White" Opacity="0.9">
+        <shell:ApplicationBar IsVisible="True" Mode="Default" IsMenuEnabled="False"  BackgroundColor="Transparent" ForegroundColor="White" Opacity="0.9">
             <shell:ApplicationBarIconButton IconUri="/Resources/appbar.refresh.rest.png" Text="Refresh" Click="RefreshButton_Click"/>
             <shell:ApplicationBarIconButton IconUri="/Resources/appbar.questionmark.rest.png" Text="About" Click="InfoButton_Click"/>
         </shell:ApplicationBar>

@@ -32,6 +32,9 @@ namespace Drash
         private bool loaded;
         private bool updatingLocation = false;
         private Size graphSize;
+        private bool dragging;
+        private int dragDelta;
+        private int graphEntries = 0;
 
         public Model Model
         {
@@ -85,10 +88,10 @@ namespace Drash
             var allowed = DrashSettings.LocationAllowed;
             lastOrientation = Orientation;
 
+            VisualizeEntries();
             SplashFadeout.Begin(() => {
                 loaded = true;
 
-                GestureService.GetGestureListener(this).Hold += (o, args) => FetchRain();
                 if (!asked) {
                     var result = MessageBox.Show("Would you like to display the rain forecast based on your current location? This will send your location to buienradar.nl to retrieve the forecast. You can disable location services in the About screen.", "Enable location services?", MessageBoxButton.OKCancel);
                     allowed = result == MessageBoxResult.OK;
@@ -100,6 +103,18 @@ namespace Drash
                     firstFetch = watcher.Position != null;
                 }
 
+                GestureService.GetGestureListener(this).Hold += (o, args) => FetchRain();
+                GestureService.GetGestureListener(this).DragStarted += (o, args) => {
+                    dragging = args.GetPosition(Graph).Y >= 0;
+                    dragDelta = 0;
+                };
+                GestureService.GetGestureListener(this).DragDelta += (o, args) => {
+                    if (dragging) {
+                        if (dragDelta != 0 && Math.Sign(args.HorizontalChange) != Math.Sign(dragDelta))
+                            dragDelta = 0;
+                        Zoomed(args.HorizontalChange);
+                    }
+                };
             });
 
             TransitionService.SetNavigationInTransition(this, new NavigationInTransition() {
@@ -107,6 +122,24 @@ namespace Drash
                 Forward = new TurnstileTransition() { Mode = TurnstileTransitionMode.ForwardIn }
             });
 
+        }
+
+        private void Zoomed(double horizontalChange)
+        {
+            dragDelta = (int)Math.Round(dragDelta + horizontalChange);
+            if (Math.Abs(dragDelta) < 30)
+                return;
+
+            var factor = 1 + (int)Math.Floor((Math.Abs(dragDelta) - 30) / 45.0);
+            var entries = Model.Entries + (dragDelta < 0 ? 3 : -3) * factor;
+            entries = Math.Min(Math.Max(6, entries), 24);
+            dragDelta = 0;
+
+            if (entries != Model.Entries) {
+                Model.Entries = entries;
+                VisualizeEntries();
+                UpdateState();
+            }
         }
 
         protected override void OnOrientationChanged(OrientationChangedEventArgs e)
@@ -326,6 +359,13 @@ namespace Drash
 
             VisualizeRain(Model.Rain);
             VisualizeLocation(Model.LocationName);
+
+        }
+
+        private void VisualizeEntries()
+        {
+            ZoomImage.Source = new BitmapImage(new Uri(string.Format("Resources/dial{0}.png", Model.Entries * 5), UriKind.Relative));
+            ZoomText.Text = string.Format("{0}min", Model.Entries * 5);
         }
 
         private void VisualizeError(DrashError drashError)
@@ -391,8 +431,9 @@ namespace Drash
                 string mmText;
 
                 animated = animated && animate;
-                if (rainData != null && rainData.Chance >= 0) {
-                    chanceText = string.Format("{0}%", rainData.Chance);
+                var chance = rainData.ChanceForEntries(Model.Entries);
+                if (rainData != null && chance >= 0) {
+                    chanceText = string.Format("{0}%", chance);
                     chanceColor = Colors.White;
                 }
                 else {
@@ -403,8 +444,8 @@ namespace Drash
                 var intensity = 0;
                 var mm = 0.0;
                 if (rainData != null) {
-                    mm = rainData.Precipitation;
-                    intensity = rainData.Intensity;
+                    mm = rainData.PrecipitationForEntries(Model.Entries);
+                    intensity = rainData.IntensityForEntries(Model.Entries);
                 }
 
                 if (intensity > 0 || mm > 0) {
@@ -445,28 +486,26 @@ namespace Drash
             if (Graph.ActualWidth == 0 || Graph.ActualHeight == 0)
                 return;
 
-            Debug.WriteLine("{0},{1}", Graph.ActualWidth, Graph.ActualHeight);
             List<int> pointValues;
             if (rainData == null || rainData.Points == null)
                 pointValues = new List<int>();
             else
-                pointValues = rainData.Points.Take(7).Select(p => p.AdjustedValue).ToList();
+                pointValues = rainData.Points.Take(25).Select(p => p.AdjustedValue).ToList();
 
-            while (pointValues.Count < 7)
+            while (pointValues.Count < 25)
                 pointValues.Add(0);
 
             var path = Graph.Data as PathGeometry;
             if (graphSize.Width == 0 && graphSize.Height == 0) {
                 graphSize = new Size(GraphContainer.ActualWidth, GraphContainer.ActualHeight);
-                Debug.WriteLine("# {0},{1}", graphSize.Width, graphSize.Height);
             }
 
-            var step = graphSize.Width / (pointValues.Count - 1);
-            Func<int, double> xForIndex = idx => idx == 0 ? -2 : idx == pointValues.Count - 1 ? graphSize.Width + 2 : idx * step;
+            var step = graphSize.Width / Model.Entries;
+            Func<int, double> xForIndex = idx => idx == 0 ? -2 : idx >= Model.Entries ? graphSize.Width + 2 : idx * step;
 
             var x = 0;
-            var max = graphSize.Height + 2 - 34;
-            var allZeros = pointValues.All(p => p == 0);
+            var max = graphSize.Height + 2 - 80;
+            var allZeros = pointValues.Take(Model.Entries + 1).All(p => p == 0);
             var points = pointValues.Select(v => {
                 var y = allZeros ? max - 40 : Math.Max(1, max - (v * max / 100));
                 var p = new Point(xForIndex(x), y);
@@ -487,7 +526,8 @@ namespace Drash
                 Graph.Data = path;
             }
 
-            Debug.WriteLine("{0}, {1},{2}", points, Graph.ActualWidth, Graph.ActualHeight);
+            animated = animated || graphEntries != Model.Entries && graphEntries > 0 && Model.Entries > 0;
+            graphEntries = Model.Entries;
             var ms300 = TimeSpan.FromMilliseconds(animated ? 300 : 0);
             var storyboard = new Storyboard() { Duration = ms300 };
 

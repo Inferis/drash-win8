@@ -117,6 +117,14 @@
     <Resource Include="Resources\intensity2.png" />
     <Resource Include="Resources\intensity3.png" />
     <Resource Include="SubmissionInfo\LargeAppTile.png" />
+    <Resource Include="Resources\dial105.png" />
+    <Resource Include="Resources\dial120.png" />
+    <Resource Include="Resources\dial15.png" />
+    <Resource Include="Resources\dial30.png" />
+    <Resource Include="Resources\dial45.png" />
+    <Resource Include="Resources\dial60.png" />
+    <Resource Include="Resources\dial75.png" />
+    <Resource Include="Resources\dial90.png" />
     <Content Include="SubmissionInfo\ManualTestResults.xml" />
     <Resource Include="SubmissionInfo\MarketPlaceTile.png" />
     <Resource Include="SubmissionInfo\Screenshot1.png" />
