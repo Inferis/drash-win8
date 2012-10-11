@@ -56,8 +56,8 @@
                         <CompositeTransform />
                     </Grid.RenderTransform>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*" MinWidth="300"/>
-                        <ColumnDefinition Width="1*" MinWidth="180"/>
+                        <ColumnDefinition Width="2*" MinWidth="280"/>
+                        <ColumnDefinition Width="1*" MinWidth="200"/>
                     </Grid.ColumnDefinitions>
 
                     <TextBlock x:Name="Chance" Text="" FontSize="126" FontFamily="Segoe WP Light" TextAlignment="Center" VerticalAlignment="Center" Grid.Column="0" />
@@ -118,7 +118,6 @@
             <shell:ApplicationBarIconButton IconUri="/Resources/appbar.questionmark.rest.png" Text="About" Click="InfoButton_Click"/>
         </shell:ApplicationBar>
     </phone:PhoneApplicationPage.ApplicationBar>
-
 
     <shell:SystemTray.ProgressIndicator>
         <shell:ProgressIndicator x:Name="spinner" IsIndeterminate="True" IsVisible="false" />
