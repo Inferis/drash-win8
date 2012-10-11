@@ -349,7 +349,7 @@ namespace Drash
                 return;
             }
 
-            if (string.IsNullOrEmpty(Model.LocationName) && Model.Rain == null) {
+            if (string.IsNullOrEmpty(Model.LocationName) || Model.Rain == null) {
                 if (Model.DataRootShown) {
                     DataRoot.FadeOut();
                     Model.DataRootShown = false;
