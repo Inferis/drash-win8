@@ -111,7 +111,7 @@
     
     NSDate* now = [NSDate date];
     NSMutableArray* points = [NSMutableArray array];
-    int lastValue = 20;
+//    int lastValue = 20;
     for (NSString* line in lines) {
         NSArray* parts = [line componentsSeparatedByString:@"|"];
         if (parts.count < 2)
@@ -119,12 +119,12 @@
 
         int value = MAX(0, [[parts objectAtIndex:0] intValue]);
 //        value = 130 + arc4random() % 50;
-        CGFloat part = arc4random() % 75 / 100.0;
+//        CGFloat part = arc4random() % 75 / 100.0;
 //
 //        value = (1-part) * (30 + arc4random() % 60 - arc4random() % 20) + (lastValue * part);
 //        value = arc4random() % 120;
 //        value = lastValue + arc4random() % 20;
-        lastValue = value;
+//        lastValue = value;
         NSDate* time = [self scanDate:[parts objectAtIndex:1]];
 
         if ([time timeIntervalSinceDate:now] > -300) {
