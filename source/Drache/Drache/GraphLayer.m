@@ -13,7 +13,7 @@
 #import "Coby.h"
 #import "NSUserDefaults+Settings.h"
 
-#define BORDERCOLOR [UIColor colorWithHex:0x40a1d9].CGColor;
+#define BORDERCOLOR [UIColor colorWithHex:0x40a1d9]
 
 @implementation GraphLayer {
     NSArray* _points;
@@ -29,7 +29,7 @@
         self.backgroundColor = [UIColor clearColor].CGColor;
         
         _borderLayer = [CAShapeLayer new];
-        _borderLayer.strokeColor = BORDERCOLOR;
+        _borderLayer.strokeColor = BORDERCOLOR.CGColor;
         _borderLayer.lineWidth = 2;
         _borderLayer.backgroundColor = [UIColor clearColor].CGColor;
         _borderLayer.opaque = NO;
@@ -94,7 +94,7 @@
     }
     
     NSArray* newColors;
-    CGColorRef newBorderColor;
+    UIColor* newBorderColor;
     if (allZero) {
         for (int i=0; i<points.count; ++i) {
             [path addLineToPoint:(CGPoint) { x, 0 }];
@@ -103,7 +103,7 @@
         [path addLineToPoint:(CGPoint) { x, 0 }];
         minY = (height-bottom)/2.0;
         newColors = [NSArray arrayWithObjects:(id)[UIColor clearColor].CGColor, [UIColor colorWithHex:0x991e4c67].CGColor, nil];
-        newBorderColor = [[UIColor clearColor] CGColor];
+        newBorderColor = [UIColor clearColor];
     }
     else {
         newBorderColor = BORDERCOLOR;
@@ -163,7 +163,7 @@
         animation.duration = DURATION;
         animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
         animation.fromValue = (__bridge id)_borderLayer.strokeColor;
-        animation.toValue = (__bridge id)newBorderColor;
+        animation.toValue = (__bridge id)newBorderColor.CGColor;
         [_borderLayer addAnimation:animation forKey:@"animateStrokeColor"];
 }
     _borderLayer.path = path.CGPath;
