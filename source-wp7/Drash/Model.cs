@@ -8,6 +8,7 @@ namespace Drash
         {
             Rain = null;
             Error = DrashError.None;
+            Entries = 6;
         }
 
         public RainData Rain;
@@ -22,5 +23,6 @@ namespace Drash
         public bool DataRootShown;
         public bool LocationShown;
         public bool ChanceShown;
+        public int Entries;
     }
 }

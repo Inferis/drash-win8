@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Device.Location;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -26,10 +27,14 @@ namespace Drash
         private bool firstFetch;
         private readonly Color graphStrokeColor;
         private readonly Color graphFillFrom;
+        private PageOrientation lastOrientation;
 
         private bool loaded;
         private bool updatingLocation = false;
         private Size graphSize;
+        private bool dragging;
+        private int dragDelta;
+        private int graphEntries = 0;
 
         public Model Model
         {
@@ -81,11 +86,12 @@ namespace Drash
         {
             var asked = DrashSettings.LocationAllowedAsked;
             var allowed = DrashSettings.LocationAllowed;
+            lastOrientation = Orientation;
 
+            VisualizeEntries();
             SplashFadeout.Begin(() => {
                 loaded = true;
 
-                GestureService.GetGestureListener(this).Hold += (o, args) => FetchRain();
                 if (!asked) {
                     var result = MessageBox.Show("Would you like to display the rain forecast based on your current location? This will send your location to buienradar.nl to retrieve the forecast. You can disable location services in the About screen.", "Enable location services?", MessageBoxButton.OKCancel);
                     allowed = result == MessageBoxResult.OK;
@@ -97,6 +103,18 @@ namespace Drash
                     firstFetch = watcher.Position != null;
                 }
 
+                GestureService.GetGestureListener(this).Hold += (o, args) => FetchRain();
+                GestureService.GetGestureListener(this).DragStarted += (o, args) => {
+                    dragging = args.GetPosition(Graph).Y >= 0;
+                    dragDelta = 0;
+                };
+                GestureService.GetGestureListener(this).DragDelta += (o, args) => {
+                    if (dragging) {
+                        if (dragDelta != 0 && Math.Sign(args.HorizontalChange) != Math.Sign(dragDelta))
+                            dragDelta = 0;
+                        Zoomed(args.HorizontalChange);
+                    }
+                };
             });
 
             TransitionService.SetNavigationInTransition(this, new NavigationInTransition() {
@@ -104,6 +122,77 @@ namespace Drash
                 Forward = new TurnstileTransition() { Mode = TurnstileTransitionMode.ForwardIn }
             });
 
+        }
+
+        private void Zoomed(double horizontalChange)
+        {
+            dragDelta = (int)Math.Round(dragDelta + horizontalChange);
+            if (Math.Abs(dragDelta) < 30)
+                return;
+
+            var factor = 1 + (int)Math.Floor((Math.Abs(dragDelta) - 30) / 45.0);
+            var entries = Model.Entries + (dragDelta < 0 ? 3 : -3) * factor;
+            entries = Math.Min(Math.Max(6, entries), 24);
+            dragDelta = 0;
+
+            if (entries != Model.Entries) {
+                Model.Entries = entries;
+                VisualizeEntries();
+                UpdateState();
+            }
+        }
+
+        protected override void OnOrientationChanged(OrientationChangedEventArgs e)
+        {
+            var newOrientation = e.Orientation;
+            var transitionElement = new RotateTransition();
+
+            switch (newOrientation) {
+                case PageOrientation.Landscape:
+                case PageOrientation.LandscapeRight:
+                    // Come here from PortraitUp (i.e. clockwise) or LandscapeLeft?
+                    if (lastOrientation == PageOrientation.PortraitUp)
+                        transitionElement.Mode = RotateTransitionMode.In90Counterclockwise;
+                    else
+                        transitionElement.Mode = RotateTransitionMode.In180Clockwise;
+                    break;
+                case PageOrientation.LandscapeLeft:
+                    // Come here from LandscapeRight or PortraitUp?
+                    if (lastOrientation == PageOrientation.LandscapeRight)
+                        transitionElement.Mode = RotateTransitionMode.In180Counterclockwise;
+                    else
+                        transitionElement.Mode = RotateTransitionMode.In90Clockwise;
+                    break;
+                case PageOrientation.Portrait:
+                case PageOrientation.PortraitUp:
+                    // Come here from LandscapeLeft or LandscapeRight?
+                    if (lastOrientation == PageOrientation.LandscapeLeft)
+                        transitionElement.Mode = RotateTransitionMode.In90Counterclockwise;
+                    else
+                        transitionElement.Mode = RotateTransitionMode.In90Clockwise;
+                    break;
+                default:
+                    break;
+            }
+
+            // Execute the transition
+            var page = (PhoneApplicationPage)(((PhoneApplicationFrame)Application.Current.RootVisual)).Content;
+            var transition = transitionElement.GetTransition(page);
+            transition.Completed += (sender, args) => {
+                transition.Stop();
+                graphSize = new Size(0, 0);
+                UpdateVisuals();
+            };
+            transition.Begin();
+
+            if (newOrientation == PageOrientation.LandscapeLeft || newOrientation == PageOrientation.LandscapeRight) {
+                DataRoot.Margin = new Thickness(70, 0, 70, 0);
+            }
+            else {
+                DataRoot.Margin = new Thickness(0);
+            }
+            lastOrientation = newOrientation;
+            base.OnOrientationChanged(e);
         }
 
         private bool UpdateLocation(GeoCoordinate newLocation)
@@ -164,7 +253,7 @@ namespace Drash
                 updatingLocation = false;
                 if (args.Address == null || args.Address.IsUnknown) {
                     if (Model.Location != null && !Model.Location.IsUnknown) {
-                        Model.LocationName = string.Format("{0:0.000000}, {1:0.000000}", Model.Location.Latitude, Model.Location.Longitude);
+                        Model.LocationName = string.Format(CultureInfo.InvariantCulture, "{0:0.000000}, {1:0.000000}", Model.Location.Latitude, Model.Location.Longitude);
                         Model.GoodLocationName = false;
                     }
                 }
@@ -206,7 +295,7 @@ namespace Drash
             UpdateSpinner();
             fetchingRain = true;
             firstFetch = false;
-            var uri = string.Format("http://gps.buienradar.nl/getrr.php?lat={0:0.000000}&lon={1:0.000000}&stamp={2}", Model.Location.Latitude, Model.Location.Longitude, DateTime.UtcNow.Ticks);
+            var uri = string.Format(CultureInfo.InvariantCulture, "http://gps.buienradar.nl/getrr.php?lat={0:0.000000}&lon={1:0.000000}&stamp={2}", Model.Location.Latitude, Model.Location.Longitude, DateTime.UtcNow.Ticks);
 
             var wc = new WebClient();
             wc.DownloadStringCompleted += (sender, args) => {
@@ -260,7 +349,7 @@ namespace Drash
                 return;
             }
 
-            if (string.IsNullOrEmpty(Model.LocationName) && Model.Rain == null) {
+            if (string.IsNullOrEmpty(Model.LocationName) || Model.Rain == null) {
                 if (Model.DataRootShown) {
                     DataRoot.FadeOut();
                     Model.DataRootShown = false;
@@ -270,6 +359,13 @@ namespace Drash
 
             VisualizeRain(Model.Rain);
             VisualizeLocation(Model.LocationName);
+
+        }
+
+        private void VisualizeEntries()
+        {
+            ZoomImage.Source = new BitmapImage(new Uri(string.Format("Resources/dial{0}.png", Model.Entries * 5), UriKind.Relative));
+            ZoomText.Text = string.Format("{0}min", Model.Entries * 5);
         }
 
         private void VisualizeError(DrashError drashError)
@@ -335,8 +431,9 @@ namespace Drash
                 string mmText;
 
                 animated = animated && animate;
-                if (rainData != null && rainData.Chance >= 0) {
-                    chanceText = string.Format("{0}%", rainData.Chance);
+                var chance = rainData.ChanceForEntries(Model.Entries);
+                if (rainData != null && chance >= 0) {
+                    chanceText = string.Format("{0}%", chance);
                     chanceColor = Colors.White;
                 }
                 else {
@@ -347,8 +444,8 @@ namespace Drash
                 var intensity = 0;
                 var mm = 0.0;
                 if (rainData != null) {
-                    mm = rainData.Precipitation;
-                    intensity = rainData.Intensity;
+                    mm = rainData.PrecipitationForEntries(Model.Entries);
+                    intensity = rainData.IntensityForEntries(Model.Entries);
                 }
 
                 if (intensity > 0 || mm > 0) {
@@ -363,7 +460,11 @@ namespace Drash
                     mmText = "0";
                     mmImage = "0";
                 }
-                mmImage = string.Format("Resources/intensity{0}.png", mmImage);
+
+                var solarinfo = SolarInfo.ForDate(Model.Location.Latitude, Model.Location.Longitude, DateTime.Now);
+                var sunrisen = solarinfo.Sunrise < DateTime.UtcNow && DateTime.UtcNow < solarinfo.Sunset;
+                var night = intensity == 0 && !sunrisen ? "n" : "";
+                mmImage = string.Format("Resources/intensity{0}{1}.png", mmImage, night);
 
                 Action setter = () => {
                     Chance.Text = chanceText;
@@ -393,22 +494,22 @@ namespace Drash
             if (rainData == null || rainData.Points == null)
                 pointValues = new List<int>();
             else
-                pointValues = rainData.Points.Take(7).Select(p => p.AdjustedValue).ToList();
+                pointValues = rainData.Points.Take(25).Select(p => p.AdjustedValue).ToList();
 
-            while (pointValues.Count < 7)
+            while (pointValues.Count < 25)
                 pointValues.Add(0);
 
             var path = Graph.Data as PathGeometry;
             if (graphSize.Width == 0 && graphSize.Height == 0) {
-                graphSize = new Size(Graph.ActualWidth, Graph.ActualHeight);
+                graphSize = new Size(GraphContainer.ActualWidth, GraphContainer.ActualHeight);
             }
 
-            var step = graphSize.Width / (pointValues.Count-1);
-            Func<int, double> xForIndex = idx => idx == 0 ? -2 : idx == pointValues.Count - 1 ? graphSize.Width + 2 : idx * step;
+            var step = graphSize.Width / Model.Entries;
+            Func<int, double> xForIndex = idx => idx == 0 ? -2 : idx >= Model.Entries ? graphSize.Width + 2 : idx * step;
 
             var x = 0;
-            var max = graphSize.Height + 2 - 10;
-            var allZeros = pointValues.All(p => p == 0);
+            var max = graphSize.Height + 2 - 80;
+            var allZeros = pointValues.Take(Model.Entries + 1).All(p => p == 0);
             var points = pointValues.Select(v => {
                 var y = allZeros ? max - 40 : Math.Max(1, max - (v * max / 100));
                 var p = new Point(xForIndex(x), y);
@@ -429,7 +530,9 @@ namespace Drash
                 Graph.Data = path;
             }
 
-            var ms300 = TimeSpan.FromMilliseconds(animated ? 300 : 0);
+            var entriesAnimated = graphEntries != Model.Entries && graphEntries > 0 && Model.Entries > 0;
+            graphEntries = Model.Entries;
+            var ms300 = TimeSpan.FromMilliseconds(entriesAnimated ? 150 : animated ? 300 : 0);
             var storyboard = new Storyboard() { Duration = ms300 };
 
             figure = path.Figures[0];
@@ -568,5 +671,6 @@ namespace Drash
                 }
             }
         }
+
     }
 }

@@ -6,12 +6,12 @@ using System.Resources;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Drash")]
+[assembly: AssemblyTitle("LocationTester")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Interface Implementation")]
-[assembly: AssemblyProduct("Drash")]
-[assembly: AssemblyCopyright("Copyright © Adriaenssen BVBA  2012")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("LocationTester")]
+[assembly: AssemblyCopyright("Copyright ©  2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -21,7 +21,7 @@ using System.Resources;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("858cc2a2-ffbd-4878-b520-f41fc3dcbfd9")]
+[assembly: Guid("4c11ac59-4c9f-4200-9d40-81a2e85bf6ee")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -32,6 +32,6 @@ using System.Resources;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("1.1.0.9")]
-[assembly: AssemblyFileVersion("1.1.0.9")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
 [assembly: NeutralResourcesLanguageAttribute("en-US")]
