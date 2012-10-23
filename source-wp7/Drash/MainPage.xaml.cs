@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Device.Location;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Runtime.Serialization;
-using System.Threading;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -30,6 +28,8 @@ namespace Drash
         private readonly Color graphFillFrom;
 
         private bool loaded;
+        private bool updatingLocation = false;
+        private Size graphSize;
 
         public Model Model
         {
@@ -65,7 +65,7 @@ namespace Drash
 
             watcher = new GeoCoordinateWatcher { MovementThreshold = 500 };
             watcher.PositionChanged += (s, a) => {
-                if (Model.Location != null && Model.Location.GetDistanceTo(a.Position.Location) < 20)
+                if (Model.Location != null && !Model.Location.IsUnknown && Model.Location.GetDistanceTo(a.Position.Location) < 20)
                     return;
                 UpdateLocation(a.Position.Location);
             };
@@ -75,19 +75,28 @@ namespace Drash
             graphFillFrom = ((LinearGradientBrush)Graph.Fill).GradientStops[0].Color;
 
             Loaded += MainPageLoaded;
-
-            ThreadPool.QueueUserWorkItem(o => {
-                watcher.Start();
-                firstFetch = watcher.Position != null;
-            });
         }
 
         private void MainPageLoaded(object sender, System.Windows.RoutedEventArgs e)
         {
-            loaded = true;
+            var asked = DrashSettings.LocationAllowedAsked;
+            var allowed = DrashSettings.LocationAllowed;
 
             SplashFadeout.Begin(() => {
+                loaded = true;
+
                 GestureService.GetGestureListener(this).Hold += (o, args) => FetchRain();
+                if (!asked) {
+                    var result = MessageBox.Show("Would you like to display the rain forecast based on your current location? This will send your location to buienradar.nl to retrieve the forecast. You can disable location services in the About screen.", "Enable location services?", MessageBoxButton.OKCancel);
+                    allowed = result == MessageBoxResult.OK;
+                    DrashSettings.LocationAllowed = allowed;
+                }
+
+                if (allowed) {
+                    watcher.Start();
+                    firstFetch = watcher.Position != null;
+                }
+
             });
 
             TransitionService.SetNavigationInTransition(this, new NavigationInTransition() {
@@ -97,13 +106,13 @@ namespace Drash
 
         }
 
-        private void UpdateLocation(GeoCoordinate newLocation)
+        private bool UpdateLocation(GeoCoordinate newLocation)
         {
             if (newLocation == null || newLocation.IsUnknown) {
                 Model.LocationName = "";
                 Model.GoodLocationName = false;
                 UpdateState();
-                return;
+                return false;
             }
 
             var delay = firstFetch || (Model.Location == null || Model.Location.IsUnknown) ||
@@ -119,6 +128,7 @@ namespace Drash
                     updateLocationName.Run(ResolveCurrentLocation, 1000);
                 }
             }, delay);
+            return true;
         }
 
         private void ResolveCurrentLocation()
@@ -126,6 +136,8 @@ namespace Drash
             if (Model.Location == null || Model.Location.IsUnknown)
                 return;
 
+            updatingLocation = true;
+            UpdateSpinner();
             var resolver = new CivicAddressResolver();
             resolver.ResolveAddressCompleted += (o, args) => {
                 if (args.Address == null || args.Address.IsUnknown) {
@@ -134,6 +146,8 @@ namespace Drash
                 else {
                     Model.LocationName = string.Format("{0}, {1}", args.Address.City, args.Address.CountryRegion);
                     Model.GoodLocationName = true;
+                    updatingLocation = false;
+                    UpdateSpinner();
                     UpdateState();
                 }
             };
@@ -147,6 +161,7 @@ namespace Drash
 
             var resolver = new GoogleAddressResolver();
             resolver.ResolveAddressCompleted += (o, args) => {
+                updatingLocation = false;
                 if (args.Address == null || args.Address.IsUnknown) {
                     if (Model.Location != null && !Model.Location.IsUnknown) {
                         Model.LocationName = string.Format("{0:0.000000}, {1:0.000000}", Model.Location.Latitude, Model.Location.Longitude);
@@ -154,10 +169,10 @@ namespace Drash
                     }
                 }
                 else {
-                    Model.LocationName = string.Format("{0}, {1}", args.Address.City,
-                                                 args.Address.CountryRegion);
+                    Model.LocationName = string.Format("{0}, {1}", args.Address.City, args.Address.CountryRegion);
                     Model.GoodLocationName = true;
                 }
+                UpdateSpinner();
                 UpdateState();
             };
             resolver.ResolveAddressAsync(Model.Location);
@@ -169,25 +184,29 @@ namespace Drash
 
             updateRain.Cancel();
             if (Model.Location == null || Model.Location.IsUnknown) {
-                updateRain.Run(FetchRain);
+                // no location, schedule new fetch
+                if (!UpdateLocation(watcher.Position.Location))
+                    updateRain.Run(FetchRain);
                 return;
             }
 
             if (!NetworkInterface.GetIsNetworkAvailable()) {
+                // no network, schedule new fetch
                 UpdateState();
                 updateRain.Run(FetchRain);
                 return;
             }
 
             // if we don't have a good location name, try to update it
-            if (!Model.GoodLocationName && Model.Location != null && !Model.Location.IsUnknown) {
+            if (!Model.GoodLocationName) {
+                // also try to resolve location
                 updateLocationName.Run(ResolveCurrentLocation, 1000);
             }
 
-            spinner.IsVisible = true;
+            UpdateSpinner();
             fetchingRain = true;
             firstFetch = false;
-            var uri = string.Format("http://gps.buienradar.nl/getrr.php?lat={0:0.000000}&lon={1:0.000000}", Model.Location.Latitude, Model.Location.Longitude);
+            var uri = string.Format("http://gps.buienradar.nl/getrr.php?lat={0:0.000000}&lon={1:0.000000}&stamp={2}", Model.Location.Latitude, Model.Location.Longitude, DateTime.UtcNow.Ticks);
 
             var wc = new WebClient();
             wc.DownloadStringCompleted += (sender, args) => {
@@ -195,7 +214,7 @@ namespace Drash
                     RainData.TryParse(args.Result, out Model.Rain);
                     fetchingRain = false;
                 }
-                spinner.IsVisible = false;
+                UpdateSpinner();
                 Model.RainWasUpdated = true;
                 UpdateState();
                 updateRain.Run(FetchRain);
@@ -203,11 +222,13 @@ namespace Drash
             wc.DownloadStringAsync(new Uri(uri));
         }
 
+        private void UpdateSpinner()
+        {
+            spinner.IsVisible = fetchingRain || updatingLocation;
+        }
+
         private void UpdateState()
         {
-            if (!loaded)
-                return;
-
             try {
                 if (!NetworkInterface.GetIsNetworkAvailable()) {
                     Model.Error = DrashError.NoNetwork;
@@ -322,10 +343,21 @@ namespace Drash
                     chanceText = "?";
                     chanceColor = Colors.DarkGray;
                 }
-                if (rainData != null && (rainData.Intensity > 0 || rainData.Precipitation > 0)) {
-                    var mm = Math.Max(rainData.Precipitation, 0.01);
-                    mmText = Math.Floor(mm) == mm ? string.Format("{0}", (int)mm) : string.Format("{0:0.00}", mm);
-                    mmImage = ((int)Math.Max(1, Math.Min(1 + rainData.Intensity / 25.0, 4))).ToString(CultureInfo.InvariantCulture);
+
+                var intensity = 0;
+                var mm = 0.0;
+                if (rainData != null) {
+                    mm = rainData.Precipitation;
+                    intensity = rainData.Intensity;
+                }
+
+                if (intensity > 0 || mm > 0) {
+                    mm = Math.Max(mm, 0.001);
+                    intensity = ((int)Math.Max(1, Math.Min(1 + intensity / 25.0, 4)));
+
+                    var format = mm < 0.01 ? "{0:0.000}" : "{0:0.00}";
+                    mmText = Math.Floor(mm) == mm ? string.Format("{0}", (int)mm) : string.Format(format, mm);
+                    mmImage = intensity.ToString(CultureInfo.InvariantCulture);
                 }
                 else {
                     mmText = "0";
@@ -354,21 +386,28 @@ namespace Drash
 
         private void VisualizeGraph(RainData rainData, bool animated)
         {
+            if (Graph.ActualWidth == 0 || Graph.ActualHeight == 0)
+                return;
 
             List<int> pointValues;
             if (rainData == null || rainData.Points == null)
                 pointValues = new List<int>();
             else
-                pointValues = rainData.Points.Select(p => p.AdjustedValue).ToList();
+                pointValues = rainData.Points.Take(7).Select(p => p.AdjustedValue).ToList();
 
             while (pointValues.Count < 7)
                 pointValues.Add(0);
 
-            var step = Graph.ActualWidth / pointValues.Count;
-            Func<int, double> xForIndex = idx => idx == 0 ? -2 : idx == pointValues.Count - 1 ? Graph.ActualWidth + 2 : idx * step;
+            var path = Graph.Data as PathGeometry;
+            if (graphSize.Width == 0 && graphSize.Height == 0) {
+                graphSize = new Size(Graph.ActualWidth, Graph.ActualHeight);
+            }
+
+            var step = graphSize.Width / (pointValues.Count-1);
+            Func<int, double> xForIndex = idx => idx == 0 ? -2 : idx == pointValues.Count - 1 ? graphSize.Width + 2 : idx * step;
 
             var x = 0;
-            var max = Graph.ActualHeight + 2 - 10;
+            var max = graphSize.Height + 2 - 10;
             var allZeros = pointValues.All(p => p == 0);
             var points = pointValues.Select(v => {
                 var y = allZeros ? max - 40 : Math.Max(1, max - (v * max / 100));
@@ -376,17 +415,17 @@ namespace Drash
                 x++;
                 return p;
             }).ToList();
+            points.Add(new Point(graphSize.Width + 2, graphSize.Height + 2));
+            //points.Add(new Point(-2, graphSize.Height + 2));
 
-            var path = Graph.Data as PathGeometry;
             PathFigure figure;
             if (path == null) {
                 path = new PathGeometry();
-                figure = new PathFigure() { StartPoint = new Point(-2.0, Graph.ActualHeight + 2), IsClosed = true };
+                figure = new PathFigure() { StartPoint = new Point(-2.0, graphSize.Height + 2), IsClosed = true };
                 path.Figures.Add(figure);
                 foreach (var p in points) {
                     figure.Segments.Add(new LineSegment() { Point = p });
                 }
-                figure.Segments.Add(new LineSegment() { Point = new Point(Graph.ActualWidth + 2, Graph.ActualHeight + 2) });
                 Graph.Data = path;
             }
 
@@ -445,7 +484,17 @@ namespace Drash
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-            Model.IsAboutOpen = false;
+            if (Model.IsAboutOpen) {
+                Model.IsAboutOpen = false;
+                if (DrashSettings.LocationAllowed) {
+                    watcher.Start();
+                }
+                else {
+                    watcher.Stop();
+                    Model.Location = GeoCoordinate.Unknown;
+                    UpdateState();
+                }
+            }
         }
 
         private void Intensity_Tap(object sender, System.Windows.Input.GestureEventArgs e)
