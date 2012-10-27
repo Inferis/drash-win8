@@ -3,7 +3,7 @@
   <Identity Name="fe7ac7b1-91e2-402a-b42f-43f3e7544bda" Publisher="CN=Tom" Version="1.0.0.0" />
   <Properties>
     <DisplayName>Drash</DisplayName>
-    <PublisherDisplayName>Tom</PublisherDisplayName>
+    <PublisherDisplayName>Interface Implementation</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
   <Prerequisites>

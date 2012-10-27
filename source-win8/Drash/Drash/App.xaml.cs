@@ -1,4 +1,5 @@
 ﻿using System;
+using Drash.Models;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.UI.Xaml;
@@ -62,7 +63,7 @@ namespace Drash
                 // When the navigation stack isn't restored navigate to the first page,
                 // configuring the new page by passing required information as a navigation
                 // parameter
-                if (!rootFrame.Navigate(typeof(MainPage), args.Arguments))
+                if (!rootFrame.Navigate(typeof(DrashPage), args.Arguments))
                 {
                     throw new Exception("Failed to create initial page");
                 }

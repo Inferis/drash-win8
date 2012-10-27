@@ -13,7 +13,7 @@ namespace Drash
             
         }
 
-        private RainPoint(DateTime stamp, int value)
+        public RainPoint(DateTime stamp, int value)
         {
             Stamp = stamp;
             Value = (int)(value * 100.0 / 255.0);

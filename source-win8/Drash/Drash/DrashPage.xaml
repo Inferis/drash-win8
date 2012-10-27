@@ -4,45 +4,49 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type=models:DesignTimeViewModel, IsDesignTimeCreatable=True}"
     mc:Ignorable="d"
     xmlns:local="using:Drash"
-    xmlns:common="using:Drash.Common"
+    xmlns:common="using:Drash.Common" 
+    xmlns:models="using:Drash.Models"
     DataContext="{Binding Model, RelativeSource={RelativeSource Self}}"
+    Background="White"
     x:Name="pageRoot">
 
     <common:LayoutAwarePage.Resources>
 
         <common:PercentageConverter x:Key="EightyPercentConverter" Percentage="80" />
-        
+        <common:PercentageConverter x:Key="FiftyPercentConverter" Percentage="50" />
+
     </common:LayoutAwarePage.Resources>
     
-    <common:LayoutAwarePage.BottomAppBar>
-        <AppBar>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Orientation="Horizontal"/>
-                <StackPanel Grid.Column="1" HorizontalAlignment="Right" Orientation="Horizontal"/>
-            </Grid>
-        </AppBar>
-    </common:LayoutAwarePage.BottomAppBar>
-
     <Grid Style="{StaticResource LayoutRootStyle}" Background="White">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition x:Name="PrimaryColumn" Width="39"/>
-            <ColumnDefinition Width="571"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="620" x:Name="PrimaryColumn"/>
+            <ColumnDefinition Width="*" x:Name="GraphColumn"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="140"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"  x:Name="DataRow"/>
+            <RowDefinition Height="0" x:Name="BottomRow"/>
         </Grid.RowDefinitions>
 
-        <Grid x:Name="titlePanel" Grid.ColumnSpan="3" Margin="30,0,0,0">
+        <Grid x:Name="titlePanel" Grid.ColumnSpan="2" Margin="30,0,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Button
+                VerticalAlignment="Bottom"
+                x:Name="refreshButton"
+                Click="Refresh"
+                IsEnabled="{Binding CanGoBack}"
+                Style="{StaticResource RefreshAppBarButtonStyle}"
+                Grid.Column="1"
+                Foreground="#333333"/>
+            
             <TextBlock x:Name="pageTitle" 
-                       Text="Binding LocationName" 
+                       Text="{Binding Location}" 
                        Style="{StaticResource PageHeaderTextStyle}" 
                        Foreground="#333"/>
         </Grid>
@@ -50,21 +54,22 @@
         <Grid x:Name="DataView"
               Grid.Column="0"
               Grid.Row="1"
-              Margin="30,30,30,70" Grid.ColumnSpan="2">
+              Margin="30">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition x:Name="DataItemView" />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="{Binding ActualWidth, ElementName=DataItemView}"/>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="{Binding ActualWidth, ElementName=DataView, Converter={StaticResource FiftyPercentConverter}}"/>
             </Grid.RowDefinitions>
 
             <Grid Background="Black"
                   Grid.ColumnSpan="2"
                   Margin="0,0,0,5">
-                <TextBlock Text="99%" 
+                <TextBlock Text="{Binding Chance}" 
+                           x:Name="Chance"
                            VerticalAlignment="Center" HorizontalAlignment="Center" 
                            FontSize="133.333" 
                            FontFamily="Segoe UI Light"/>
@@ -73,16 +78,14 @@
             <Grid Background="Black"
                   Grid.Column="0" Grid.Row="1"
                   Margin="0,5,5,0">
-                <TextBlock 
+                <TextBlock Text="{Binding Precipitation}"
+                           x:Name="Precipitation"
                     Margin="0,6,0,0"
                     LineStackingStrategy="BlockLineHeight"
                     TextAlignment="Center"
                     LineHeight="34"
             		VerticalAlignment="Center" HorizontalAlignment="Center" 
             		FontSize="40" FontFamily="Segoe UI Light">
-                    <Run Text="0.004" />
-                    <LineBreak />
-                    <Run Text="mm" />
                 </TextBlock>
 
             </Grid>
@@ -92,21 +95,93 @@
                   Margin="5,5,0,0"
                   x:Name="IntensityView">
                 
-                <Image Source="Assets/intensity3.png"
+                <Image Source="{Binding IntensityImage}"
                        VerticalAlignment="Center" HorizontalAlignment="Center"
                        MaxWidth="200" MaxHeight="200"
-                       Width="{Binding ActualWidth, ElementName=IntensityView, Converter={StaticResource EightyPercentConverter}}"
-                       Height="{Binding ActualWidth, ElementName=IntensityView, Converter={StaticResource EightyPercentConverter}}" MinWidth="100" MinHeight="100" UseLayoutRounding="True"
+                       Width="{Binding Width, ElementName=IntensityView, Converter={StaticResource EightyPercentConverter}}"
+                       Height="{Binding Width, ElementName=IntensityView, Converter={StaticResource EightyPercentConverter}}" MinWidth="100" MinHeight="100" UseLayoutRounding="True"
                        />
 
             </Grid>
         </Grid>
 
         <Grid x:Name="GraphView"
-              Grid.Column="2"
+              Grid.Column="1"
               Grid.Row="1"
-              Margin="30,30,30,70"
+              Margin="30"
               Background="black">
         </Grid>
+
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="ApplicationViewStates">
+                <VisualState x:Name="FullScreenLandscapeOrWide"/>
+
+                <!-- Filled uses a simpler list format in a narrower column -->
+                <VisualState x:Name="FilledOrNarrow">
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PrimaryColumn" Storyboard.TargetProperty="Width">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="420"/>
+                        </ObjectAnimationUsingKeyFrames>
+                    </Storyboard>
+                </VisualState>
+
+                <VisualState x:Name="Snapped">
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PrimaryColumn" Storyboard.TargetProperty="Width">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="320"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="GraphColumn" Storyboard.TargetProperty="Width">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="0"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BottomRow" Storyboard.TargetProperty="Height">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="*"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Chance" Storyboard.TargetProperty="FontSize">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="70"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Precipitation" Storyboard.TargetProperty="FontSize">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="20"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="pageTitle" Storyboard.TargetProperty="FontSize">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="30"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="pageTitle" Storyboard.TargetProperty="TextWrapping">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Wrap"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="GraphView" Storyboard.TargetProperty="(Grid.Column)">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="0"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="GraphView" Storyboard.TargetProperty="(Grid.Row)">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="2"/>
+                        </ObjectAnimationUsingKeyFrames>
+                    </Storyboard>
+                </VisualState>
+
+                <VisualState x:Name="FullScreenPortrait">
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PrimaryColumn" Storyboard.TargetProperty="Width">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="*"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="DataRow" Storyboard.TargetProperty="Height">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="768"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="GraphColumn" Storyboard.TargetProperty="Width">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="0"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BottomRow" Storyboard.TargetProperty="Height">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="*"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="GraphView" Storyboard.TargetProperty="(Grid.Column)">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="0"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="GraphView" Storyboard.TargetProperty="(Grid.Row)">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="2"/>
+                        </ObjectAnimationUsingKeyFrames>
+                    </Storyboard>
+                </VisualState>
+
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
     </Grid>
 </common:LayoutAwarePage>

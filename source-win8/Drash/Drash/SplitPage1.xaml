@@ -35,7 +35,16 @@
 
         <!-- Back button and page title -->
         <Grid x:Name="titlePanel">
-            <TextBlock x:Name="pageTitle" Text="{Binding Group.Title}" Style="{StaticResource PageHeaderTextStyle}"/>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button
+                x:Name="backButton"
+                Click="GoBack"
+                IsEnabled="{Binding DefaultViewModel.CanGoBack, ElementName=pageRoot}"
+                Style="{StaticResource BackButtonStyle}"/>
+            <TextBlock x:Name="pageTitle" Grid.Column="1" Text="{Binding Group.Title}" Style="{StaticResource PageHeaderTextStyle}"/>
         </Grid>
 
         <!-- Vertical scrolling item list -->
