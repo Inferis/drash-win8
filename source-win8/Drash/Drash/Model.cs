@@ -12,7 +12,7 @@ namespace Drash
 
         public RainData Rain;
         public Geocoordinate Location;
-        public string LocationName;
+        public string LocationName { get; set; }
         public bool GoodLocationName;
         public DrashError Error = DrashError.None;
         public bool RainWasUpdated = false;

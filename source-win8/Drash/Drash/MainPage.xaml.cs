@@ -123,11 +123,23 @@ namespace Drash
                         Model.Location.GetDistanceTo(newLocation.Coordinate) > 500
                             ? 0
                             : 2000;
-            updateLocation.Run(() => {
+
+            Action<Geoposition> setName = loc => {
+            };
+            updateLocation.Run(async () => {
                 Model.Location = newLocation.Coordinate;
-                Model.LocationName = newLocation.CivicAddress == null || string.IsNullOrEmpty(newLocation.CivicAddress.City) || string.IsNullOrEmpty(newLocation.CivicAddress.Country)
-                    ? string.Format("{0:0.000000}, {1:0.000000}", Model.Location.Latitude, Model.Location.Longitude)
-                    : string.Format("{0}, {1}", newLocation.CivicAddress.City, newLocation.CivicAddress.Country);
+                if (newLocation.CivicAddress == null || string.IsNullOrEmpty(newLocation.CivicAddress.City) || string.IsNullOrEmpty(newLocation.CivicAddress.Country))
+                {
+                    var glocator = new GoogleAddressResolver();
+                    var addr = await glocator.ResolveAddressAsync(newLocation.Coordinate);
+                    Model.LocationName = addr == null || addr.IsUnknown || string.IsNullOrEmpty(addr.City) || string.IsNullOrEmpty(addr.CountryRegion)
+                        ? string.Format("{0:0.000000}, {1:0.000000}", newLocation.Coordinate.Latitude, newLocation.Coordinate.Longitude)
+                        : string.Format("{0}, {1}", addr.City, addr.CountryRegion);
+                }
+                else
+                    Model.LocationName = newLocation.CivicAddress == null || string.IsNullOrEmpty(newLocation.CivicAddress.City) || string.IsNullOrEmpty(newLocation.CivicAddress.Country)
+                        ? string.Format("{0:0.000000}, {1:0.000000}", newLocation.Coordinate.Latitude, newLocation.Coordinate.Longitude)
+                        : string.Format("{0}, {1}", newLocation.CivicAddress.City, newLocation.CivicAddress.Country);
 
                 UpdateState();
                 FetchRain();
