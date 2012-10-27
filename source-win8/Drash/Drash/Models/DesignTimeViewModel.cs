@@ -18,5 +18,6 @@ namespace Drash.Models
             IntensityImage = new BitmapImage(new Uri("ms-appx:/Assets/Intensity3.png", UriKind.Absolute));
             Precipitation = "3.314\nmm";
         }
+
     }
 }

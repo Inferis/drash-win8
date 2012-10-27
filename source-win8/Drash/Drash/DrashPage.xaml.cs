@@ -1,5 +1,6 @@
 ﻿using Drash.Common;
 using Drash.Models;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 
@@ -25,5 +26,9 @@ namespace Drash
         }
 
         public ViewModel Model { get; set; }
+
+        private void Refresh(object sender, RoutedEventArgs e)
+        {
+        }
     }
 }

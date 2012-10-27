@@ -1,6 +1,5 @@
-using System;
+using System.Windows.Input;
 using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Media.Imaging;
 
 namespace Drash.Models
 {
@@ -10,5 +9,7 @@ namespace Drash.Models
         public string Chance { get; set; }
         public string Precipitation { get; set; }
         public ImageSource IntensityImage { get; set; }
+
+        public ICommand RefreshCommand { get; set; }
     }
 }
