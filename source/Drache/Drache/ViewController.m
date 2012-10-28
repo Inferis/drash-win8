@@ -16,18 +16,25 @@
 #import "ErrorView.h"
 #import "UIView+Pop.h"
 #import "RainData.h"
+#import "NSUserDefaults+Settings.h"
+#import "IIViewDeckController.h"
+#import "WBNoticeView.h"
+#import "TestFlight.h"
 
-@interface ViewController () <CLLocationManagerDelegate>
+@interface ViewController () <CLLocationManagerDelegate, UIGestureRecognizerDelegate>
 
 @property (nonatomic, strong) IBOutlet DataView* dataView;
 @property (nonatomic, strong) IBOutlet ErrorView* errorView;
 @property (nonatomic, strong) IBOutlet UIActivityIndicatorView* smallSpinner;
 @property (nonatomic, strong) IBOutlet UIButton* infoButton;
+@property (nonatomic, strong) IBOutlet UIButton* refreshButton;
+@property (nonatomic, strong) IBOutlet UIButton* zoomButton;
+@property (nonatomic, strong) IBOutlet UILabel* zoomLabel;
+@property (nonatomic, strong) IBOutlet UIImageView* zoomInfo;
 
 @end
 
 @implementation ViewController {
-    CLLocationManager* _locationManager;
     CLLocation* _location;
     CLGeocoder* _geocoder;
     NSTimer* _timer;
@@ -41,30 +48,39 @@
     NSString* _error;
     BOOL _reachable;
     BOOL _firstFetch;
+    int _entries;
+    UIPopoverController* _infoController;
+    CLLocationManager* _locationManager;
+    UITapGestureRecognizer* _tapper;
 }
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
     
+    _entries = [[NSUserDefaults standardUserDefaults] entries];
+    
     _rain = nil;
     _locationName = @"";
     _error = nil;
     _reachable = [Drache.network isReachable];
+    _tapper = nil;
     
     self.errorView.alpha = 0;
     self.dataView.alpha = 0;
     self.smallSpinner.alpha = 0;
     
-    CGRect bottomRect = CGRectOffsetTopAndShrink(self.view.bounds, self.view.bounds.size.height-40);
-    self.smallSpinner.frame = CGRectCenterIn(self.smallSpinner.frame, bottomRect);
-    self.infoButton.frame = CGRectCenterIn(self.infoButton.frame, bottomRect);
+    [self.zoomButton setImage:[UIImage imageNamed:[NSString stringWithFormat:@"dial%d.png", _entries*5]] forState:UIControlStateNormal];
+    self.zoomLabel.text = [NSString stringWithFormat:@"%dmin", (_entries*5)];
   
     UILongPressGestureRecognizer* longTapper = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(forcedRefresh:)];
     longTapper.minimumPressDuration = 1.5;
     [self.view addGestureRecognizer:longTapper];
+    
+    UIPanGestureRecognizer* zoomer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(zoomed:)];
+    [self.view addGestureRecognizer:zoomer];
 
-    _locationManager = [CLLocationManager new];
+    _locationManager = SharedLocationManager;
     _locationManager.delegate = self;
     _locationManager.distanceFilter = 500;
     _locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters;
@@ -77,15 +93,33 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reachabilityChanged:) name:kReachabilityChangedNotification object:nil];
     
     UIImageView* splash = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"Default.png"]];
-    splash.frame = (CGRect) { 0, -[UIApplication sharedApplication].statusBarFrame.size.height, splash.frame.size };
+    splash.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
     splash.tag = 998811;
     [self.view addSubview:splash];
+    
+    if (IsIPad()) {
+        self.zoomInfo.image = [UIImage imageNamed:@"swipe-ipad.png"];
+        self.zoomInfo.frame = CGRectOffsetTopAndShrink(self.zoomInfo.frame, -self.zoomInfo.frame.size.height);
+    }
 }
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
+    [self setSplashFrame];
     [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackOpaque animated:YES];
+}
+
+- (void)setSplashFrame {
+    UIImageView* splash = (UIImageView*)[self.view viewWithTag:998811];
+    if (!splash) return;
+    
+    if (IsIPad()) {
+        splash.frame = (CGRect) { (self.view.bounds.size.width - splash.frame.size.width)/2.0, (self.view.bounds.size.height - splash.frame.size.height)/2.0, splash.frame.size };
+    }
+    else {
+        splash.frame = (CGRect) { 0, (self.view.bounds.size.height - [UIApplication sharedApplication].statusBarFrame.size.height - splash.frame.size.height)/2.0, splash.frame.size };
+    }
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -93,6 +127,9 @@
     
     UIImageView* splash = (UIImageView*)[self.view viewWithTag:998811];
     if (splash) {
+        [self setSplashFrame];
+
+        splash.tag = 0;
         [UIView animateWithDuration:0.3 delay:0 options:UIViewAnimationOptionCurveEaseIn animations:^{
             splash.transform = CGAffineTransformMakeScale(1.5, 1.5);
             splash.alpha = 0;
@@ -111,15 +148,20 @@
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
     [super willRotateToInterfaceOrientation:toInterfaceOrientation duration:duration];
     
+    if (IsIPad())
+        return;
+    
     if (UIInterfaceOrientationIsLandscape(toInterfaceOrientation) == UIInterfaceOrientationIsLandscape(self.interfaceOrientation))
         return;
     
     if (UIInterfaceOrientationIsLandscape(toInterfaceOrientation)) {
         self.smallSpinner.frame = CGRectOffset(self.smallSpinner.frame, 0, 5);
+        self.refreshButton.frame = CGRectOffset(self.refreshButton.frame, 0, 5);
         self.infoButton.frame = CGRectOffset(self.infoButton.frame, 0, 5);
     }
     else {
         self.smallSpinner.frame = CGRectOffset(self.smallSpinner.frame, 0, -5);
+        self.refreshButton.frame = CGRectOffset(self.refreshButton.frame, 0, -5);
         self.infoButton.frame = CGRectOffset(self.infoButton.frame, 0, -5);
     }
 }
@@ -127,11 +169,62 @@
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
     [super willAnimateRotationToInterfaceOrientation:toInterfaceOrientation duration:duration];
     
+    [self removeTapper:NO];
+}
+
+- (BOOL)shouldAutorotate {
+    return YES;
+}
+
+- (NSUInteger)supportedInterfaceOrientations {
+    if (IsIPad()) return UIInterfaceOrientationMaskAll;
+    return UIInterfaceOrientationMaskAllButUpsideDown;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
+    if (IsIPad()) return YES;
     return (interfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);
+}
+
+- (IBAction)zoomTapped:(id)sender {
+    NSLog(@"tapper = %@", _tapper);
+    if (_tapper) {
+        [self removeTapper:NO];
+        return;
+    }
+    
+    [self.zoomInfo popInCompletion:^{
+        _tapper = [UITapGestureRecognizer new];
+        _tapper.numberOfTapsRequired = 1;
+        _tapper.numberOfTouchesRequired = 1;
+        [self.view addGestureRecognizer:_tapper];
+        _tapper.delegate = self;
+    }];
+}
+
+- (void)removeTapper:(BOOL)delayed {
+    [self.view removeGestureRecognizer:_tapper];
+    
+    dispatch_delayed(0.1, ^{
+        _tapper = nil;
+    });
+    if (delayed) {
+        dispatch_delayed(0.5, ^{
+            [self.zoomInfo popOutCompletion:nil];
+        });
+    }
+    else
+        [self.zoomInfo popOutCompletion:nil];
+}
+
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
+    [self removeTapper:[otherGestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]]];
+    return YES;
+}
+
+- (IBAction)forcedRefresh {
+    [self fetchRain];
 }
 
 - (void)forcedRefresh:(UILongPressGestureRecognizer*)longTapper {
@@ -139,19 +232,53 @@
         [self fetchRain];
 }
 
-- (IBAction)infoTapped:(id)sender {
+- (void)zoomed:(UIPanGestureRecognizer*)zoomer {
+    if (zoomer.state != UIGestureRecognizerStateChanged)
+        return;
+    
+    CGPoint delta = [zoomer translationInView:self.view];
+    if (ABS(delta.y) < 25 && ABS(delta.x) > 30) {
+        int factor = 1 + (int)floorf(ABS([zoomer velocityInView:self.view].x)/1000.0);
+
+        int entries = _entries + (delta.x < 0 ? 3 : -3)*factor;
+        entries = MIN(MAX(6, entries), 24);
+        
+        if (_entries != entries) {
+            [self.zoomButton setImage:[UIImage imageNamed:[NSString stringWithFormat:@"dial%d.png", entries*5]] forState:UIControlStateNormal];
+            self.zoomLabel.text = [NSString stringWithFormat:@"%dmin", (entries*5)];
+            
+            _entries = entries;
+            //NSLog(@"entries = %i", entries);
+            [[NSUserDefaults standardUserDefaults] setEntries:entries];
+            [self updateState];
+            [zoomer setTranslation:CGPointZero inView:self.view];
+        }
+        else if (_entries == 24 || _entries == 6)
+            [zoomer setTranslation:CGPointZero inView:self.view];
+    }
+}
+
+
+- (IBAction)infoTapped:(UIButton*)sender {
     InfoViewController* infoViewController = [[InfoViewController alloc] initWithNibName:nil bundle:nil];
-    infoViewController.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
-    [self presentViewController:infoViewController animated:YES completion:nil];
+    
+    if (self.viewDeckController) {
+        [self.viewDeckController toggleRightView];
+    }
+    else {
+        infoViewController.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
+        [self presentViewController:infoViewController animated:YES completion:nil];
+    }
 }
 
 #pragma mark - network
 
 - (void)reachabilityChanged:(NSNotification*)notification {
-    if (_reachable != [Drache.network isReachable])
-        [self fetchRain];
-
-    [self updateState];
+    dispatch_delayed(1, ^{
+        BOOL shouldFetch = _reachable != [Drache.network isReachable] && [Drache.network isReachable];
+        [self updateState];
+        if (shouldFetch) [self fetchRain];
+    });
 }
 
 #pragma mark - Location Manager Delegate
@@ -169,7 +296,6 @@
     }
     
     int delay = (_firstFetch || !_location || [_location distanceFromLocation:location] > 500) ? 0 : 2;
-    NSLog(@"delay = %d", delay);
     
     [_locationTimer invalidate];
     _locationTimer = [NSTimer scheduledTimerWithTimeInterval:delay target:self selector:@selector(updateLocation2:) userInfo:location repeats:NO];
@@ -342,29 +468,6 @@
     [self showData:^(BOOL animated) {
         [self.dataView setLocation:location animated:animated];
     }];
-//    if ([self.locationLabel.text isEqualToString:location])
-//        return;
-//
-//    if (self.locationLabel.alpha != 0) {
-//        [UIView animateWithDuration:0.15 animations:^{
-//            self.locationLabel.alpha = 0;
-//            self.locationLabel.transform = CGAffineTransformMakeScale(0.9, 0.9);
-//        } completion:^(BOOL finished) {
-//            self.locationLabel.text = location;
-//            [UIView animateWithDuration:0.15 animations:^{
-//                self.locationLabel.alpha = 1;
-//                self.locationLabel.transform = CGAffineTransformIdentity;
-//            }];
-//        }];
-//    }
-//    else {
-//        self.locationLabel.text = location;
-//        self.locationLabel.transform = CGAffineTransformMakeScale(0.9, 0.9);
-//        [UIView animateWithDuration:0.30 animations:^{
-//            self.locationLabel.alpha = 1;
-//            self.locationLabel.transform = CGAffineTransformIdentity;
-//        }];
-//    }
 }
 
 - (void)visualizeRain:(RainData*)rain {
@@ -400,6 +503,12 @@
             RainData* result = nil;
             if (!response.error)
                 result = [RainData rainDataFromString:response.bodyString];
+            else {
+                [[WBNoticeView defaultManager] showErrorNoticeInView:self.view
+                                                               title:@"Network issue"
+                                                             message:@"Could not fetch rain prediction data at this moment."];
+                TFLog(@"fetchrain error: %@", response.error);
+            }
             
             _fetchingRain = NO;
             _timer = [NSTimer scheduledTimerWithTimeInterval:3*60 target:self selector:@selector(fetchRain) userInfo:nil repeats:NO];
@@ -417,19 +526,10 @@
     }
     
     dispatch_sync_main(^{
-        [UIView animateWithDuration:0.15 animations:^{
-            self.smallSpinner.transform = CGAffineTransformMakeScale(0.6, 0.6);
-            self.infoButton.transform = CGAffineTransformMakeScale(0.6, 0.6);
-        } completion:^(BOOL finished) {
-            [UIView animateWithDuration:0.15 animations:^{
-                self.smallSpinner.transform = CGAffineTransformIdentity;
-                self.infoButton.transform = CGAffineTransformIdentity;
-                self.smallSpinner.frame = CGRectOffset(self.smallSpinner.frame, -20, 0);
-                self.infoButton.frame = CGRectOffset(self.infoButton.frame, 20, 0);
-                [self.smallSpinner startAnimating];
-                self.smallSpinner.alpha = 1;
-            }];
-        }];
+        [self.refreshButton popOutCompletion:^{
+            [self.smallSpinner startAnimating];
+            [self.smallSpinner popInCompletion:nil fast:YES];
+        } fast:YES];
     });
 }
 
@@ -442,20 +542,10 @@
     }
 
     dispatch_sync_main(^{
-        [UIView animateWithDuration:0.15 animations:^{
-            self.smallSpinner.frame = CGRectOffset(self.smallSpinner.frame, 20, 0);
-            self.infoButton.frame = CGRectOffset(self.infoButton.frame, -20, 0);
-            self.smallSpinner.alpha = 0;
-            self.smallSpinner.transform = CGAffineTransformMakeScale(0.6, 0.6);
-            self.infoButton.transform = CGAffineTransformMakeScale(0.6, 0.6);
-        } completion:^(BOOL finished) {
-            [UIView animateWithDuration:0.15 animations:^{
-                self.smallSpinner.transform = CGAffineTransformIdentity;
-                self.infoButton.transform = CGAffineTransformIdentity;
-            } completion:^(BOOL finished) {
-                [self.smallSpinner stopAnimating];
-            }];
-        }];
+        [self.smallSpinner popOutCompletion:^{
+            [self.smallSpinner stopAnimating];
+            [self.refreshButton popInCompletion:nil fast:YES];
+        } fast:YES];
     });
 }
 

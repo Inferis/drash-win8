@@ -105,15 +105,20 @@
         </StackPanel>
 
         <StackPanel x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
-            <TextBlock Text="Gives the chance of rain at your location in the next 30min." TextWrapping="Wrap" Margin="9,0,0,0" Foreground="Black" FontFamily="Segoe WP Light"/>
-            <TextBlock Text="Works only in Belgium and the Netherlands. Updates automatically every 5 minutes or when you move far enough from your original location." TextWrapping="Wrap" Margin="9,10,0,0" Foreground="Black" FontFamily="Segoe WP Light"/>
-            <TextBlock Text="Press anywhere on the screen for a few seconds to update manually." TextWrapping="Wrap" Margin="9,10,0,0" Foreground="Black" FontFamily="Segoe WP Light"/>
-            <TextBlock Tap="BuienRadar_Tap" TextWrapping="Wrap" Margin="9,50,0,0" Foreground="Black" FontFamily="Segoe WP Light">
-                <Run Text="Uses free data from" />
+            <TextBlock Text="Quick Help" Margin="9,0,0,0" Style="{StaticResource PhoneTextTitle3Style}" Foreground="#FF333333"/>
+            <TextBlock Text="Gives the chance of rain at your location in the next 30min to 2hrs." TextWrapping="Wrap" Margin="9,5,0,0" Foreground="Black" FontFamily="Segoe WP Light" FontSize="17"/>
+            <TextBlock Text="Works only in Belgium and the Netherlands. Updates automatically every 5 minutes or when you move far enough from your original location." TextWrapping="Wrap" FontSize="17" Margin="9,10,0,0" Foreground="Black" FontFamily="Segoe WP Light"/>
+            <TextBlock Text="Press anywhere on the screen for a few seconds to update manually." TextWrapping="Wrap" Margin="9,10,0,0" Foreground="Black" FontFamily="Segoe WP Light" FontSize="17"/>
+
+            <TextBlock Text="Acknowledgements" Margin="9,25,0,0" Style="{StaticResource PhoneTextTitle3Style}" Foreground="#FF333333"/>
+            <TextBlock Tap="BuienRadar_Tap" TextWrapping="Wrap" Margin="9,5,0,0" Foreground="Black" FontFamily="Segoe WP Light" FontSize="17" >
+                <Run Text="This app uses free weather data provided by " />
                 <Run Text="buienradar.nl" Foreground="#333333" FontFamily="Segoe WP" TextDecorations="Underline" />
-                <Run Text="."/>
+                <Run Text=" (see "/>
+                <Run Text="http://gratisweerdata.buienradar.nl" Foreground="#333333" FontFamily="Segoe WP" TextDecorations="Underline" />
+                <Run Text="). Incorrect predictions usually are caused by bad data returned from the weather service. Atmospheric conditions can reduce the effectiveness of the predictions."/>
             </TextBlock>
-            <TextBlock Tap="Website_Tap" TextWrapping="Wrap" Margin="9,50,0,0" Foreground="Black" FontFamily="Segoe WP Light">
+            <TextBlock Tap="Website_Tap" TextWrapping="Wrap" Margin="9,25,0,0" Foreground="Black" FontFamily="Segoe WP Light" FontSize="17">
                 <Run Text="Drash is an app by " />
                 <Run Text="Interface Implementation" Foreground="#333333" FontFamily="Segoe WP" TextDecorations="Underline" />
                 <Run Text="."/>
@@ -125,11 +130,15 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
 
-            <TextBlock Margin="12,0,12,0" Grid.Column="0" Text="Location services enabled" FontSize="20" VerticalAlignment="Center" Foreground="White" />
+            <TextBlock Margin="12,0,12,0" Grid.Row="0" Grid.Column="0" Text="Location services enabled" FontSize="20" VerticalAlignment="Center" Foreground="White" />
 
             <toolkitPrimitives:ToggleSwitchButton 
-                Grid.Column="1"
+                Grid.Column="1" Grid.Row="0"
                 x:Name="AllowLocation"                                                 
                 VerticalAlignment="Center"
                 HorizontalAlignment="Center"
@@ -137,6 +146,13 @@
                 Checked="AllowLocation_Changed"
                 Unchecked="AllowLocation_Changed"
                 BorderThickness="0" Style="{StaticResource LocalToggleSwitch}"/>
+
+            <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Tap="BuienRadar_Tap" TextWrapping="Wrap" Margin="9,5,0,0" Foreground="White" FontFamily="Segoe WP Light" FontSize="15" >
+                <Run Text="Your location is not stored locally. It is sent to " />
+                <Run Text="buienradar.nl" Foreground="#cccccc" FontFamily="Segoe WP" TextDecorations="Underline" />
+                <Run Text=" to lookup the local weather situation. If you do not want your location to be sent, just disable location services."/>
+            </TextBlock>
+
         </Grid>
     </Grid>
 

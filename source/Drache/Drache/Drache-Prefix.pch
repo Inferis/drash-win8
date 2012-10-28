@@ -16,3 +16,4 @@
 #endif
 
 #define Drache ((AppDelegate*)[UIApplication sharedApplication].delegate)
+#define SharedLocationManager [Drache locationManager]
