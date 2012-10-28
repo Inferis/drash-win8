@@ -15,11 +15,10 @@
     <common:LayoutAwarePage.Resources>
 
         <common:PercentageConverter x:Key="EightyPercentConverter" Percentage="80" />
-        <common:PercentageConverter x:Key="FiftyPercentConverter" Percentage="50" />
 
     </common:LayoutAwarePage.Resources>
 
-    <Grid Background="#333333">
+    <Grid Background="white">
 
         <Image Stretch="None" x:Name="NoLocationError" Source="ms-appx:/Assets/nolocation.png" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0" RenderTransformOrigin="0.5,0.5">
             <Image.RenderTransform>
@@ -33,7 +32,10 @@
             </Image.RenderTransform>
         </Image>
 
-        <Grid x:Name="pageRoot" Style="{StaticResource LayoutRootStyle}">
+        <Grid x:Name="pageRoot" Style="{StaticResource LayoutRootStyle}" Background="white"  RenderTransformOrigin="0.5,1">
+            <Grid.RenderTransform>
+                <CompositeTransform />
+            </Grid.RenderTransform>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*" x:Name="PrimaryColumn"/>
                 <ColumnDefinition Width="3*" x:Name="GraphColumn"/>
@@ -49,18 +51,16 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <Button
-                    VerticalAlignment="Bottom"
-                    x:Name="refreshButton"
-                    Command="{Binding RefreshCommand}"
-                    Style="{StaticResource RefreshAppBarButtonStyle}"
-                    Grid.Column="1"
-                    Foreground="white"/>
+
+                <ProgressRing Grid.Column="1" Margin="30,30,30,40"
+                              Width="40" Height="40" VerticalAlignment="Bottom" HorizontalAlignment="Right" IsActive="{Binding IsBusy}"
+                              Foreground="#991e4c67"
+                              />
 
                 <TextBlock x:Name="pageTitle" 
                            Text="{Binding Location}" 
                            Style="{StaticResource PageHeaderTextStyle}" 
-                           Foreground="White"/>
+                           Foreground="#991e4c67"/>
             </Grid>
 
             <Grid x:Name="DataView"
@@ -130,6 +130,85 @@
         </Grid>
 
         <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="LogicalViewStates">
+                <VisualState x:Name="Good">
+                    <Storyboard Duration="0:0:0.300">
+                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="pageRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleX)">
+                            <DiscreteDoubleKeyFrame KeyTime="0" Value="0.9"/>
+                            <EasingDoubleKeyFrame KeyTime="0:0:0.300" Value="1">
+                                <EasingDoubleKeyFrame.EasingFunction>
+                                    <CubicEase EasingMode="EaseOut"  />
+                                </EasingDoubleKeyFrame.EasingFunction>
+                            </EasingDoubleKeyFrame>
+                        </DoubleAnimationUsingKeyFrames>
+                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="pageRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleY)">
+                            <DiscreteDoubleKeyFrame KeyTime="0" Value="0.9"/>
+                            <EasingDoubleKeyFrame KeyTime="0:0:0.300" Value="1">
+                                <EasingDoubleKeyFrame.EasingFunction>
+                                    <CubicEase EasingMode="EaseOut"  />
+                                </EasingDoubleKeyFrame.EasingFunction>
+                            </EasingDoubleKeyFrame>
+                        </DoubleAnimationUsingKeyFrames>
+                        <DoubleAnimation Duration="0:0:0.150" To="1" Storyboard.TargetName="pageRoot" Storyboard.TargetProperty="Opacity" />
+                        <DoubleAnimation Duration="0:0:0.300" To="0" Storyboard.TargetName="NoLocationError" Storyboard.TargetProperty="Opacity" />
+                        <DoubleAnimation Duration="0:0:0.300" To="0" Storyboard.TargetName="NoNetworkError" Storyboard.TargetProperty="Opacity" />
+                    </Storyboard>
+                </VisualState>
+
+                <VisualState x:Name="NoNetwork">
+                    <Storyboard Duration="0:0:0.300">
+                        <DoubleAnimation Duration="0:0:0.150" To="0" Storyboard.TargetName="pageRoot" Storyboard.TargetProperty="Opacity" />
+                        <DoubleAnimation Duration="0:0:0.150" To="0" Storyboard.TargetName="NoLocationError" Storyboard.TargetProperty="Opacity" />
+                        <DoubleAnimation Duration="0:0:0.150" To="1" Storyboard.TargetName="NoNetworkError" Storyboard.TargetProperty="Opacity" />
+                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NoNetworkError" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleX)">
+                            <DiscreteDoubleKeyFrame KeyTime="0" Value="0.9"/>
+                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.150" Value="0.9"/>
+                            <EasingDoubleKeyFrame KeyTime="0:0:0.300" Value="1">
+                                <EasingDoubleKeyFrame.EasingFunction>
+                                    <ElasticEase EasingMode="EaseOut" Oscillations="3" />
+                                </EasingDoubleKeyFrame.EasingFunction>
+                            </EasingDoubleKeyFrame>
+                        </DoubleAnimationUsingKeyFrames>
+                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NoNetworkError" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleY)">
+                            <DiscreteDoubleKeyFrame KeyTime="0" Value="0.9"/>
+                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.150" Value="0.9"/>
+                            <EasingDoubleKeyFrame KeyTime="0:0:0.300" Value="1">
+                                <EasingDoubleKeyFrame.EasingFunction>
+                                    <ElasticEase EasingMode="EaseOut" Oscillations="3" />
+                                </EasingDoubleKeyFrame.EasingFunction>
+                            </EasingDoubleKeyFrame>
+                        </DoubleAnimationUsingKeyFrames>
+                    </Storyboard>
+                </VisualState>
+
+                <VisualState x:Name="NoLocation">
+                    <Storyboard Duration="0:0:0.300">
+                        <DoubleAnimation Duration="0:0:0.150" To="0" Storyboard.TargetName="pageRoot" Storyboard.TargetProperty="Opacity" />
+                        <DoubleAnimation Duration="0:0:0.150" To="0" Storyboard.TargetName="NoNetworkError" Storyboard.TargetProperty="Opacity" />
+                        <DoubleAnimation Duration="0:0:0.150" To="1" Storyboard.TargetName="NoLocationError" Storyboard.TargetProperty="Opacity" />
+                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NoLocationError" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleX)">
+                            <DiscreteDoubleKeyFrame KeyTime="0" Value="0.9"/>
+                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.150" Value="0.9"/>
+                            <EasingDoubleKeyFrame KeyTime="0:0:0.300" Value="1">
+                                <EasingDoubleKeyFrame.EasingFunction>
+                                    <ElasticEase EasingMode="EaseOut" Oscillations="3" />
+                                </EasingDoubleKeyFrame.EasingFunction>
+                            </EasingDoubleKeyFrame>
+                        </DoubleAnimationUsingKeyFrames>
+                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NoLocationError" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleY)">
+                            <DiscreteDoubleKeyFrame KeyTime="0" Value="0.9"/>
+                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.150" Value="0.9"/>
+                            <EasingDoubleKeyFrame KeyTime="0:0:0.300" Value="1">
+                                <EasingDoubleKeyFrame.EasingFunction>
+                                    <ElasticEase EasingMode="EaseOut" Oscillations="3" />
+                                </EasingDoubleKeyFrame.EasingFunction>
+                            </EasingDoubleKeyFrame>
+                        </DoubleAnimationUsingKeyFrames>
+                    </Storyboard>
+                </VisualState>
+
+            </VisualStateGroup>
+
             <VisualStateGroup x:Name="ApplicationViewStates">
                 <VisualState x:Name="FullScreenLandscape" />
                 <VisualState x:Name="Filled"/>
@@ -191,60 +270,9 @@
                         </ObjectAnimationUsingKeyFrames>
                     </Storyboard>
                 </VisualState>
-                
-                <VisualState x:Name="NoNetwork">
-                    <Storyboard Duration="0:0:0.300">
-                        <DoubleAnimation Duration="0:0:0.150" To="0" Storyboard.TargetName="pageRoot" Storyboard.TargetProperty="Opacity" />
-                        <DoubleAnimation Duration="0:0:0.150" To="0" Storyboard.TargetName="NoLocationError" Storyboard.TargetProperty="Opacity" />
-                        <DoubleAnimation Duration="0" From="0" To="1" Storyboard.TargetName="NoNetworkError" Storyboard.TargetProperty="Opacity" />
-                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NoNetworkError" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleX)">
-                            <DiscreteDoubleKeyFrame KeyTime="0" Value="0.9"/>
-                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.150" Value="0.9"/>
-                            <EasingDoubleKeyFrame KeyTime="0:0:0.300" Value="1">
-                                <EasingDoubleKeyFrame.EasingFunction>
-                                    <ElasticEase EasingMode="EaseOut" Oscillations="3" />
-                                </EasingDoubleKeyFrame.EasingFunction>
-                            </EasingDoubleKeyFrame>
-                        </DoubleAnimationUsingKeyFrames>
-                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NoNetworkError" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleY)">
-                            <DiscreteDoubleKeyFrame KeyTime="0" Value="0.9"/>
-                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.150" Value="0.9"/>
-                            <EasingDoubleKeyFrame KeyTime="0:0:0.300" Value="1">
-                                <EasingDoubleKeyFrame.EasingFunction>
-                                    <ElasticEase EasingMode="EaseOut" Oscillations="3" />
-                                </EasingDoubleKeyFrame.EasingFunction>
-                            </EasingDoubleKeyFrame>
-                        </DoubleAnimationUsingKeyFrames>
-                    </Storyboard>
-                </VisualState>
-
-                <VisualState x:Name="NoLocation">
-                    <Storyboard Duration="0:0:0.300">
-                        <DoubleAnimation Duration="0:0:0.150" To="0" Storyboard.TargetName="pageRoot" Storyboard.TargetProperty="Opacity" />
-                        <DoubleAnimation Duration="0:0:0.150" To="0" Storyboard.TargetName="NoNetworkError" Storyboard.TargetProperty="Opacity" />
-                        <DoubleAnimation Duration="0" From="0" To="1" Storyboard.TargetName="NoLocationError" Storyboard.TargetProperty="Opacity" />
-                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NoLocationError" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleX)">
-                            <DiscreteDoubleKeyFrame KeyTime="0" Value="0.9"/>
-                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.150" Value="0.9"/>
-                            <EasingDoubleKeyFrame KeyTime="0:0:0.300" Value="1">
-                                <EasingDoubleKeyFrame.EasingFunction>
-                                    <ElasticEase EasingMode="EaseOut" Oscillations="3" />
-                                </EasingDoubleKeyFrame.EasingFunction>
-                            </EasingDoubleKeyFrame>
-                        </DoubleAnimationUsingKeyFrames>
-                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NoLocationError" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleY)">
-                            <DiscreteDoubleKeyFrame KeyTime="0" Value="0.9"/>
-                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.150" Value="0.9"/>
-                            <EasingDoubleKeyFrame KeyTime="0:0:0.300" Value="1">
-                                <EasingDoubleKeyFrame.EasingFunction>
-                                    <ElasticEase EasingMode="EaseOut" Oscillations="3" />
-                                </EasingDoubleKeyFrame.EasingFunction>
-                            </EasingDoubleKeyFrame>
-                        </DoubleAnimationUsingKeyFrames>
-                    </Storyboard>
-                </VisualState>
 
             </VisualStateGroup>
         </VisualStateManager.VisualStateGroups>
     </Grid>
+
 </common:LayoutAwarePage>
