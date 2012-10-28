@@ -11,7 +11,7 @@
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="White"
     SupportedOrientations="Portrait" Orientation="Portrait"
-    shell:SystemTray.IsVisible="True" shell:SystemTray.BackgroundColor="black" shell:SystemTray.ForegroundColor="#fefefe" shell:SystemTray.Opacity="0.9">
+    shell:SystemTray.IsVisible="True" shell:SystemTray.BackgroundColor="#00000001" shell:SystemTray.ForegroundColor="#fefefe" shell:SystemTray.Opacity="0.9">
 
     <phone:PhoneApplicationPage.Resources>
         <Storyboard x:Name="SplashFadeout">
@@ -21,7 +21,7 @@
     </phone:PhoneApplicationPage.Resources>
 
     <!--LayoutRoot is the root grid where all page content is placed-->
-    <Grid x:Name="LayoutRoot" Background="Black">
+    <Grid x:Name="LayoutRoot" Background="black">
         <Grid x:Name="DataRoot" Background="Transparent" RenderTransformOrigin="0.5,0.5" Opacity="0">
             <Grid.RenderTransform>
                 <CompositeTransform />
@@ -33,6 +33,7 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="1"/>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="70"/>
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="0">
@@ -42,41 +43,43 @@
                     </TextBlock.RenderTransform>
                 </TextBlock>
             </Grid>
-            <Line X1="0" Y1="0" X2="{Binding ActualWidth, ElementName=LayoutRoot}" Y2="0" 
-                  StrokeThickness="2" Stretch="UniformToFill"
+            <Line X1="0" Y1="0" X2="{Binding ActualWidth, ElementName=DataRoot}" Y2="0" 
+                  StrokeThickness="2" Stretch="UniformToFill" HorizontalAlignment="Stretch"
                   VerticalAlignment="Top" 
 				  UseLayoutRounding="False" Grid.Row="1" StrokeDashArray="1 1" Stroke="White" 
                   Grid.RowSpan="2"
 				  Opacity="0.6" />
 
-            <Grid Grid.Row="2" x:Name="DataGrid">
-                <Grid.RenderTransform>
-                    <CompositeTransform />
-                </Grid.RenderTransform>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="1*" MinWidth="180"/>
-                </Grid.ColumnDefinitions>
+            <Grid Grid.Row="2">
+                <Grid Grid.Row="2" HorizontalAlignment="Center" x:Name="DataGrid">
+                    <Grid.RenderTransform>
+                        <CompositeTransform />
+                    </Grid.RenderTransform>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" MinWidth="280"/>
+                        <ColumnDefinition Width="1*" MinWidth="200"/>
+                    </Grid.ColumnDefinitions>
 
-                <TextBlock x:Name="Chance" Text="" FontSize="126" FontFamily="Segoe WP Light" TextAlignment="Center" VerticalAlignment="Center" Grid.Column="0" />
+                    <TextBlock x:Name="Chance" Text="" FontSize="126" FontFamily="Segoe WP Light" TextAlignment="Center" VerticalAlignment="Center" Grid.Column="0" />
 
-                <Grid Grid.Column="1" x:Name="Intensity" Tap="Intensity_Tap" Margin="-20,0,20,0">
-                    <Image x:Name="IntensityImage" Source="Resources/intensity0.png" Stretch="None" />
-                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" x:Name="IntensityValue" Opacity="0">
-                        <TextBlock x:Name="IntensityValueNumber" Text="0" FontSize="50" FontFamily="Segoe WP Light" TextAlignment="Center" VerticalAlignment="Center" />
-                        <TextBlock Text="mm" FontSize="50" FontFamily="Segoe WP Light" TextAlignment="Center" VerticalAlignment="Center" Margin="0,-20,0,0"/>
-                    </StackPanel>
+                    <Grid Grid.Column="1" x:Name="Intensity" Tap="Intensity_Tap" Margin="-20,0,20,0">
+                        <Image x:Name="IntensityImage" Source="Resources/intensity0.png" Stretch="None" />
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" x:Name="IntensityValue" Opacity="0">
+                            <TextBlock x:Name="IntensityValueNumber" Text="0" FontSize="50" FontFamily="Segoe WP Light" TextAlignment="Center" VerticalAlignment="Center" />
+                            <TextBlock Text="mm" FontSize="50" FontFamily="Segoe WP Light" TextAlignment="Center" VerticalAlignment="Center" Margin="0,-20,0,0"/>
+                        </StackPanel>
+                    </Grid>
                 </Grid>
             </Grid>
 
-            <Line X1="0" Y1="0" X2="{Binding ActualWidth, ElementName=LayoutRoot}" Y2="0" 
-                  StrokeThickness="2" Stretch="UniformToFill"
+            <Line X1="0" Y1="0" X2="{Binding ActualWidth, ElementName=DataRoot}" Y2="0" 
+                  StrokeThickness="2" Stretch="UniformToFill" HorizontalAlignment="Stretch"
                   VerticalAlignment="Top" 
 				  UseLayoutRounding="False" Grid.Row="3" StrokeDashArray="1 1" Stroke="White" 
                   Grid.RowSpan="2"
 				  Opacity="0.6" />
 
-            <Grid Grid.Row="4">
+            <Grid Grid.Row="4" x:Name="GraphContainer" Grid.RowSpan="2">
                 <Path x:Name="Graph" Stroke="#40a1d9" StrokeThickness="3">
                     <Path.Fill>
                         <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -86,8 +89,12 @@
                             </LinearGradientBrush.GradientStops>
                         </LinearGradientBrush>
                     </Path.Fill>
-
                 </Path>
+            </Grid>
+            
+            <Grid Grid.Row="5">
+                <Image x:Name="ZoomImage" Source="Resources/dial105.png" Width="70" Height="70" HorizontalAlignment="Left" />
+                <TextBlock x:Name="ZoomText" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="70" FontSize="18" Margin="0,0,0,4" TextAlignment="Center">120min</TextBlock>
             </Grid>
         </Grid>
 
@@ -106,12 +113,11 @@
 
     <!--Sample code showing usage of ApplicationBar-->
     <phone:PhoneApplicationPage.ApplicationBar>
-        <shell:ApplicationBar  IsVisible="True" Mode="Minimized" IsMenuEnabled="False" BackgroundColor="Transparent" ForegroundColor="White" Opacity="0.9">
+        <shell:ApplicationBar IsVisible="True" Mode="Default" IsMenuEnabled="False"  BackgroundColor="Transparent" ForegroundColor="White" Opacity="0.9">
             <shell:ApplicationBarIconButton IconUri="/Resources/appbar.refresh.rest.png" Text="Refresh" Click="RefreshButton_Click"/>
             <shell:ApplicationBarIconButton IconUri="/Resources/appbar.questionmark.rest.png" Text="About" Click="InfoButton_Click"/>
         </shell:ApplicationBar>
     </phone:PhoneApplicationPage.ApplicationBar>
-
 
     <shell:SystemTray.ProgressIndicator>
         <shell:ProgressIndicator x:Name="spinner" IsIndeterminate="True" IsVisible="false" />
