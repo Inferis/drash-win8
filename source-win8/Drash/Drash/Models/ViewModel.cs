@@ -8,6 +8,7 @@ using Drash.Common;
 using Windows.Devices.Geolocation;
 using Windows.UI;
 using Windows.UI.Core;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Imaging;
@@ -208,15 +209,29 @@ namespace Drash.Models
             fetchingRain = true;
             UpdateBusy();
             firstFetch = false;
-            try {
-                var uri = string.Format("http://gps.buienradar.nl/getrr.php?lat={0:0.000000}&lon={1:0.000000}&stamp={2}", Model.Location.Latitude, Model.Location.Longitude, DateTime.UtcNow.Ticks);
 
-                var wc = new HttpClient();
-                var result = await wc.GetAsync(uri);
-                if (result.IsSuccessStatusCode) {
-                    Model.Rain = await RainData.TryParseAsync(await result.Content.ReadAsStringAsync());
+            try {
+                MessageDialog dialog = null;
+
+                try {
+                    var uri = string.Format("http://gps.buienradar.nl/getrr.php?lat={0:0.000000}&lon={1:0.000000}&stamp={2}", Model.Location.Latitude, Model.Location.Longitude, DateTime.UtcNow.Ticks);
+
+                    var wc = new HttpClient();
+                    var result = await wc.GetAsync(uri);
+                    if (result.IsSuccessStatusCode) {
+                        Model.Rain = await RainData.TryParseAsync(await result.Content.ReadAsStringAsync());
+                    }
+                    Model.RainWasUpdated = true;
                 }
-                Model.RainWasUpdated = true;
+                catch (Exception ex) {
+                    dialog = new MessageDialog("Could not fetch rain data. An error occured.") {
+                        Options = MessageDialogOptions.AcceptUserInputAfterDelay
+                    };
+                }
+
+                if (dialog != null) {
+                    await dialog.ShowAsync();
+                }
             }
             finally {
                 fetchingRain = false;
@@ -224,6 +239,7 @@ namespace Drash.Models
                 UpdateState();
                 nextRainUpdate.Run(FetchRain);
             }
+
         }
 
         private void UpdateBusy()
@@ -306,13 +322,12 @@ namespace Drash.Models
             }
 
             string night;
-            if (Model.Location != null) {
+            if (intensity == 0 && Model.Location != null) {
                 var solarinfo = SolarInfo.ForDate(Model.Location.Latitude, Model.Location.Longitude, DateTime.Now);
                 var sunrisen = solarinfo.Sunrise < DateTime.UtcNow && DateTime.UtcNow < solarinfo.Sunset;
-                night = intensity == 0 && !sunrisen ? "n" : "d";
+                night = !sunrisen ? "n" : "d";
             }
-            else
-            {
+            else {
                 night = "";
             }
             mmImage = string.Format("ms-appx:/Assets/intensity{0}{1}.png", mmImage, night);

@@ -274,6 +274,12 @@
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="pageRoot" Storyboard.TargetProperty="MaxHeight">
                             <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="800"/>
                         </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="DataView" Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="30,0,30,30"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="GraphView" Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="30,30,30,0"/>
+                        </ObjectAnimationUsingKeyFrames>
                     </Storyboard>
                 </VisualState>
 
