@@ -35,22 +35,19 @@ namespace Drash
         protected override void OnLaunched(LaunchActivatedEventArgs args)
         {
             // if the view model is not loaded, create a new one
-            if (Model == null)
-            {
+            if (Model == null) {
                 Model = new Model();
             }
 
-            Frame rootFrame = Window.Current.Content as Frame;
+            var rootFrame = Window.Current.Content as Frame;
 
             // Do not repeat app initialization when the Window already has content,
             // just ensure that the window is active
-            if (rootFrame == null)
-            {
+            if (rootFrame == null) {
                 // Create a Frame to act as the navigation context and navigate to the first page
                 rootFrame = new Frame();
 
-                if (args.PreviousExecutionState == ApplicationExecutionState.Terminated)
-                {
+                if (args.PreviousExecutionState == ApplicationExecutionState.Terminated) {
                     //TODO: Load state from previously suspended application
                 }
 
@@ -58,15 +55,14 @@ namespace Drash
                 Window.Current.Content = rootFrame;
             }
 
-            if (rootFrame.Content == null)
-            {
+            if (rootFrame.Content == null) {
                 // When the navigation stack isn't restored navigate to the first page,
                 // configuring the new page by passing required information as a navigation
                 // parameter
-                if (!rootFrame.Navigate(typeof(DrashPage), args.Arguments))
-                {
+                if (!rootFrame.Navigate(typeof(DrashPage), args.Arguments)) {
                     throw new Exception("Failed to create initial page");
                 }
+                ((DrashPage)rootFrame.Content).Model = new ViewModel(Model);
             }
             // Ensure the current window is active
             Window.Current.Activate();

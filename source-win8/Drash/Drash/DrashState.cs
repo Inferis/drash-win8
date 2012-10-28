@@ -1,8 +1,8 @@
 namespace Drash
 {
-    public enum DrashError
+    public enum DrashState
     {
-        None,
+        Good,
         NoLocation,
         NoNetwork,
     }

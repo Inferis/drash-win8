@@ -14,6 +14,12 @@ namespace Drash
         public DrashPage()
         {
             this.InitializeComponent();
+
+            Loaded += (sender, args) => {
+                if (Model != null) {
+                    Model.View = this;
+                }
+            };
         }
 
         /// <summary>

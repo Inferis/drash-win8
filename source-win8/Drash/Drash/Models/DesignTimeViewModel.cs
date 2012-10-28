@@ -6,7 +6,7 @@ namespace Drash.Models
 {
     public class DesignTimeViewModel : ViewModel
     {
-        public DesignTimeViewModel()
+        public DesignTimeViewModel() : base(null)
         {
             var random = new Random();
             var points = Enumerable.Range(0, 20)

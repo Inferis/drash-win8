@@ -291,7 +291,7 @@ namespace Drash.Common
         /// <returns>Visual state name used to drive the
         /// <see cref="VisualStateManager"/></returns>
         /// <seealso cref="InvalidateVisualState"/>
-        protected virtual string DetermineVisualState(ApplicationViewState viewState)
+        protected internal virtual string DetermineVisualState(ApplicationViewState viewState)
         {
             return viewState.ToString();
         }

@@ -50,7 +50,7 @@ namespace Drash
 
         public Model Model
         {
-            get { return ((App)Application.Current).Model; }
+            get { return null; } // return ((App)Application.Current).Model; }
         }
 
         public void UpdateStateFromModel()
@@ -193,16 +193,16 @@ namespace Drash
         {
             try {
                 if (!NetworkInterface.GetIsNetworkAvailable()) {
-                    Model.Error = DrashError.NoNetwork;
+                    Model.State = DrashState.NoNetwork;
                     return;
                 }
 
                 if (Model.Location == null) {
-                    Model.Error = DrashError.NoLocation;
+                    Model.State = DrashState.NoLocation;
                     return;
                 }
 
-                Model.Error = DrashError.None;
+                Model.State = DrashState.Good;
             }
             finally {
                 UpdateVisuals();
@@ -211,8 +211,8 @@ namespace Drash
 
         private void UpdateVisuals()
         {
-            if (Model.Error != DrashError.None) {
-                VisualizeError(Model.Error);
+            if (Model.State != DrashState.Good) {
+                VisualizeError(Model.State);
                 return;
             }
 
@@ -234,7 +234,7 @@ namespace Drash
             VisualizeLocation(Model.LocationName);
         }
 
-        private void VisualizeError(DrashError drashError)
+        private void VisualizeError(DrashState drashState)
         {
         }
 

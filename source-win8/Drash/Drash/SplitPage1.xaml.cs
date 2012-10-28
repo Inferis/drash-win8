@@ -155,7 +155,7 @@ namespace Drash
         /// <returns>The name of the desired visual state.  This is the same as the name of the
         /// view state except when there is a selected item in portrait and snapped views where
         /// this additional logical page is represented by adding a suffix of _Detail.</returns>
-        protected override string DetermineVisualState(ApplicationViewState viewState)
+        protected internal override string DetermineVisualState(ApplicationViewState viewState)
         {
             // Update the back button's enabled state when the view state changes
             var logicalPageBack = this.UsingLogicalPageNavigation(viewState) && this.itemListView.SelectedItem != null;

@@ -7,7 +7,7 @@ namespace Drash.Models
         public Model()
         {
             Rain = null;
-            Error = DrashError.None;
+            State = DrashState.Good;
             RainWasUpdated = false;
         }
 
@@ -15,7 +15,7 @@ namespace Drash.Models
         public Geocoordinate Location { get; set; }
         public string LocationName { get; set; }
         public bool GoodLocationName { get; set; }
-        public DrashError Error { get; set; }
+        public DrashState State { get; set; }
         public bool RainWasUpdated { get; set; }
         public bool IsAboutOpen { get; set; }
         public bool IntensityValueShown { get; set; }

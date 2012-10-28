@@ -117,7 +117,7 @@
     <Compile Include="Common\SuspensionManager.cs" />
     <Compile Include="DelayedAction.cs" />
     <Compile Include="Models\DesignTimeViewModel.cs" />
-    <Compile Include="DrashError.cs" />
+    <Compile Include="DrashState.cs" />
     <Compile Include="DrashPage.xaml.cs">
       <DependentUpon>DrashPage.xaml</DependentUpon>
     </Compile>
