@@ -1,13 +1,16 @@
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Windows.Input;
 using Drash.Common;
 using Windows.Devices.Geolocation;
+using Windows.UI;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Media.Imaging;
 
 namespace Drash.Models
 {
@@ -20,6 +23,9 @@ namespace Drash.Models
         private bool fetchingRain = false;
         private bool isBusy;
         private string location;
+        private string chance;
+        private string precipitation;
+        private ImageSource intensityImage;
 
         public LayoutAwarePage View
         {
@@ -29,6 +35,11 @@ namespace Drash.Models
                 view = value;
                 if (view != null) ViewLoaded();
             }
+        }
+
+        public ViewModel()
+        {
+            RefreshCommand = new ActionCommand(FetchRain);
         }
 
         #region Binding Properties
@@ -43,9 +54,36 @@ namespace Drash.Models
             }
         }
 
-        public string Chance { get; set; }
-        public string Precipitation { get; set; }
-        public ImageSource IntensityImage { get; set; }
+        public string Chance
+        {
+            get { return chance; }
+            set
+            {
+                chance = value;
+                OnPropertyChanged(() => Chance);
+            }
+        }
+
+        public string Precipitation
+        {
+            get { return precipitation; }
+            set
+            {
+                precipitation = value;
+                OnPropertyChanged(() => Precipitation);
+            }
+        }
+
+        public ImageSource IntensityImage
+        {
+            get { return intensityImage; }
+            set
+            {
+                intensityImage = value;
+                OnPropertyChanged(() => IntensityImage);
+            }
+        }
+
         public ICommand RefreshCommand { get; set; }
 
         public bool IsBusy
@@ -216,12 +254,74 @@ namespace Drash.Models
 
         private void UpdateVisuals()
         {
+
+
             View.Dispatcher.RunAsync(
                 CoreDispatcherPriority.Normal,
                 () => {
+                    VisualizeRain(Model.Rain);
                     Location = Model.LocationName;
                 });
 
+        }
+
+        private void VisualizeRain(RainData rainData)
+        {
+            var animated = Model.RainWasUpdated;
+            Model.RainWasUpdated = false;
+
+            string chanceText;
+            Color chanceColor;
+            string mmImage;
+            string mmText;
+
+            var chance = rainData != null ? rainData.ChanceForEntries(Model.Entries) : -1;
+            if (chance >= 0) {
+                chanceText = string.Format("{0}%", chance);
+                chanceColor = Colors.White;
+            }
+            else {
+                chanceText = "?";
+                chanceColor = Colors.DarkGray;
+            }
+
+            var intensity = 0;
+            var mm = 0.0;
+            if (rainData != null) {
+                mm = rainData.PrecipitationForEntries(Model.Entries);
+                intensity = rainData.IntensityForEntries(Model.Entries);
+            }
+
+            if (intensity > 0 || mm > 0) {
+                mm = Math.Max(mm, 0.001);
+                intensity = ((int)Math.Max(1, Math.Min(1 + intensity / 25.0, 4)));
+
+                var format = mm < 0.01 ? "{0:0.000}" : "{0:0.00}";
+                mmText = Math.Floor(mm) == mm ? string.Format("{0}", (int)mm) : string.Format(format, mm);
+                mmImage = intensity.ToString(CultureInfo.InvariantCulture);
+            }
+            else {
+                mmText = "0";
+                mmImage = "0";
+            }
+
+            string night;
+            if (Model.Location != null) {
+                var solarinfo = SolarInfo.ForDate(Model.Location.Latitude, Model.Location.Longitude, DateTime.Now);
+                var sunrisen = solarinfo.Sunrise < DateTime.UtcNow && DateTime.UtcNow < solarinfo.Sunset;
+                night = intensity == 0 && !sunrisen ? "n" : "d";
+            }
+            else
+            {
+                night = "";
+            }
+            mmImage = string.Format("ms-appx:/Assets/intensity{0}{1}.png", mmImage, night);
+
+            Chance = chanceText;
+            Precipitation = mmText + "\nmm";
+            IntensityImage = new BitmapImage(new Uri(mmImage));
+
+            //VisualizeGraph(rainData, animated);
         }
 
         private void GoToState(DrashState state)

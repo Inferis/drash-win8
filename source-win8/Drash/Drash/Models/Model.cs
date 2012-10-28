@@ -9,6 +9,7 @@ namespace Drash.Models
             Rain = null;
             State = DrashState.Good;
             RainWasUpdated = false;
+            Entries = 6;
         }
 
         public RainData Rain { get; set; }
@@ -23,5 +24,6 @@ namespace Drash.Models
         public bool DataRootShown { get; set; }
         public bool LocationShown { get; set; }
         public bool ChanceShown { get; set; }
+        public int Entries { get; set; }
     }
 }

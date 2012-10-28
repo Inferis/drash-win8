@@ -17,6 +17,31 @@
         <common:PercentageConverter x:Key="EightyPercentConverter" Percentage="80" />
 
     </common:LayoutAwarePage.Resources>
+	<common:LayoutAwarePage.BottomAppBar>
+		<AppBar x:Name="Appbar">
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition/>
+					<ColumnDefinition/>
+				</Grid.ColumnDefinitions>
+				<StackPanel Orientation="Horizontal"/>
+				<StackPanel Grid.Column="1" HorizontalAlignment="Right" Orientation="Horizontal">
+					<Button
+						AutomationProperties.Name="Refresh"
+						Style="{StaticResource RefreshAppBarButtonStyle}"
+						Command="{Binding RefreshCommand}" >
+						<Button.Resources>
+							<ResourceDictionary>
+								<ResourceDictionary.MergedDictionaries>
+									<ResourceDictionary Source="Common/StandardStyles.xaml"/>
+								</ResourceDictionary.MergedDictionaries>
+							</ResourceDictionary>
+						</Button.Resources>
+					</Button>
+				</StackPanel>
+			</Grid>
+		</AppBar>
+	</common:LayoutAwarePage.BottomAppBar>
 
     <Grid Background="white">
 
@@ -32,7 +57,7 @@
             </Image.RenderTransform>
         </Image>
 
-        <Grid x:Name="pageRoot" Style="{StaticResource LayoutRootStyle}" Background="white"  RenderTransformOrigin="0.5,1">
+        <Grid x:Name="pageRoot" Style="{StaticResource LayoutRootStyle}" Background="white"  RenderTransformOrigin="0.5,1" Margin="0,0,0,40">
             <Grid.RenderTransform>
                 <CompositeTransform />
             </Grid.RenderTransform>
@@ -210,63 +235,67 @@
             </VisualStateGroup>
 
             <VisualStateGroup x:Name="ApplicationViewStates">
-                <VisualState x:Name="FullScreenLandscape" />
-                <VisualState x:Name="Filled"/>
+                <VisualState x:Name="FullScreenLandscape">
+                    <Storyboard Duration="0:0:0.150" />
+                </VisualState>
+                <VisualState x:Name="Filled">
+                    <Storyboard Duration="0:0:0.150" />
+                </VisualState>
 
                 <VisualState x:Name="Snapped">
-                    <Storyboard>
+                    <Storyboard Duration="0:0:0.150">
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PrimaryColumn" Storyboard.TargetProperty="Width">
-                            <DiscreteObjectKeyFrame KeyTime="0" Value="320"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150"  Value="320"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="GraphColumn" Storyboard.TargetProperty="Width">
-                            <DiscreteObjectKeyFrame KeyTime="0" Value="0"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="0"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BottomRow" Storyboard.TargetProperty="Height">
-                            <DiscreteObjectKeyFrame KeyTime="0" Value="*"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="*"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Chance" Storyboard.TargetProperty="FontSize">
-                            <DiscreteObjectKeyFrame KeyTime="0" Value="70"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="70"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Precipitation" Storyboard.TargetProperty="FontSize">
-                            <DiscreteObjectKeyFrame KeyTime="0" Value="20"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="20"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="pageTitle" Storyboard.TargetProperty="FontSize">
-                            <DiscreteObjectKeyFrame KeyTime="0" Value="30"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="30"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="pageTitle" Storyboard.TargetProperty="TextWrapping">
-                            <DiscreteObjectKeyFrame KeyTime="0" Value="Wrap"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="Wrap"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="GraphView" Storyboard.TargetProperty="(Grid.Column)">
-                            <DiscreteObjectKeyFrame KeyTime="0" Value="0"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="0"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="GraphView" Storyboard.TargetProperty="(Grid.Row)">
-                            <DiscreteObjectKeyFrame KeyTime="0" Value="2"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="2"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="pageRoot" Storyboard.TargetProperty="MaxHeight">
-                            <DiscreteObjectKeyFrame KeyTime="0" Value="800"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="800"/>
                         </ObjectAnimationUsingKeyFrames>
                     </Storyboard>
                 </VisualState>
 
                 <VisualState x:Name="FullScreenPortrait">
-                    <Storyboard>
+                    <Storyboard Duration="0:0:0.150">
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PrimaryColumn" Storyboard.TargetProperty="Width">
-                            <DiscreteObjectKeyFrame KeyTime="0" Value="*"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="*"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="DataRow" Storyboard.TargetProperty="Height">
-                            <DiscreteObjectKeyFrame KeyTime="0" Value="768"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="768"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="GraphColumn" Storyboard.TargetProperty="Width">
-                            <DiscreteObjectKeyFrame KeyTime="0" Value="0"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="0"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BottomRow" Storyboard.TargetProperty="Height">
-                            <DiscreteObjectKeyFrame KeyTime="0" Value="*"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="*"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="GraphView" Storyboard.TargetProperty="(Grid.Column)">
-                            <DiscreteObjectKeyFrame KeyTime="0" Value="0"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="0"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="GraphView" Storyboard.TargetProperty="(Grid.Row)">
-                            <DiscreteObjectKeyFrame KeyTime="0" Value="2" />
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="2" />
                         </ObjectAnimationUsingKeyFrames>
                     </Storyboard>
                 </VisualState>

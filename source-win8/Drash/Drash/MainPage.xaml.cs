@@ -230,8 +230,8 @@ namespace Drash
                 return;
             }
 
-            VisualizeRain(Model.Rain);
-            VisualizeLocation(Model.LocationName);
+            //VisualizeRain(Model.Rain);
+            //VisualizeLocation(Model.LocationName);
         }
 
         private void VisualizeError(DrashState drashState)
@@ -262,66 +262,6 @@ namespace Drash
                     Location.Text = name;
                 });
 
-            });
-        }
-
-        private void VisualizeRain(RainData rainData)
-        {
-            var animate = Model.RainWasUpdated;
-            Model.RainWasUpdated = false;
-            ShowData(animated => {
-                string chanceText;
-                Color chanceColor;
-                string mmImage;
-                string mmText;
-
-                animated = animated && animate;
-                if (rainData != null && rainData.Chance >= 0) {
-                    chanceText = string.Format("{0}%", rainData.Chance);
-                    chanceColor = Colors.White;
-                }
-                else {
-                    chanceText = "?";
-                    chanceColor = Colors.DarkGray;
-                }
-
-                var intensity = 0;
-                var mm = 0.0;
-                if (rainData != null) {
-                    mm = rainData.Precipitation;
-                    intensity = rainData.Intensity;
-                }
-
-                if (intensity > 0 || mm > 0) {
-                    mm = Math.Max(mm, 0.001);
-                    intensity = ((int)Math.Max(1, Math.Min(1 + intensity / 25.0, 4)));
-
-                    var format = mm < 0.01 ? "{0:0.000}" : "{0:0.00}";
-                    mmText = Math.Floor(mm) == mm ? string.Format("{0}", (int)mm) : string.Format(format, mm);
-                    mmImage = intensity.ToString(CultureInfo.InvariantCulture);
-                }
-                else {
-                    mmText = "0";
-                    mmImage = "0";
-                }
-                mmImage = string.Format("Resources/intensity{0}.png", mmImage);
-
-                Action setter = () => {
-                    Chance.Text = chanceText;
-                    Chance.Foreground = new SolidColorBrush(chanceColor);
-                    IntensityValueNumber.Text = mmText;
-                    IntensityImage.Source = new BitmapImage(new Uri("ms-appx://"+ mmImage, UriKind.Absolute));
-                    VisualizeGraph(rainData, animated);
-                };
-
-                if (!Model.DataRootShown || !animated) {
-                    Chance.Opacity = 1;
-                    Model.ChanceShown = true;
-                    setter();
-                    return;
-                }
-
-                DataGrid.FadeOutThenIn(between: setter);
             });
         }
 
