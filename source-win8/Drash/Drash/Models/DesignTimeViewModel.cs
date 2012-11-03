@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Drash.Models.Api;
 using Windows.UI.Xaml.Media.Imaging;
 
 namespace Drash.Models
@@ -17,6 +18,8 @@ namespace Drash.Models
             Chance = "75%";
             IntensityImage = new BitmapImage(new Uri("ms-appx:/Assets/Intensity3.png", UriKind.Absolute));
             Precipitation = "3.314\nmm";
+            EntriesImage = new BitmapImage(new Uri("ms-appx:/Assets/dial30.png", UriKind.Absolute));
+            EntriesDescription = "30 min";
         }
 
     }

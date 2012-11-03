@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
-namespace Drash
+namespace Drash.Models.Api
 {
     public class RainData
     {
@@ -59,7 +58,7 @@ namespace Drash
 
         public double PrecipitationForEntries(int entries)
         {
-            var totalPrecipitation = Points.Take(entries).Sum(point => point.Precipitation / 60.0 * 5.0);
+            var totalPrecipitation = Points.Take(entries).Sum(point => point.Precipitation / 6.0 * 5.0);
 
             if (ChanceForEntries(entries) > 0)
                 totalPrecipitation = Math.Max(0.001, totalPrecipitation);
@@ -76,7 +75,8 @@ namespace Drash
                 if (lines.Length == 0)
                     return null;
 
-                var points = lines.Select(RainPoint.Parse);
+                var rnd = new Random();
+                var points = lines.Select(RainPoint.Parse); //.Select((x, i) => new RainPoint(x.Stamp, rnd.Next(20 + i * 10)));
                 points = points.SkipWhile(p => p.Stamp.AddMinutes(5) < DateTime.Now);
 
                 return new RainData(points.ToList());

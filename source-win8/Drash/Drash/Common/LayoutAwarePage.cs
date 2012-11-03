@@ -305,7 +305,7 @@ namespace Drash.Common
         /// signal that a different value may be returned even though the view state has not
         /// changed.
         /// </remarks>
-        public void InvalidateVisualState()
+        public virtual void InvalidateVisualState()
         {
             if (this._layoutAwareControls != null)
             {

@@ -1,3 +1,4 @@
+using Drash.Models.Api;
 using Windows.Devices.Geolocation;
 
 namespace Drash.Models

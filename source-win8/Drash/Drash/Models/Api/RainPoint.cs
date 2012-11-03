@@ -1,8 +1,7 @@
 using System;
 using System.Globalization;
-using System.Runtime.Serialization;
 
-namespace Drash
+namespace Drash.Models.Api
 {
     public class RainPoint
     {
@@ -37,7 +36,7 @@ namespace Drash
             if (stamp.Subtract(DateTime.Now).TotalHours < -2)
                 stamp = stamp.AddDays(1);
 
-//            return new RainPoint(stamp, rnd.Next(0, 100) > 50 ? 0 : rnd.Next(9, 50));
+            //return new RainPoint(stamp, rnd.Next(0, 100) > 50 ? 0 : rnd.Next(9, 50));
             return new RainPoint(stamp, int.Parse(parts[0]));
         }
     }

@@ -1,8 +1,11 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
+using System.Diagnostics;
 using Drash.Common;
 using Drash.Models;
-using Windows.UI.Xaml;
-using Windows.UI.Xaml.Controls;
+using Windows.Devices.Input;
+using Windows.Foundation;
+using Windows.UI.Input;
 using Windows.UI.Xaml.Navigation;
 
 namespace Drash
@@ -21,7 +24,82 @@ namespace Drash
             Loaded += (sender, args) => {
                 if (Model != null) {
                     Model.View = this;
+                    Model.GraphView = Graph;
+                    Model.GraphContainer = GraphView;
                 }
+
+                AddGestureRecognizer();
+            };
+
+
+        }
+
+        private void AddGestureRecognizer()
+        {
+            var gesture = new GestureRecognizer() {
+                AutoProcessInertia = true,
+                GestureSettings = GestureSettings.Drag | GestureSettings.CrossSlide,
+                CrossSlideHorizontally = true,
+                CrossSlideThresholds = new CrossSlideThresholds { SpeedBumpEnd = 30 }
+            };
+
+            Point lastDragLocation;
+            var lastDragTime = DateTime.Now;
+            gesture.Dragging += (sender, args) => {
+                switch (args.DraggingState) {
+                    case DraggingState.Started:
+                        lastDragLocation = args.Position;
+                        lastDragTime = DateTime.Now;
+                        break;
+
+                    case DraggingState.Continuing: {
+                            var delta = args.Position.X - lastDragLocation.X;
+                            var time = DateTime.Now.Subtract(lastDragTime).TotalSeconds;
+                            if (Math.Abs(delta) > 30 && time > 0) {
+                                var velocity = delta / time;
+
+                                lastDragLocation = args.Position;
+                                lastDragTime = DateTime.Now;
+
+                                Model.Zoomed(velocity);
+                            }
+                            break;
+                        }
+                }
+            };
+            gesture.CrossSliding += (sender, args) => {
+                switch (args.CrossSlidingState) {
+                    case CrossSlidingState.Started:
+                        lastDragLocation = args.Position;
+                        lastDragTime = DateTime.Now;
+                        break;
+
+                    case CrossSlidingState.Dragging: {
+                            var delta = args.Position.X - lastDragLocation.X;
+                            var time = DateTime.Now.Subtract(lastDragTime).TotalSeconds;
+                            if (Math.Abs(delta) > 30 && time > 0) {
+                                var velocity = delta / time;
+
+                                lastDragLocation = args.Position;
+                                lastDragTime = DateTime.Now;
+
+                                Model.Zoomed(velocity);
+                            }
+                            break;
+                        }
+                }
+            };
+
+            GraphView.PointerPressed += (sender, args) => {
+                GraphView.CapturePointer(args.Pointer);
+                gesture.ProcessDownEvent(args.GetCurrentPoint(GraphView));
+            };
+            GraphView.PointerMoved += (sender, args) => {
+                gesture.ProcessMoveEvents(args.GetIntermediatePoints(GraphView));
+            };
+            GraphView.PointerReleased += (sender, args) => {
+                gesture.ProcessUpEvent(args.GetCurrentPoint(GraphView));
+                GraphView.ReleasePointerCapture(args.Pointer);
             };
         }
 
@@ -44,11 +122,12 @@ namespace Drash
             }
         }
 
-        private void Refresh(object sender, RoutedEventArgs e)
+        public bool TouchEnabled
         {
+            get { return new TouchCapabilities().TouchPresent != 0; }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged = delegate {};
+        public event PropertyChangedEventHandler PropertyChanged = delegate { };
 
         private void OnPropertyChanged(string propertyName)
         {

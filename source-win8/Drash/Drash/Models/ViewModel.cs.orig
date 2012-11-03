@@ -7,7 +7,6 @@ using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Windows.Input;
 using Drash.Common;
-using Drash.Models.Api;
 using Windows.Devices.Geolocation;
 using Windows.Foundation;
 using Windows.UI;
@@ -25,20 +24,18 @@ namespace Drash.Models
     {
         private LayoutAwarePage view;
         private Geolocator geolocator;
-        private DelayedAction delayedLocationUpdate, nextRainUpdate, sizeChangedUpdate;
+        private DelayedAction delayedLocationUpdate, nextRainUpdate;
         private bool firstFetch = true;
         private bool fetchingRain = false;
         private bool isBusy;
         private string location;
         private string chance;
         private string precipitation;
-        private ImageSource intensityImage, entriesImage;
+        private ImageSource intensityImage;
         private int graphEntries = 0;
         private Color graphStrokeColor;
         private Color graphFillFrom;
         private Path graphView;
-        private FrameworkElement graphContainer;
-        private string entriesDescription;
 
         public LayoutAwarePage View
         {
@@ -50,6 +47,10 @@ namespace Drash.Models
             }
         }
 
+<<<<<<< HEAD
+
+=======
+>>>>>>> 4ee35aa5f0717d45bc7ca1ff6f3b2eecad8934af
         #region Binding Properties
 
         public string Location
@@ -82,7 +83,6 @@ namespace Drash.Models
             }
         }
 
-        //
         public ImageSource IntensityImage
         {
             get { return intensityImage; }
@@ -90,44 +90,6 @@ namespace Drash.Models
             {
                 intensityImage = value;
                 OnPropertyChanged(() => IntensityImage);
-            }
-        }
-
-        public int Entries
-        {
-            get { return Model.Entries; }
-            set
-            {
-                if (value != Model.Entries) {
-                    Model.Entries = value;
-                    OnPropertyChanged(() => Entries);
-                    UpdateVisuals();
-                }
-            }
-        }
-
-        public IReadOnlyCollection<int> AllEntries
-        {
-            get { return Enumerable.Range(2, 7).Select(x => x * 3).ToList(); }
-        }
-
-        public ImageSource EntriesImage
-        {
-            get { return entriesImage; }
-            set
-            {
-                entriesImage = value;
-                OnPropertyChanged(() => EntriesImage);
-            }
-        }
-
-        public string EntriesDescription
-        {
-            get { return entriesDescription; }
-            set
-            {
-                entriesDescription = value;
-                OnPropertyChanged(() => EntriesDescription);
             }
         }
 
@@ -157,24 +119,7 @@ namespace Drash.Models
             }
         }
 
-        public FrameworkElement GraphContainer
-        {
-            get { return graphContainer; }
-            set
-            {
-                if (graphContainer != null)
-                    graphContainer.SizeChanged -= GraphContainerOnSizeChanged;
-                graphContainer = value;
-                if (graphContainer != null)
-                    graphContainer.SizeChanged += GraphContainerOnSizeChanged;
-            }
-        }
-
-        private void GraphContainerOnSizeChanged(object sender, SizeChangedEventArgs sizeChangedEventArgs)
-        {
-            VisualizeGraph(Model.Rain, false);
-        }
-
+<<<<<<< HEAD
         public ViewModel()
         {
             RefreshCommand = new ActionCommand(FetchRain);
@@ -182,6 +127,18 @@ namespace Drash.Models
 
         public ViewModel(Model model)
             : this()
+=======
+        public FrameworkElement GraphContainer { get; set; }
+
+        public ViewModel()
+        {
+            RefreshCommand = new ActionCommand(() => {
+                FetchRain();
+            });
+        }
+
+        public ViewModel(Model model) : this()
+>>>>>>> 4ee35aa5f0717d45bc7ca1ff6f3b2eecad8934af
         {
             Model = model;
         }
@@ -193,7 +150,6 @@ namespace Drash.Models
 
             NetworkChange.NetworkAddressChanged += (sender, args) => UpdateState();
 
-            UpdateEntriesImage();
             UpdateState();
             InitializeGeolocator();
         }
@@ -275,7 +231,7 @@ namespace Drash.Models
             nextRainUpdate.Cancel();
             if (Model.Location == null) {
                 // no location, schedule new fetch
-                if (geolocator.LocationStatus != PositionStatus.Ready || !UpdateLocation(await geolocator.GetGeopositionAsync()))
+                if (!UpdateLocation(await geolocator.GetGeopositionAsync()))
                     nextRainUpdate.Run(FetchRain);
                 return;
             }
@@ -419,7 +375,7 @@ namespace Drash.Models
             //VisualizeGraph(rainData, animated);
         }
 
-        private void VisualizeGraph(RainData rainData, bool animated = true)
+        private void VisualizeGraph(RainData rainData)
         {
             List<int> pointValues;
             if (rainData == null || rainData.Points == null)
@@ -437,14 +393,12 @@ namespace Drash.Models
             Func<int, double> xForIndex = idx => idx == 0 ? -2 : idx >= Model.Entries ? graphSize.Width + 2 : idx * step;
 
             var x = 0;
-            var max = (graphSize.Height / 12.0 * 11.0) - 10;
+            var max = graphSize.Height + 2 - 20;
             var allZeros = pointValues.Take(Model.Entries + 1).All(p => p == 0);
-            Debug.WriteLine(">>>");
             var points = pointValues.Select(v => {
-                var y = allZeros ? max - 20 : Math.Max(1, max - (v * max / 100));
+                var y = allZeros ? max - 40 : Math.Max(1, max - (v * max / 100));
                 var p = new Point(xForIndex(x), y);
                 x++;
-                Debug.WriteLine("p={0}", p);
                 return p;
             }).ToList();
             points.Add(new Point(graphSize.Width + 2, graphSize.Height + 2));
@@ -461,16 +415,14 @@ namespace Drash.Models
             }
 
             var entriesAnimated = graphEntries != Model.Entries && graphEntries > 0 && Model.Entries > 0;
-            if (entriesAnimated)
-                UpdateEntriesImage();
-
-            var ms300 = TimeSpan.FromMilliseconds(entriesAnimated ? 450 / Math.Abs(Model.Entries - graphEntries) : animated ? 300 : 0);
-            var storyboard = new Storyboard() { Duration = ms300 };
             graphEntries = Model.Entries;
+            var ms300 = TimeSpan.FromMilliseconds(entriesAnimated ? 150 : true ? 300 : 0);
+            var storyboard = new Storyboard() { Duration = ms300 };
 
             figure = path.Figures[0];
             for (var i = 0; i < points.Count; ++i) {
                 var anim = new PointAnimation() { Duration = ms300, To = points[i], FillBehavior = FillBehavior.HoldEnd, EnableDependentAnimation = true };
+                //((LineSegment)figure.Segments[i]).Point = points[i];
                 Storyboard.SetTarget(anim, figure.Segments[i]);
                 Storyboard.SetTargetProperty(anim, "Point");
                 storyboard.Children.Add(anim);
@@ -489,13 +441,6 @@ namespace Drash.Models
             storyboard.Begin(() => GraphView.Data = path);
         }
 
-        private void UpdateEntriesImage()
-        {
-            var uri = string.Format("ms-appx:/Assets/dial{0}.png", Model.Entries * 5);
-            EntriesImage = new BitmapImage(new Uri(uri));
-            EntriesDescription = string.Format("{0} min", Model.Entries * 5);
-        }
-
         private void GoToState(DrashState state)
         {
             Model.State = state;
@@ -505,29 +450,5 @@ namespace Drash.Models
                 CoreDispatcherPriority.Normal,
                 () => VisualStateManager.GoToState(View, state.ToString(), true));
         }
-
-        public void Zoomed(double velocity)
-        {
-            var factor = 1 + (int)Math.Floor(Math.Abs(velocity / 1000.0));
-            var entries = Model.Entries + (velocity < 0 ? 3 : -3) * factor;
-            entries = Math.Min(Math.Max(6, entries), 24);
-
-            if (entries != Model.Entries) {
-                Entries = entries;
-                UpdateVisuals();
-            }
-        }
-    }
-
-    public class Entry
-    {
-        public Entry(int entries)
-        {
-            Description = string.Format("{0} min", entries * 5);
-            NumEntries = entries;
-        }
-
-        public string Description { get; set; }
-        public int NumEntries { get; set; }
     }
 }

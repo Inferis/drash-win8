@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Net.Http;
 using System.Net.NetworkInformation;
 using Drash.Models;
+using Drash.Models.Api;
 using Windows.Devices.Geolocation;
 using Windows.UI;
 using Windows.UI.Input;

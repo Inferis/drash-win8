@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Diagnostics;
 
 // originally from here: https://gist.github.com/767532, but adapted
 
-namespace Drash
+namespace Drash.Models.Api
 {
     public class SolarInfo
     {
