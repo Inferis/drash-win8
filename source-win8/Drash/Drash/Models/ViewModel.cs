@@ -38,10 +38,6 @@ namespace Drash.Models
             }
         }
 
-        public ViewModel()
-        {
-            RefreshCommand = new ActionCommand(FetchRain);
-        }
 
         #region Binding Properties
 
@@ -101,7 +97,13 @@ namespace Drash.Models
 
         private Model Model { get; set; }
 
+        public ViewModel()
+        {
+            RefreshCommand = new ActionCommand(FetchRain);
+        }
+
         public ViewModel(Model model)
+            : this()
         {
             Model = model;
         }
@@ -119,7 +121,7 @@ namespace Drash.Models
 
         private void InitializeGeolocator()
         {
-            geolocator = new Geolocator() { MovementThreshold = 500, DesiredAccuracy = PositionAccuracy.Default };
+            geolocator = new Geolocator() { MovementThreshold = 500, DesiredAccuracy = PositionAccuracy.High };
             geolocator.PositionChanged += (s, a) => {
                 Debug.WriteLine("Position changed");
                 if (Model.Location != null && Model.Location.GetDistanceTo(a.Position.Coordinate) < 20)
@@ -214,7 +216,7 @@ namespace Drash.Models
                 MessageDialog dialog = null;
 
                 try {
-                    var uri = string.Format("http://gps.buienradar.nl/getrr.php?lat={0:0.000000}&lon={1:0.000000}&stamp={2}", Model.Location.Latitude, Model.Location.Longitude, DateTime.UtcNow.Ticks);
+                    var uri = string.Format(CultureInfo.InvariantCulture, "http://gps.buienradar.nl/getrr.php?lat={0:0.000000}&lon={1:0.000000}&stamp={2}", Model.Location.Latitude, Model.Location.Longitude, DateTime.UtcNow.Ticks);
 
                     var wc = new HttpClient();
                     var result = await wc.GetAsync(uri);
