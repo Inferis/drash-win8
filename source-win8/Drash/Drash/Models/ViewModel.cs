@@ -25,7 +25,7 @@ namespace Drash.Models
     {
         private LayoutAwarePage view;
         private Geolocator geolocator;
-        private DelayedAction delayedLocationUpdate, nextRainUpdate, sizeChangedUpdate;
+        private DelayedAction delayedLocationUpdate, nextRainUpdate;
         private bool firstFetch = true;
         private bool fetchingRain = false;
         private bool isBusy;
@@ -91,24 +91,6 @@ namespace Drash.Models
                 intensityImage = value;
                 OnPropertyChanged(() => IntensityImage);
             }
-        }
-
-        public int Entries
-        {
-            get { return Model.Entries; }
-            set
-            {
-                if (value != Model.Entries) {
-                    Model.Entries = value;
-                    OnPropertyChanged(() => Entries);
-                    UpdateVisuals();
-                }
-            }
-        }
-
-        public IReadOnlyCollection<int> AllEntries
-        {
-            get { return Enumerable.Range(2, 7).Select(x => x * 3).ToList(); }
         }
 
         public ImageSource EntriesImage
@@ -432,27 +414,26 @@ namespace Drash.Models
 
             var path = GraphView.Data as PathGeometry;
             var graphSize = new Size(GraphContainer.ActualWidth, GraphContainer.ActualHeight);
-
+            Debug.WriteLine("c={0} g={1}", graphSize, new Size(GraphView.ActualWidth, GraphView.ActualHeight));
             var step = graphSize.Width / Model.Entries;
             Func<int, double> xForIndex = idx => idx == 0 ? -2 : idx >= Model.Entries ? graphSize.Width + 2 : idx * step;
 
             var x = 0;
             var max = (graphSize.Height / 12.0 * 11.0) - 10;
             var allZeros = pointValues.Take(Model.Entries + 1).All(p => p == 0);
-            Debug.WriteLine(">>>");
             var points = pointValues.Select(v => {
                 var y = allZeros ? max - 20 : Math.Max(1, max - (v * max / 100));
                 var p = new Point(xForIndex(x), y);
                 x++;
-                Debug.WriteLine("p={0}", p);
                 return p;
             }).ToList();
             points.Add(new Point(graphSize.Width + 2, graphSize.Height + 2));
 
             PathFigure figure;
+            var startPoint = new Point(-2.0, graphSize.Height + 2);
             if (path == null) {
                 path = new PathGeometry();
-                figure = new PathFigure() { StartPoint = new Point(-2.0, graphSize.Height + 2), IsClosed = true };
+                figure = new PathFigure() { StartPoint = startPoint, IsClosed = true };
                 path.Figures.Add(figure);
                 foreach (var p in points) {
                     figure.Segments.Add(new LineSegment() { Point = p });
@@ -465,12 +446,18 @@ namespace Drash.Models
                 UpdateEntriesImage();
 
             var ms300 = TimeSpan.FromMilliseconds(entriesAnimated ? 450 / Math.Abs(Model.Entries - graphEntries) : animated ? 300 : 0);
-            var storyboard = new Storyboard() { Duration = ms300 };
             graphEntries = Model.Entries;
+            var storyboard = new Storyboard() { Duration = ms300 };
+
 
             figure = path.Figures[0];
+            var anim = new PointAnimation() { Duration = ms300, To = startPoint, FillBehavior = FillBehavior.HoldEnd, EnableDependentAnimation = true };
+            Storyboard.SetTarget(anim, figure);
+            Storyboard.SetTargetProperty(anim, "StartPoint");
+            storyboard.Children.Add(anim);
+
             for (var i = 0; i < points.Count; ++i) {
-                var anim = new PointAnimation() { Duration = ms300, To = points[i], FillBehavior = FillBehavior.HoldEnd, EnableDependentAnimation = true };
+                anim = new PointAnimation() { Duration = ms300, To = points[i], FillBehavior = FillBehavior.HoldEnd, EnableDependentAnimation = true };
                 Storyboard.SetTarget(anim, figure.Segments[i]);
                 Storyboard.SetTargetProperty(anim, "Point");
                 storyboard.Children.Add(anim);
@@ -500,7 +487,6 @@ namespace Drash.Models
         {
             Model.State = state;
 
-            Debug.WriteLine("state " + state.ToString());
             View.Dispatcher.RunAsync(
                 CoreDispatcherPriority.Normal,
                 () => VisualStateManager.GoToState(View, state.ToString(), true));
@@ -513,7 +499,7 @@ namespace Drash.Models
             entries = Math.Min(Math.Max(6, entries), 24);
 
             if (entries != Model.Entries) {
-                Entries = entries;
+                Model.Entries = entries;
                 UpdateVisuals();
             }
         }
