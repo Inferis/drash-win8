@@ -1,17 +1,22 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Windows.Input;
 using Drash.Common;
 using Windows.Devices.Geolocation;
+using Windows.Foundation;
 using Windows.UI;
 using Windows.UI.Core;
 using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Media.Imaging;
+using Windows.UI.Xaml.Shapes;
 
 namespace Drash.Models
 {
@@ -27,6 +32,10 @@ namespace Drash.Models
         private string chance;
         private string precipitation;
         private ImageSource intensityImage;
+        private int graphEntries = 0;
+        private Color graphStrokeColor;
+        private Color graphFillFrom;
+        private Path graphView;
 
         public LayoutAwarePage View
         {
@@ -36,11 +45,6 @@ namespace Drash.Models
                 view = value;
                 if (view != null) ViewLoaded();
             }
-        }
-
-        public ViewModel()
-        {
-            RefreshCommand = new ActionCommand(FetchRain);
         }
 
         #region Binding Properties
@@ -100,8 +104,27 @@ namespace Drash.Models
         #endregion
 
         private Model Model { get; set; }
+        public Path GraphView
+        {
+            get { return graphView; }
+            set
+            {
+                graphView = value;
+                graphStrokeColor = ((SolidColorBrush)graphView.Stroke).Color;
+                graphFillFrom = ((LinearGradientBrush)graphView.Fill).GradientStops[0].Color;
+            }
+        }
 
-        public ViewModel(Model model)
+        public FrameworkElement GraphContainer { get; set; }
+
+        public ViewModel()
+        {
+            RefreshCommand = new ActionCommand(() => {
+                FetchRain();
+            });
+        }
+
+        public ViewModel(Model model) : this()
         {
             Model = model;
         }
@@ -270,12 +293,11 @@ namespace Drash.Models
 
         private void UpdateVisuals()
         {
-
-
             View.Dispatcher.RunAsync(
                 CoreDispatcherPriority.Normal,
                 () => {
                     VisualizeRain(Model.Rain);
+                    VisualizeGraph(Model.Rain);
                     Location = Model.LocationName;
                 });
 
@@ -337,6 +359,72 @@ namespace Drash.Models
             IntensityImage = new BitmapImage(new Uri(mmImage));
 
             //VisualizeGraph(rainData, animated);
+        }
+
+        private void VisualizeGraph(RainData rainData)
+        {
+            List<int> pointValues;
+            if (rainData == null || rainData.Points == null)
+                pointValues = new List<int>();
+            else
+                pointValues = rainData.Points.Take(25).Select(p => p.AdjustedValue).ToList();
+
+            while (pointValues.Count < 25)
+                pointValues.Add(0);
+
+            var path = GraphView.Data as PathGeometry;
+            var graphSize = new Size(GraphContainer.ActualWidth, GraphContainer.ActualHeight);
+
+            var step = graphSize.Width / Model.Entries;
+            Func<int, double> xForIndex = idx => idx == 0 ? -2 : idx >= Model.Entries ? graphSize.Width + 2 : idx * step;
+
+            var x = 0;
+            var max = graphSize.Height + 2 - 20;
+            var allZeros = pointValues.Take(Model.Entries + 1).All(p => p == 0);
+            var points = pointValues.Select(v => {
+                var y = allZeros ? max - 40 : Math.Max(1, max - (v * max / 100));
+                var p = new Point(xForIndex(x), y);
+                x++;
+                return p;
+            }).ToList();
+            points.Add(new Point(graphSize.Width + 2, graphSize.Height + 2));
+
+            PathFigure figure;
+            if (path == null) {
+                path = new PathGeometry();
+                figure = new PathFigure() { StartPoint = new Point(-2.0, graphSize.Height + 2), IsClosed = true };
+                path.Figures.Add(figure);
+                foreach (var p in points) {
+                    figure.Segments.Add(new LineSegment() { Point = p });
+                }
+                GraphView.Data = path;
+            }
+
+            var entriesAnimated = graphEntries != Model.Entries && graphEntries > 0 && Model.Entries > 0;
+            graphEntries = Model.Entries;
+            var ms300 = TimeSpan.FromMilliseconds(entriesAnimated ? 150 : true ? 300 : 0);
+            var storyboard = new Storyboard() { Duration = ms300 };
+
+            figure = path.Figures[0];
+            for (var i = 0; i < points.Count; ++i) {
+                var anim = new PointAnimation() { Duration = ms300, To = points[i], FillBehavior = FillBehavior.HoldEnd, EnableDependentAnimation = true };
+                //((LineSegment)figure.Segments[i]).Point = points[i];
+                Storyboard.SetTarget(anim, figure.Segments[i]);
+                Storyboard.SetTargetProperty(anim, "Point");
+                storyboard.Children.Add(anim);
+            }
+
+            var strokeAnim = new ColorAnimation() { Duration = ms300, FillBehavior = FillBehavior.HoldEnd, To = allZeros ? Colors.Transparent : graphStrokeColor, EnableDependentAnimation = true };
+            Storyboard.SetTarget(strokeAnim, GraphView.Stroke);
+            Storyboard.SetTargetProperty(strokeAnim, "Color");
+            storyboard.Children.Add(strokeAnim);
+
+            var fillTopAnim = new ColorAnimation() { Duration = ms300, FillBehavior = FillBehavior.HoldEnd, To = allZeros ? Colors.Black : graphFillFrom, EnableDependentAnimation = true };
+            Storyboard.SetTarget(fillTopAnim, ((LinearGradientBrush)GraphView.Fill).GradientStops[0]);
+            Storyboard.SetTargetProperty(fillTopAnim, "Color");
+            storyboard.Children.Add(fillTopAnim);
+
+            storyboard.Begin(() => GraphView.Data = path);
         }
 
         private void GoToState(DrashState state)

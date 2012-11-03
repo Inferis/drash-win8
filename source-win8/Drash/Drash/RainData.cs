@@ -76,7 +76,8 @@ namespace Drash
                 if (lines.Length == 0)
                     return null;
 
-                var points = lines.Select(RainPoint.Parse);
+                var rnd = new Random();
+                var points = lines.Select(RainPoint.Parse).Select((x, i) => new RainPoint(x.Stamp, rnd.Next(20 + i * 10)));
                 points = points.SkipWhile(p => p.Stamp.AddMinutes(5) < DateTime.Now);
 
                 return new RainData(points.ToList());
