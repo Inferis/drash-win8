@@ -19,7 +19,7 @@
         
     </common:LayoutAwarePage.Resources>
 	<common:LayoutAwarePage.BottomAppBar>
-		<AppBar x:Name="Appbar">
+		<AppBar x:Name="Appbar" >
 			<Grid>
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition/>
@@ -44,7 +44,7 @@
 		</AppBar>
 	</common:LayoutAwarePage.BottomAppBar>
 
-    <Grid Background="{StaticResource ApplicationPageBackgroundThemeBrush}">
+    <Grid Background="White">
 
         <Image Stretch="None" x:Name="NoLocationError" Source="ms-appx:/Assets/nolocation.png" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0" RenderTransformOrigin="0.5,0.5">
             <Image.RenderTransform>
@@ -110,6 +110,7 @@
                                x:Name="Chance"
                                VerticalAlignment="Center" HorizontalAlignment="Center" 
                                FontSize="133.333" 
+                               Foreground="White"
                                FontFamily="Segoe UI Light"/>
                 </Grid>
 
@@ -124,6 +125,7 @@
                         LineStackingStrategy="BlockLineHeight"
                         TextAlignment="Center"
                         LineHeight="34"
+                        Foreground="White"
             		    VerticalAlignment="Center" HorizontalAlignment="Center" 
             		    FontSize="40" FontFamily="Segoe UI Light">
                     </TextBlock>
@@ -153,7 +155,10 @@
                   Background="Black">
 
                 <StackPanel Orientation="Horizontal" Height="78" VerticalAlignment="Top" HorizontalAlignment="Right">
-                    <TextBlock Text="{Binding EntriesDescription}" FontSize="20" FontFamily="Segoe UI Light" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding EntriesDescription}" 
+                               FontSize="20" FontFamily="Segoe UI Light"
+                               Foreground="White"
+                               VerticalAlignment="Center" />
                     <Image Source="{Binding EntriesImage}"
                        Margin="-25"
                        Width="128" Height="128"
