@@ -152,8 +152,20 @@
                   Grid.Column="1"
                   Grid.Row="1"
                   Margin="30"
-                  Background="Black">
+                  Background="Black"
+                  Tapped="OnGraphViewTapped"
+                  >
 
+                <Path x:Name="Graph" Stroke="#40a1d9" StrokeThickness="3">
+                    <Path.Fill>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <LinearGradientBrush.GradientStops>
+                                <GradientStop Color="#9980ccff" Offset="0" />
+                                <GradientStop Color="#991e4c67" Offset="1" />
+                            </LinearGradientBrush.GradientStops>
+                        </LinearGradientBrush>
+                    </Path.Fill>
+                </Path>
                 <StackPanel Orientation="Horizontal" Height="78" VerticalAlignment="Top" HorizontalAlignment="Right">
                     <TextBlock Text="{Binding EntriesDescription}" 
                                FontSize="20" FontFamily="Segoe UI Light"
@@ -165,16 +177,13 @@
                        UseLayoutRounding="True"
                            />
                 </StackPanel>
-                <Path x:Name="Graph" Stroke="#40a1d9" StrokeThickness="3">
-                    <Path.Fill>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                            <LinearGradientBrush.GradientStops>
-                                <GradientStop Color="#9980ccff" Offset="0" />
-                                <GradientStop Color="#991e4c67" Offset="1" />
-                            </LinearGradientBrush.GradientStops>
-                        </LinearGradientBrush>
-                    </Path.Fill>
-                </Path>
+                <Image Width="640" Height="240" 
+                       Stretch="None" x:Name="SwipeHelp" Source="ms-appx:/Assets/swipe.png" 
+                       Opacity="0" RenderTransformOrigin="0.5,0.5">
+                    <Image.RenderTransform>
+                        <CompositeTransform />
+                    </Image.RenderTransform>
+                </Image>
             </Grid>
 
         </Grid>

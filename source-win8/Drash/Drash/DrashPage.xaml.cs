@@ -6,6 +6,7 @@ using Drash.Models;
 using Windows.Devices.Input;
 using Windows.Foundation;
 using Windows.UI.Input;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Navigation;
 
 namespace Drash
@@ -16,6 +17,7 @@ namespace Drash
     public sealed partial class DrashPage : LayoutAwarePage, INotifyPropertyChanged
     {
         private ViewModel model;
+        private bool swipeDisplayed;
 
         public DrashPage()
         {
@@ -31,7 +33,7 @@ namespace Drash
                 AddGestureRecognizer();
             };
 
-
+            swipeDisplayed = SwipeHelp.Opacity != 0;
         }
 
         private void AddGestureRecognizer()
@@ -53,6 +55,11 @@ namespace Drash
                         break;
 
                     case DraggingState.Continuing: {
+                            if (swipeDisplayed) {
+                                SwipeHelp.FadeOut();
+                                swipeDisplayed = false;
+                            }
+
                             var delta = args.Position.X - lastDragLocation.X;
                             var time = DateTime.Now.Subtract(lastDragTime).TotalSeconds;
                             if (Math.Abs(delta) > 30 && time > 0) {
@@ -75,6 +82,11 @@ namespace Drash
                         break;
 
                     case CrossSlidingState.Dragging: {
+                            if (swipeDisplayed) {
+                                SwipeHelp.FadeOut();
+                                swipeDisplayed = false;
+                            }
+
                             var delta = args.Position.X - lastDragLocation.X;
                             var time = DateTime.Now.Subtract(lastDragTime).TotalSeconds;
                             if (Math.Abs(delta) > 30 && time > 0) {
@@ -132,6 +144,16 @@ namespace Drash
         private void OnPropertyChanged(string propertyName)
         {
             PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private void OnGraphViewTapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
+        {
+            if (swipeDisplayed)
+                SwipeHelp.FadeOut();
+            else
+                SwipeHelp.FadeIn();
+
+            swipeDisplayed = !swipeDisplayed;
         }
     }
 }
