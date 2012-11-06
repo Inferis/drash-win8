@@ -28,16 +28,21 @@ namespace Drash
             storyboard.Children.Add(anim);
 
             // scalex
-            anim = new DoubleAnimation() { Duration = durationSpan, To = 1 };
-            Storyboard.SetTarget(anim, element);
-            Storyboard.SetTargetProperty(anim, "(UIElement.RenderTransform).(CompositeTransform.ScaleX)");
-            storyboard.Children.Add(anim);
+            var bump = KeyTime.FromTimeSpan(durationSpan.Subtract(TimeSpan.FromMilliseconds(80)));
+            var kfanim = new DoubleAnimationUsingKeyFrames() { Duration = durationSpan };
+            kfanim.KeyFrames.Add(new EasingDoubleKeyFrame() { KeyTime = bump, Value = 1.02 });
+            kfanim.KeyFrames.Add(new EasingDoubleKeyFrame() { KeyTime = durationSpan, Value = 1 });
+            Storyboard.SetTarget(kfanim, element);
+            Storyboard.SetTargetProperty(kfanim, "(UIElement.RenderTransform).(CompositeTransform.ScaleX)");
+            storyboard.Children.Add(kfanim);
 
             // scaley
-            anim = new DoubleAnimation() { Duration = durationSpan, To = 1 };
-            Storyboard.SetTarget(anim, element);
-            Storyboard.SetTargetProperty(anim, "(UIElement.RenderTransform).(CompositeTransform.ScaleY)");
-            storyboard.Children.Add(anim);
+            kfanim = new DoubleAnimationUsingKeyFrames() { Duration = durationSpan };
+            kfanim.KeyFrames.Add(new EasingDoubleKeyFrame() { KeyTime = bump, Value = 1.02 });
+            kfanim.KeyFrames.Add(new EasingDoubleKeyFrame() { KeyTime = durationSpan, Value = 1 });
+            Storyboard.SetTarget(kfanim, element);
+            Storyboard.SetTargetProperty(kfanim, "(UIElement.RenderTransform).(CompositeTransform.ScaleY)");
+            storyboard.Children.Add(kfanim);
 
             storyboard.Begin(callback);
         }
@@ -62,16 +67,21 @@ namespace Drash
             storyboard.Children.Add(anim);
 
             // scalex
-            anim = new DoubleAnimation() { Duration = ms300, To = 0.9 };
-            Storyboard.SetTarget(anim, element);
-            Storyboard.SetTargetProperty(anim, "(UIElement.RenderTransform).(CompositeTransform.ScaleX)");
-            storyboard.Children.Add(anim);
+            var bump = KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(80));
+            var kfanim = new DoubleAnimationUsingKeyFrames() { Duration = ms300 };
+            kfanim.KeyFrames.Add(new EasingDoubleKeyFrame() { KeyTime = bump, Value = 1.02 });
+            kfanim.KeyFrames.Add(new EasingDoubleKeyFrame() { KeyTime = ms300, Value = 0.9 });
+            Storyboard.SetTarget(kfanim, element);
+            Storyboard.SetTargetProperty(kfanim, "(UIElement.RenderTransform).(CompositeTransform.ScaleX)");
+            storyboard.Children.Add(kfanim);
 
             // scaley
-            anim = new DoubleAnimation() { Duration = ms300, To = 0.9 };
-            Storyboard.SetTarget(anim, element);
-            Storyboard.SetTargetProperty(anim, "(UIElement.RenderTransform).(CompositeTransform.ScaleY)");
-            storyboard.Children.Add(anim);
+            kfanim = new DoubleAnimationUsingKeyFrames() { Duration = ms300 };
+            kfanim.KeyFrames.Add(new EasingDoubleKeyFrame() { KeyTime = bump, Value = 1.02 });
+            kfanim.KeyFrames.Add(new EasingDoubleKeyFrame() { KeyTime = ms300, Value = 0.9 });
+            Storyboard.SetTarget(kfanim, element);
+            Storyboard.SetTargetProperty(kfanim, "(UIElement.RenderTransform).(CompositeTransform.ScaleY)");
+            storyboard.Children.Add(kfanim);
 
             storyboard.Begin(callback);
         }
