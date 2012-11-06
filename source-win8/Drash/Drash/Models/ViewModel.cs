@@ -82,7 +82,6 @@ namespace Drash.Models
             }
         }
 
-        //
         public ImageSource IntensityImage
         {
             get { return intensityImage; }
@@ -125,9 +124,15 @@ namespace Drash.Models
             }
         }
 
+        public DrashState State
+        {
+            get { return Model != null ? Model.State : DrashState.NoLocation; }
+        }
+
         #endregion
 
         private Model Model { get; set; }
+
         public Path GraphView
         {
             get { return graphView; }
@@ -410,13 +415,12 @@ namespace Drash.Models
                 pointValues = rainData.Points.Take(25).Select(p => p.AdjustedValue).ToList();
 
             while (pointValues.Count < 25)
-                pointValues.Add(0);
+                pointValues.Add(pointValues.LastOrDefault());
 
             var path = GraphView.Data as PathGeometry;
             var graphSize = new Size(GraphContainer.ActualWidth, GraphContainer.ActualHeight);
-            Debug.WriteLine("c={0} g={1}", graphSize, new Size(GraphView.ActualWidth, GraphView.ActualHeight));
             var step = graphSize.Width / Model.Entries;
-            Func<int, double> xForIndex = idx => idx == 0 ? -2 : idx >= Model.Entries ? graphSize.Width + 2 : idx * step;
+            Func<int, double> xForIndex = idx => idx == 0 ? -2 : idx * step;
 
             var x = 0;
             var max = (graphSize.Height / 12.0 * 11.0) - 10;
@@ -427,6 +431,7 @@ namespace Drash.Models
                 x++;
                 return p;
             }).ToList();
+            points.Add(new Point(graphSize.Width + 2, points.Last().Y));
             points.Add(new Point(graphSize.Width + 2, graphSize.Height + 2));
 
             PathFigure figure;
@@ -489,7 +494,7 @@ namespace Drash.Models
 
             View.Dispatcher.RunAsync(
                 CoreDispatcherPriority.Normal,
-                () => VisualStateManager.GoToState(View, state.ToString(), true));
+                () => OnPropertyChanged(() => State));
         }
 
         public void Zoomed(double velocity)
@@ -500,7 +505,9 @@ namespace Drash.Models
 
             if (entries != Model.Entries) {
                 Model.Entries = entries;
+                Animatable.Enabled = false;
                 UpdateVisuals();
+                Animatable.Enabled = true;
             }
         }
     }

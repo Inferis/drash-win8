@@ -109,8 +109,10 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="Common\BindableBase.cs" />
+    <Compile Include="Common\Animatable.cs" />
     <Compile Include="Common\BooleanNegationConverter.cs" />
     <Compile Include="Common\BooleanToVisibilityConverter.cs" />
+    <Compile Include="Common\DrashStateToVisibilityConverter.cs" />
     <Compile Include="Common\PercentageConverter.cs" />
     <Compile Include="Common\LayoutAwarePage.cs" />
     <Compile Include="Common\RichTextColumns.cs" />
@@ -174,6 +176,7 @@
     <Content Include="Assets\nolocation.png" />
     <Content Include="Assets\nonetwork.png" />
     <Content Include="Assets\Splash.jpg" />
+    <Content Include="Assets\swipe.png" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
