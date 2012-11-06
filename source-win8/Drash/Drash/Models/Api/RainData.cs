@@ -58,7 +58,7 @@ namespace Drash.Models.Api
 
         public double PrecipitationForEntries(int entries)
         {
-            var totalPrecipitation = Points.Take(entries).Sum(point => point.Precipitation / 6.0 * 5.0);
+            var totalPrecipitation = Points.Take(entries).Sum(point => point.Precipitation / 60.0 * 5.0);
 
             if (ChanceForEntries(entries) > 0)
                 totalPrecipitation = Math.Max(0.001, totalPrecipitation);
@@ -75,9 +75,10 @@ namespace Drash.Models.Api
                 if (lines.Length == 0)
                     return null;
 
-                var rnd = new Random();
-                var points = lines.Select(RainPoint.Parse); //.Select((x, i) => new RainPoint(x.Stamp, rnd.Next(20 + i * 10)));
-                points = points.SkipWhile(p => p.Stamp.AddMinutes(5) < DateTime.Now);
+                var points = lines.Select(RainPoint.Parse).SkipWhile(p => p.Stamp.AddMinutes(5) < DateTime.Now).ToList();
+
+                var last = points.LastOrDefault() ?? new RainPoint(DateTime.Now, 0);
+                points = points.Concat(Enumerable.Range(0, 24 - points.Count).Select(x => last)).ToList();
 
                 return new RainData(points.ToList());
             });
