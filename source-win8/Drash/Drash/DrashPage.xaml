@@ -58,102 +58,9 @@
             </TransitionCollection>
         </Grid.ChildrenTransitions>
 
-        <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding State, Converter={StaticResource DrashStateFindingLocationConverter}}" x:Name="FindingLocationError">
-            <Grid.Transitions>
-                <TransitionCollection>
-                    <EntranceThemeTransition/>
-                </TransitionCollection>
-            </Grid.Transitions>
-            
-            <Image Stretch="None" x:Name="NoLocationImage" Source="ms-appx:/Assets/nolocation.png" RenderTransformOrigin="0.5,0.5">
-
-                <Image.RenderTransform>
-                    <CompositeTransform />
-                </Image.RenderTransform>
-                
-                <Image.Triggers>
-                    <EventTrigger RoutedEvent="Image.Loaded">
-                        <BeginStoryboard>
-                            <Storyboard Duration="0:0:1" RepeatBehavior="Forever">
-                                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NoLocationImage" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleX)">
-                                    <LinearDoubleKeyFrame KeyTime="0:0:0.250" Value="1.05" />
-                                    <LinearDoubleKeyFrame KeyTime="0:0:0.500" Value="1" />
-                                    <LinearDoubleKeyFrame KeyTime="0:0:0.750" Value="0.95" />
-                                    <LinearDoubleKeyFrame KeyTime="0:0:1" Value="1" />
-                                </DoubleAnimationUsingKeyFrames>
-                                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NoLocationImage" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleY)">
-                                    <LinearDoubleKeyFrame KeyTime="0:0:0.250" Value="1.05" />
-                                    <LinearDoubleKeyFrame KeyTime="0:0:0.500" Value="1" />
-                                    <LinearDoubleKeyFrame KeyTime="0:0:0.750" Value="0.95" />
-                                    <LinearDoubleKeyFrame KeyTime="0:0:1" Value="1" />
-                                </DoubleAnimationUsingKeyFrames>
-                            </Storyboard>
-
-                        </BeginStoryboard>
-                    </EventTrigger>
-                </Image.Triggers>
-            </Image>
-
-            <ProgressRing Width="300" Height="300" IsActive="true" Foreground="#ffeeeeee"  />
-        </Grid>
-
-        <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding State, Converter={StaticResource DrashStateNoLocationConverter}}"
-              x:Name="NoLocationError"
-              Tapped="NoLocationError_OnTapped">
-            <Grid.Transitions>
-                <TransitionCollection>
-                    <EntranceThemeTransition/>
-                </TransitionCollection>
-            </Grid.Transitions>
-            
-            <Image Stretch="None" Source="ms-appx:/Assets/nolocation.png" RenderTransformOrigin="0.5,0.5">
-                <Image.RenderTransform>
-                    <CompositeTransform />
-                </Image.RenderTransform>
-            </Image>
-
-            <StackPanel>
-                <TextBlock Margin="0,250,0,0" Text="Location disabled." 
-                       Foreground="#333333"
-                       FontSize="30" FontFamily="Segoe UI Light" />
-                <TextBlock 
-                       Foreground="#666666"
-                       FontSize="20" FontFamily="Segoe UI Light">
-                    <Run Text="Enable location (Settings -> Permissions)," />
-                    <Run Text="then tap the icon to restart rain detection." />
-                </TextBlock>
-            </StackPanel>
-        </Grid>
-
-        <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding State, Converter={StaticResource DrashStateStartingConverter}}">
-            <Grid.Transitions>
-                <TransitionCollection>
-                    <EntranceThemeTransition/>
-                </TransitionCollection>
-            </Grid.Transitions>
-
-            <Image Stretch="None" Source="ms-appx:/Assets/SplashScreen.png" RenderTransformOrigin="0.5,0.5">
-                <Image.RenderTransform>
-                    <CompositeTransform />
-                </Image.RenderTransform>
-            </Image>
-        </Grid>
-
-        <Image Stretch="None" Visibility="{Binding State, Converter={StaticResource DrashStateNoNetworkConverter}}" x:Name="NoNetworkError" Source="ms-appx:/Assets/nonetwork.png" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
-            <Image.Transitions>
-                <TransitionCollection>
-                    <EntranceThemeTransition/>
-                </TransitionCollection>
-            </Image.Transitions>
-
-            <Image.RenderTransform>
-                <CompositeTransform />
-            </Image.RenderTransform>
-        </Image>
-
-        <Grid x:Name="pageRoot" Visibility="{Binding State, Converter={StaticResource DrashStateGoodConverter}}" Style="{StaticResource LayoutRootStyle}"  
+        <Grid x:Name="drashPageRoot" Visibility="{Binding State, Converter={StaticResource DrashStateGoodConverter}}" Style="{StaticResource LayoutRootStyle}"  
               RenderTransformOrigin="0.5,1" 
-              Margin="90,0,0,30" Background="{StaticResource AppBarItemBackgroundThemeBrush}">
+              Margin="90,0,0,30" Background="White">
             <Grid.RenderTransform>
                 <CompositeTransform />
             </Grid.RenderTransform>
@@ -168,7 +75,7 @@
                 <RowDefinition Height="0" x:Name="BottomRow"/>
             </Grid.RowDefinitions>
 
-            <Grid x:Name="titlePanel" Grid.ColumnSpan="2" Margin="30,0,0,0">
+            <Grid x:Name="titlePanel" Grid.ColumnSpan="2" Margin="20,0,0,0">
                 <TextBlock x:Name="pageTitle" 
                         Text="{Binding Location}" Foreground="#991e4c67"
                         Style="{StaticResource PageHeaderTextStyle}" 
@@ -285,193 +192,192 @@
 
         </Grid>
 
+        <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding State, Converter={StaticResource DrashStateFindingLocationConverter}}" x:Name="FindingLocationError" d:IsHidden="True">
+            <Grid.Transitions>
+                <TransitionCollection>
+                    <EntranceThemeTransition/>
+                </TransitionCollection>
+            </Grid.Transitions>
+
+            <Image Stretch="None" x:Name="NoLocationImage" Source="ms-appx:/Assets/nolocation.png" RenderTransformOrigin="0.5,0.5">
+
+                <Image.RenderTransform>
+                    <CompositeTransform />
+                </Image.RenderTransform>
+
+                <Image.Triggers>
+                    <EventTrigger RoutedEvent="Image.Loaded">
+                        <BeginStoryboard>
+                            <Storyboard Duration="0:0:1" RepeatBehavior="Forever">
+                                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NoLocationImage" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleX)">
+                                    <LinearDoubleKeyFrame KeyTime="0:0:0.250" Value="1.05" />
+                                    <LinearDoubleKeyFrame KeyTime="0:0:0.500" Value="1" />
+                                    <LinearDoubleKeyFrame KeyTime="0:0:0.750" Value="0.95" />
+                                    <LinearDoubleKeyFrame KeyTime="0:0:1" Value="1" />
+                                </DoubleAnimationUsingKeyFrames>
+                                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NoLocationImage" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleY)">
+                                    <LinearDoubleKeyFrame KeyTime="0:0:0.250" Value="1.05" />
+                                    <LinearDoubleKeyFrame KeyTime="0:0:0.500" Value="1" />
+                                    <LinearDoubleKeyFrame KeyTime="0:0:0.750" Value="0.95" />
+                                    <LinearDoubleKeyFrame KeyTime="0:0:1" Value="1" />
+                                </DoubleAnimationUsingKeyFrames>
+                            </Storyboard>
+
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </Image.Triggers>
+            </Image>
+
+            <ProgressRing Width="300" Height="300" IsActive="true" Foreground="#ffeeeeee"  />
+        </Grid>
+
+        <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding State, Converter={StaticResource DrashStateNoLocationConverter}}"
+              x:Name="NoLocationError"
+              Tapped="NoLocationError_OnTapped" d:IsHidden="True">
+            <Grid.Transitions>
+                <TransitionCollection>
+                    <EntranceThemeTransition/>
+                </TransitionCollection>
+            </Grid.Transitions>
+
+            <Image Stretch="None" Source="ms-appx:/Assets/nolocation.png" RenderTransformOrigin="0.5,0.5">
+                <Image.RenderTransform>
+                    <CompositeTransform />
+                </Image.RenderTransform>
+            </Image>
+
+            <StackPanel>
+                <TextBlock Margin="0,250,0,0" Text="Location disabled." 
+                       Foreground="#333333"
+                       FontSize="30" FontFamily="Segoe UI Light" />
+                <TextBlock 
+                       Foreground="#666666"
+                       FontSize="20" FontFamily="Segoe UI Light">
+                    <Run Text="Enable location (Settings -> Permissions)," />
+                    <Run Text="then tap the icon to restart rain detection." />
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding State, Converter={StaticResource DrashStateStartingConverter}}" d:IsHidden="True">
+            <Grid.Transitions>
+                <TransitionCollection>
+                    <EntranceThemeTransition/>
+                </TransitionCollection>
+            </Grid.Transitions>
+
+            <Image Stretch="None" Source="ms-appx:/Assets/SplashScreen.png" RenderTransformOrigin="0.5,0.5">
+                <Image.RenderTransform>
+                    <CompositeTransform />
+                </Image.RenderTransform>
+            </Image>
+        </Grid>
+
+        <Image Stretch="None" Visibility="{Binding State, Converter={StaticResource DrashStateNoNetworkConverter}}" x:Name="NoNetworkError" Source="ms-appx:/Assets/nonetwork.png" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5" d:IsHidden="True">
+            <Image.Transitions>
+                <TransitionCollection>
+                    <EntranceThemeTransition/>
+                </TransitionCollection>
+            </Image.Transitions>
+
+            <Image.RenderTransform>
+                <CompositeTransform />
+            </Image.RenderTransform>
+        </Image>
+
         <VisualStateManager.VisualStateGroups>
-            <!--
-            <VisualStateGroup x:Name="LogicalViewStates">
-                <VisualState x:Name="Good">
-                    <Storyboard Duration="0:0:0.300">
-                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="pageRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleX)">
-                            <DiscreteDoubleKeyFrame KeyTime="0" Value="0.9"/>
-                            <EasingDoubleKeyFrame KeyTime="0:0:0.300" Value="1">
-                                <EasingDoubleKeyFrame.EasingFunction>
-                                    <CubicEase EasingMode="EaseOut"  />
-                                </EasingDoubleKeyFrame.EasingFunction>
-                            </EasingDoubleKeyFrame>
-                        </DoubleAnimationUsingKeyFrames>
-                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="pageRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleY)">
-                            <DiscreteDoubleKeyFrame KeyTime="0" Value="0.9"/>
-                            <EasingDoubleKeyFrame KeyTime="0:0:0.300" Value="1">
-                                <EasingDoubleKeyFrame.EasingFunction>
-                                    <CubicEase EasingMode="EaseOut"  />
-                                </EasingDoubleKeyFrame.EasingFunction>
-                            </EasingDoubleKeyFrame>
-                        </DoubleAnimationUsingKeyFrames>
-                        <DoubleAnimation Duration="0:0:0.150" To="1" Storyboard.TargetName="pageRoot" Storyboard.TargetProperty="Opacity" />
-                        <DoubleAnimation Duration="0:0:0.300" To="0" Storyboard.TargetName="NoLocationError" Storyboard.TargetProperty="Opacity" />
-                        <DoubleAnimation Duration="0:0:0.300" To="0" Storyboard.TargetName="NoNetworkError" Storyboard.TargetProperty="Opacity" />
-                    </Storyboard>
-                </VisualState>
-
-                <VisualState x:Name="NoNetwork">
-                    <Storyboard Duration="0:0:0.300">
-                        <DoubleAnimation Duration="0:0:0.150" To="0" Storyboard.TargetName="pageRoot" Storyboard.TargetProperty="Opacity" />
-                        <DoubleAnimation Duration="0:0:0.150" To="0" Storyboard.TargetName="NoLocationError" Storyboard.TargetProperty="Opacity" />
-                        <DoubleAnimation Duration="0:0:0.150" To="1" Storyboard.TargetName="NoNetworkError" Storyboard.TargetProperty="Opacity" />
-                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NoNetworkError" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleX)">
-                            <DiscreteDoubleKeyFrame KeyTime="0" Value="0.9"/>
-                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.150" Value="0.9"/>
-                            <EasingDoubleKeyFrame KeyTime="0:0:0.300" Value="1">
-                                <EasingDoubleKeyFrame.EasingFunction>
-                                    <ElasticEase EasingMode="EaseOut" Oscillations="3" />
-                                </EasingDoubleKeyFrame.EasingFunction>
-                            </EasingDoubleKeyFrame>
-                        </DoubleAnimationUsingKeyFrames>
-                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NoNetworkError" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleY)">
-                            <DiscreteDoubleKeyFrame KeyTime="0" Value="0.9"/>
-                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.150" Value="0.9"/>
-                            <EasingDoubleKeyFrame KeyTime="0:0:0.300" Value="1">
-                                <EasingDoubleKeyFrame.EasingFunction>
-                                    <ElasticEase EasingMode="EaseOut" Oscillations="3" />
-                                </EasingDoubleKeyFrame.EasingFunction>
-                            </EasingDoubleKeyFrame>
-                        </DoubleAnimationUsingKeyFrames>
-                    </Storyboard>
-                </VisualState>
-
-                <VisualState x:Name="NoLocation">
-                    <Storyboard Duration="0:0:0.300">
-                        <DoubleAnimation Duration="0:0:0.150" To="0" Storyboard.TargetName="pageRoot" Storyboard.TargetProperty="Opacity" />
-                        <DoubleAnimation Duration="0:0:0.150" To="0" Storyboard.TargetName="NoNetworkError" Storyboard.TargetProperty="Opacity" />
-                        <DoubleAnimation Duration="0:0:0.150" To="1" Storyboard.TargetName="NoLocationError" Storyboard.TargetProperty="Opacity" />
-                        <DoubleAnimation Duration="0:0:0.150" To="1" Storyboard.TargetName="NoLocationError" Storyboard.TargetProperty="Opacity" />
-                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NoLocationError" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleX)">
-                            <DiscreteDoubleKeyFrame KeyTime="0" Value="0.9"/>
-                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.150" Value="0.9"/>
-                            <EasingDoubleKeyFrame KeyTime="0:0:0.300" Value="1">
-                                <EasingDoubleKeyFrame.EasingFunction>
-                                    <ElasticEase EasingMode="EaseOut" Oscillations="3" />
-                                </EasingDoubleKeyFrame.EasingFunction>
-                            </EasingDoubleKeyFrame>
-                        </DoubleAnimationUsingKeyFrames>
-                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NoLocationError" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleY)">
-                            <DiscreteDoubleKeyFrame KeyTime="0" Value="0.9"/>
-                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.150" Value="0.9"/>
-                            <EasingDoubleKeyFrame KeyTime="0:0:0.300" Value="1">
-                                <EasingDoubleKeyFrame.EasingFunction>
-                                    <ElasticEase EasingMode="EaseOut" Oscillations="3" />
-                                </EasingDoubleKeyFrame.EasingFunction>
-                            </EasingDoubleKeyFrame>
-                        </DoubleAnimationUsingKeyFrames>
-                    </Storyboard>
-                </VisualState>
-
-                <VisualState x:Name="FindingLocation">
-                    <Storyboard Duration="0:0:0.300">
-                        <DoubleAnimation Duration="0:0:0.150" To="0" Storyboard.TargetName="pageRoot" Storyboard.TargetProperty="Opacity" />
-                        <DoubleAnimation Duration="0:0:0.150" To="0" Storyboard.TargetName="NoNetworkError" Storyboard.TargetProperty="Opacity" />
-                        <DoubleAnimation Duration="0:0:0.150" To="1" Storyboard.TargetName="NoLocationError" Storyboard.TargetProperty="Opacity" />
-                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NoLocationError" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleX)">
-                            <DiscreteDoubleKeyFrame KeyTime="0" Value="0.9"/>
-                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.150" Value="0.9"/>
-                            <EasingDoubleKeyFrame KeyTime="0:0:0.300" Value="1">
-                                <EasingDoubleKeyFrame.EasingFunction>
-                                    <ElasticEase EasingMode="EaseOut" Oscillations="3" />
-                                </EasingDoubleKeyFrame.EasingFunction>
-                            </EasingDoubleKeyFrame>
-                        </DoubleAnimationUsingKeyFrames>
-                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NoLocationError" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleY)">
-                            <DiscreteDoubleKeyFrame KeyTime="0" Value="0.9"/>
-                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.150" Value="0.9"/>
-                            <EasingDoubleKeyFrame KeyTime="0:0:0.300" Value="1">
-                                <EasingDoubleKeyFrame.EasingFunction>
-                                    <ElasticEase EasingMode="EaseOut" Oscillations="3" />
-                                </EasingDoubleKeyFrame.EasingFunction>
-                            </EasingDoubleKeyFrame>
-                        </DoubleAnimationUsingKeyFrames>
-                    </Storyboard>
-                </VisualState>
-
-            </VisualStateGroup>
-            -->
-
             <VisualStateGroup x:Name="ApplicationViewStates">
                 <VisualState x:Name="FullScreenLandscape">
-                    <Storyboard Duration="0:0:0.150" />
+                    <Storyboard Duration="0:0:0" />
                 </VisualState>
                 <VisualState x:Name="Filled">
-                    <Storyboard Duration="0:0:0.150" />
+                    <Storyboard Duration="0:0:0" />
                 </VisualState>
 
                 <VisualState x:Name="Snapped">
-                    <Storyboard Duration="0:0:0.150">
+                    <Storyboard Duration="0:0:0">
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ProgressBar" Storyboard.TargetProperty="Visibility">
                             <DiscreteObjectKeyFrame KeyTime="0" Value="Visible"/>
                         </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ProgressBar" Storyboard.TargetProperty="(Grid.ColumnSpan)">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="1"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="titlePanel" Storyboard.TargetProperty="(Grid.ColumnSpan)">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="1"/>
+                        </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PrimaryColumn" Storyboard.TargetProperty="Width">
-                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150"  Value="320"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0"  Value="320"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="GraphColumn" Storyboard.TargetProperty="Width">
-                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="0"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="0"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BottomRow" Storyboard.TargetProperty="Height">
-                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="*"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="*"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Chance" Storyboard.TargetProperty="FontSize">
-                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="70"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="70"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Precipitation" Storyboard.TargetProperty="FontSize">
-                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="20"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="20"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="pageTitle" Storyboard.TargetProperty="FontSize">
-                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="30"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="30"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="pageTitle" Storyboard.TargetProperty="TextWrapping">
-                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="Wrap"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="Wrap"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="GraphView" Storyboard.TargetProperty="(Grid.Column)">
-                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="0"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="0"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="GraphView" Storyboard.TargetProperty="(Grid.Row)">
-                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="3"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="3"/>
                         </ObjectAnimationUsingKeyFrames>
-                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="pageRoot" Storyboard.TargetProperty="MaxHeight">
-                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="600"/>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="drashPageRoot" Storyboard.TargetProperty="MaxHeight">
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="748"/>
                         </ObjectAnimationUsingKeyFrames>
-                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="pageRoot" Storyboard.TargetProperty="Margin">
-                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="0,0,0,30"/>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="drashPageRoot" Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="0,0,0,20"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="DataView" Storyboard.TargetProperty="Margin">
-                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="30,0,30,30"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0">
+                            	<DiscreteObjectKeyFrame.Value>
+                            		<Thickness>20,10,20,20</Thickness>
+                            	</DiscreteObjectKeyFrame.Value>
+                            </DiscreteObjectKeyFrame>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="GraphView" Storyboard.TargetProperty="Margin">
-                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="30,30,30,0"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0">
+                            	<DiscreteObjectKeyFrame.Value>
+                            		<Thickness>20,20,20,0</Thickness>
+                            	</DiscreteObjectKeyFrame.Value>
+                            </DiscreteObjectKeyFrame>
                         </ObjectAnimationUsingKeyFrames>
 
                     </Storyboard>
                 </VisualState>
 
                 <VisualState x:Name="FullScreenPortrait">
-                    <Storyboard Duration="0:0:0.150">
+                    <Storyboard Duration="0:0:0">
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ProgressBar" Storyboard.TargetProperty="Visibility">
                             <DiscreteObjectKeyFrame KeyTime="0" Value="Visible"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PrimaryColumn" Storyboard.TargetProperty="Width">
-                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="*"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="*"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="DataRow" Storyboard.TargetProperty="Height">
-                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="768"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="768"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="GraphColumn" Storyboard.TargetProperty="Width">
-                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="0"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="0"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BottomRow" Storyboard.TargetProperty="Height">
-                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="*"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="*"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="GraphView" Storyboard.TargetProperty="(Grid.Column)">
-                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="0"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="0"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="GraphView" Storyboard.TargetProperty="(Grid.Row)">
-                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="3" />
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="3" />
                         </ObjectAnimationUsingKeyFrames>
                     </Storyboard>
                 </VisualState>

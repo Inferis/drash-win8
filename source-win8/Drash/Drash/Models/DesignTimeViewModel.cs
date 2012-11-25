@@ -14,6 +14,7 @@ namespace Drash.Models
                 .Select(x => new RainPoint(DateTime.Now.AddMinutes(5 * x), random.Next(50 + x * 7, 255)))
                 .ToList();
 
+            Model.State = DrashState.Good;
             Location = "Someplace, Somewhere";
             Chance = "75%";
             IntensityImage = new BitmapImage(new Uri("ms-appx:/Assets/Intensity3.png", UriKind.Absolute));

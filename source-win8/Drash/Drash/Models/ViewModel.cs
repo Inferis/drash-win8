@@ -133,7 +133,7 @@ namespace Drash.Models
 
         #endregion
 
-        private Model Model { get; set; }
+        protected Model Model { get; set; }
 
         public Path GraphView
         {
