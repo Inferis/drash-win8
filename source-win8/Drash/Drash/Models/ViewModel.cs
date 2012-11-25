@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Net.NetworkInformation;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Drash.Common;
 using Drash.Models.Api;
@@ -12,6 +13,7 @@ using Windows.Devices.Geolocation;
 using Windows.Foundation;
 using Windows.UI;
 using Windows.UI.Core;
+using Windows.UI.Notifications;
 using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Media;
@@ -26,7 +28,7 @@ namespace Drash.Models
         private LayoutAwarePage view;
         private Geolocator geolocator;
         private DelayedAction delayedLocationUpdate, nextRainUpdate;
-        private bool firstFetch = true;
+        private bool firstFetch = true, noLocationData = false;
         private bool fetchingRain = false;
         private bool isBusy;
         private string location;
@@ -39,6 +41,7 @@ namespace Drash.Models
         private Path graphView;
         private FrameworkElement graphContainer;
         private string entriesDescription;
+        private bool forced;
 
         public LayoutAwarePage View
         {
@@ -165,6 +168,7 @@ namespace Drash.Models
         public ViewModel()
         {
             RefreshCommand = new ActionCommand(FetchRain);
+
         }
 
         public ViewModel(Model model)
@@ -196,6 +200,7 @@ namespace Drash.Models
             };
             geolocator.StatusChanged += async (o, args) => {
                 Debug.WriteLine("status changed " + args.Status);
+                noLocationData = false;
                 if (args.Status == PositionStatus.Ready) {
                     try {
                         Debug.WriteLine("getting pos");
@@ -207,31 +212,29 @@ namespace Drash.Models
                         Debug.WriteLine("status Failed");
                     }
                 }
-                else {
+                else if (args.Status == PositionStatus.Disabled || args.Status == PositionStatus.NotAvailable || args.Status == PositionStatus.NoData) {
+                    noLocationData = true;
                     UpdateLocation(null);
                 }
+
             };
         }
 
         private bool UpdateLocation(Geoposition newLocation)
         {
             if (newLocation == null || newLocation.Coordinate == null) {
-                Debug.WriteLine("Update location null");
                 Model.LocationName = "";
                 Model.GoodLocationName = false;
                 UpdateState();
                 return false;
             }
 
-            Debug.WriteLine("Update location");
-            Debug.WriteLine(Model.Location != null ? Model.Location.GetDistanceTo(newLocation.Coordinate).ToString() : "000");
             var delay = firstFetch || Model.Location == null ||
                         Model.Location.GetDistanceTo(newLocation.Coordinate) > 500
                             ? 0
                             : 2000;
-            Debug.WriteLine("Delay = ", delay);
             delayedLocationUpdate.Run(async () => {
-                Debug.WriteLine("Actually updating");
+                await Task.Delay(2000);
                 Model.Location = newLocation.Coordinate;
                 if (newLocation.CivicAddress == null || string.IsNullOrEmpty(newLocation.CivicAddress.City) || string.IsNullOrEmpty(newLocation.CivicAddress.Country)) {
                     var glocator = new GoogleAddressResolver();
@@ -258,7 +261,6 @@ namespace Drash.Models
         {
             if (fetchingRain) return;
 
-            Debug.WriteLine("fetching rain");
             nextRainUpdate.Cancel();
             if (Model.Location == null) {
                 // no location, schedule new fetch
@@ -276,7 +278,6 @@ namespace Drash.Models
 
             fetchingRain = true;
             UpdateBusy();
-            firstFetch = false;
 
             try {
                 MessageDialog dialog = null;
@@ -285,11 +286,13 @@ namespace Drash.Models
                     var uri = string.Format(CultureInfo.InvariantCulture, "http://gps.buienradar.nl/getrr.php?lat={0:0.000000}&lon={1:0.000000}&stamp={2}", Model.Location.Latitude, Model.Location.Longitude, DateTime.UtcNow.Ticks);
 
                     var wc = new HttpClient();
+                    await Task.Delay(3000);
                     var result = await wc.GetAsync(uri);
                     if (result.IsSuccessStatusCode) {
                         Model.Rain = await RainData.TryParseAsync(await result.Content.ReadAsStringAsync());
                     }
                     Model.RainWasUpdated = true;
+                    firstFetch = false;
                 }
                 catch (Exception ex) {
                     dialog = new MessageDialog("Could not fetch rain data. An error occured.") {
@@ -325,7 +328,7 @@ namespace Drash.Models
                 }
 
                 if (Model.Location == null) {
-                    GoToState(DrashState.NoLocation);
+                    GoToState(noLocationData ? DrashState.NoLocation : DrashState.FindingLocation);
                     return;
                 }
 
@@ -348,9 +351,10 @@ namespace Drash.Models
 
         }
 
-        private void VisualizeRain(RainData rainData)
+        private async void VisualizeRain(RainData rainData)
         {
-            var animated = Model.RainWasUpdated;
+            if (Model.RainWasUpdated)
+                Animatable.Mode = AnimatableMode.Forced;
             Model.RainWasUpdated = false;
 
             string chanceText;
@@ -387,6 +391,7 @@ namespace Drash.Models
                 mmText = "0";
                 mmImage = "0";
             }
+            mmText = mmText + "\nmm";
 
             string night;
             if (intensity == 0 && Model.Location != null) {
@@ -399,11 +404,20 @@ namespace Drash.Models
             }
             mmImage = string.Format("ms-appx:/Assets/intensity{0}{1}.png", mmImage, night);
 
+            // we have to jump through silly hoops to have the text change
+            if (Animatable.Mode == AnimatableMode.Forced) {
+                Animatable.Mode = AnimatableMode.Disabled;
+                if (Chance == chanceText) Chance = null;
+                if (Precipitation == mmText) Precipitation = null;
+                Animatable.Mode = AnimatableMode.Forced;
+            }
             Chance = chanceText;
-            Precipitation = mmText + "\nmm";
+            Precipitation = mmText;
+
             IntensityImage = new BitmapImage(new Uri(mmImage));
 
-            //VisualizeGraph(rainData, animated);
+            await Task.Delay(500);
+            Animatable.Mode = AnimatableMode.Enabled;
         }
 
         private void VisualizeGraph(RainData rainData, bool animated = true)
@@ -497,7 +511,7 @@ namespace Drash.Models
                 () => OnPropertyChanged(() => State));
         }
 
-        public void Zoomed(double velocity)
+        public async void Zoomed(double velocity)
         {
             var factor = 1 + (int)Math.Floor(Math.Abs(velocity / 1000.0));
             var entries = Model.Entries + (velocity < 0 ? 3 : -3) * factor;
@@ -505,9 +519,10 @@ namespace Drash.Models
 
             if (entries != Model.Entries) {
                 Model.Entries = entries;
-                Animatable.Enabled = false;
+                Animatable.Mode = AnimatableMode.Disabled;
                 UpdateVisuals();
-                Animatable.Enabled = true;
+                await Task.Delay(250);
+                Animatable.Mode = AnimatableMode.Enabled;
             }
         }
     }

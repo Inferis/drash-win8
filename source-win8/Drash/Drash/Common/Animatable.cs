@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
@@ -6,12 +7,19 @@ using Windows.UI.Xaml.Media.Imaging;
 
 namespace Drash.Common
 {
-    public class Animatable : DependencyObject
+    enum AnimatableMode
     {
-        public static bool Enabled { get; set; }
+        Enabled,
+        Disabled,
+        Forced
+    }
+    
+    class Animatable : DependencyObject
+    {
+        public static AnimatableMode Mode { get; set; }
         static Animatable()
         {
-            Enabled = true;
+            Mode = AnimatableMode.Enabled;
         }
 
         #region Source
@@ -26,10 +34,7 @@ namespace Drash.Common
             if (target != null) {
                 var oldSource = e.OldValue as BitmapImage != null ? ((BitmapImage)e.OldValue).UriSource : null;
                 var newSource = e.NewValue as BitmapImage != null ? ((BitmapImage)e.NewValue).UriSource : null;
-                if (Equals(oldSource, newSource))
-                    return;
-
-                Animate(target, t => t.SetValue(Image.SourceProperty, e.NewValue));
+                Animate(oldSource, newSource, target, t => t.SetValue(Image.SourceProperty, e.NewValue));
             }
 
         }
@@ -53,17 +58,19 @@ namespace Drash.Common
         {
             var target = d as TextBlock;
             if (target != null) {
-                if (e.OldValue == e.NewValue)
-                    return;
-
-                Animate(target, t => t.SetValue(TextBlock.TextProperty, e.NewValue));
+                Animate(e.OldValue, e.NewValue, target, t => t.SetValue(TextBlock.TextProperty, e.NewValue));
             }
 
         }
 
-        private static void Animate(FrameworkElement target, Action<DependencyObject> action)
+        private static void Animate(object oldValue, object newValue, FrameworkElement target, Action<DependencyObject> action)
         {
-            if (Enabled)
+            Debug.WriteLine("{3}: {2} = {0} -> {1}", oldValue, newValue, target == null ? "?" : target.Name, Mode);
+
+            if (Equals(oldValue, newValue) && Mode != AnimatableMode.Forced)
+                return;
+
+            if (Mode != AnimatableMode.Disabled)
                 target.FadeOutThenIn(() => action(target));
             else 
                 action(target);
@@ -71,8 +78,6 @@ namespace Drash.Common
 
         public static void SetText(DependencyObject target, string text)
         {
-            if (Enabled) return;
-            target.SetValue(TextBlock.TextProperty, text);
         }
 
         public static string GetText(DependencyObject target)

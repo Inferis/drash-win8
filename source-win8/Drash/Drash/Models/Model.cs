@@ -8,7 +8,7 @@ namespace Drash.Models
         public Model()
         {
             Rain = null;
-            State = DrashState.Good;
+            State = DrashState.NoLocation;
             RainWasUpdated = false;
             Entries = 6;
         }

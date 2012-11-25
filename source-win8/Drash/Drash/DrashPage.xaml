@@ -17,12 +17,13 @@
 
         <common:PercentageConverter x:Key="EightyPercentConverter" Percentage="80" />
         <common:DrashStateToVisibilityConverter x:Key="DrashStateGoodConverter" VisibleForState="Good" />
+        <common:DrashStateToVisibilityConverter x:Key="DrashStateFindingLocationConverter" VisibleForState="FindingLocation" />
         <common:DrashStateToVisibilityConverter x:Key="DrashStateNoLocationConverter" VisibleForState="NoLocation" />
         <common:DrashStateToVisibilityConverter x:Key="DrashStateNoNetworkConverter" VisibleForState="NoNetwork" />
 
     </common:LayoutAwarePage.Resources>
     <common:LayoutAwarePage.BottomAppBar>
-        <AppBar x:Name="Appbar" >
+        <AppBar x:Name="Appbar">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
@@ -33,7 +34,8 @@
                     <Button
 						AutomationProperties.Name="Refresh"
 						Style="{StaticResource RefreshAppBarButtonStyle}"
-						Command="{Binding RefreshCommand}" >
+						Command="{Binding RefreshCommand}"
+                        Tapped="Button_Tapped_1">
                         <Button.Resources>
                             <ResourceDictionary>
                                 <ResourceDictionary.MergedDictionaries>
@@ -48,13 +50,61 @@
     </common:LayoutAwarePage.BottomAppBar>
 
     <Grid Background="White">
-        <Image Stretch="None" Visibility="{Binding State, Converter={StaticResource DrashStateNoLocationConverter}}" x:Name="NoLocationError" Source="ms-appx:/Assets/nolocation.png" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
-            <Image.RenderTransform>
-                <CompositeTransform />
-            </Image.RenderTransform>
-        </Image>
+        <Grid.ChildrenTransitions>
+            <TransitionCollection>
+                <EntranceThemeTransition />
+                <RepositionThemeTransition />
+            </TransitionCollection>
+        </Grid.ChildrenTransitions>
+
+        <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding State, Converter={StaticResource DrashStateFindingLocationConverter}}" x:Name="FindingLocation">
+            <Image Stretch="None" x:Name="NoLocationImage" Source="ms-appx:/Assets/nolocation.png" RenderTransformOrigin="0.5,0.5">
+
+                <Image.RenderTransform>
+                    <CompositeTransform />
+                </Image.RenderTransform>
+                
+                <Image.Triggers>
+                    <EventTrigger RoutedEvent="Image.Loaded">
+                        <BeginStoryboard>
+                            <Storyboard Duration="0:0:1" RepeatBehavior="Forever">
+                                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NoLocationImage" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleX)">
+                                    <LinearDoubleKeyFrame KeyTime="0:0:0.250" Value="1.05" />
+                                    <LinearDoubleKeyFrame KeyTime="0:0:0.500" Value="1" />
+                                    <LinearDoubleKeyFrame KeyTime="0:0:0.750" Value="0.95" />
+                                    <LinearDoubleKeyFrame KeyTime="0:0:1" Value="1" />
+                                </DoubleAnimationUsingKeyFrames>
+                                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NoLocationImage" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleY)">
+                                    <LinearDoubleKeyFrame KeyTime="0:0:0.250" Value="1.05" />
+                                    <LinearDoubleKeyFrame KeyTime="0:0:0.500" Value="1" />
+                                    <LinearDoubleKeyFrame KeyTime="0:0:0.750" Value="0.95" />
+                                    <LinearDoubleKeyFrame KeyTime="0:0:1" Value="1" />
+                                </DoubleAnimationUsingKeyFrames>
+                            </Storyboard>
+
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </Image.Triggers>
+            </Image>
+
+            <ProgressRing Width="300" Height="300" IsActive="true" Foreground="#ffeeeeee"  />
+        </Grid>
+
+        <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding State, Converter={StaticResource DrashStateNoLocationConverter}}" x:Name="NoLocationError">
+            <Image Stretch="None" Source="ms-appx:/Assets/nolocation.png" RenderTransformOrigin="0.5,0.5">
+                <Image.RenderTransform>
+                    <CompositeTransform />
+                </Image.RenderTransform>
+            </Image>
+        </Grid>
 
         <Image Stretch="None" Visibility="{Binding State, Converter={StaticResource DrashStateNoNetworkConverter}}" x:Name="NoNetworkError" Source="ms-appx:/Assets/nonetwork.png" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
+            <Image.Transitions>
+                <TransitionCollection>
+                    <EntranceThemeTransition/>
+                </TransitionCollection>
+            </Image.Transitions>
+
             <Image.RenderTransform>
                 <CompositeTransform />
             </Image.RenderTransform>
@@ -70,37 +120,32 @@
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="140"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"  x:Name="DataRow"/>
                 <RowDefinition Height="0" x:Name="BottomRow"/>
             </Grid.RowDefinitions>
 
             <Grid x:Name="titlePanel" Grid.ColumnSpan="2" Margin="30,0,0,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <ProgressRing Grid.Column="1" Margin="30,30,30,40"
-                              Width="40" Height="40" VerticalAlignment="Bottom" HorizontalAlignment="Right" IsActive="{Binding IsBusy}"
-                              Foreground="#991e4c67"
-                              />
-
                 <TextBlock x:Name="pageTitle" 
-                           Text="{Binding Location}" 
-                           Style="{StaticResource PageHeaderTextStyle}" 
-                           Foreground="#FF40A1D9"/>
+                        Text="{Binding Location}" Foreground="#991e4c67"
+                        Style="{StaticResource PageHeaderTextStyle}" 
+                            />
             </Grid>
+
+            <ProgressBar Grid.Row="1" Grid.ColumnSpan="2"
+                         x:Name="ProgressBar"
+                         IsIndeterminate="{Binding IsBusy}" />
 
             <Grid x:Name="DataView"
                   Grid.Column="0"
-                  Grid.Row="1"
+                  Grid.Row="2"
                   Margin="30">
                 <Grid.ChildrenTransitions>
                     <TransitionCollection>
                         <EntranceThemeTransition/>
                     </TransitionCollection>
                 </Grid.ChildrenTransitions>
-                
+
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition x:Name="DataItemView" />
                     <ColumnDefinition />
@@ -158,7 +203,7 @@
 
             <Grid x:Name="GraphView"
                   Grid.Column="1"
-                  Grid.Row="1"
+                  Grid.Row="2"
                   Margin="30"
                   Background="Black"
                   Tapped="OnGraphViewTapped"
@@ -286,6 +331,9 @@
 
                 <VisualState x:Name="Snapped">
                     <Storyboard Duration="0:0:0.150">
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ProgressBar" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Visible"/>
+                        </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PrimaryColumn" Storyboard.TargetProperty="Width">
                             <DiscreteObjectKeyFrame KeyTime="0:0:0.150"  Value="320"/>
                         </ObjectAnimationUsingKeyFrames>
@@ -311,10 +359,10 @@
                             <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="0"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="GraphView" Storyboard.TargetProperty="(Grid.Row)">
-                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="2"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="3"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="pageRoot" Storyboard.TargetProperty="MaxHeight">
-                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="800"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="600"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="DataView" Storyboard.TargetProperty="Margin">
                             <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="30,0,30,30"/>
@@ -328,6 +376,9 @@
 
                 <VisualState x:Name="FullScreenPortrait">
                     <Storyboard Duration="0:0:0.150">
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ProgressBar" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Visible"/>
+                        </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PrimaryColumn" Storyboard.TargetProperty="Width">
                             <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="*"/>
                         </ObjectAnimationUsingKeyFrames>
@@ -344,7 +395,7 @@
                             <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="0"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="GraphView" Storyboard.TargetProperty="(Grid.Row)">
-                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="2" />
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="3" />
                         </ObjectAnimationUsingKeyFrames>
                     </Storyboard>
                 </VisualState>

@@ -155,5 +155,10 @@ namespace Drash
 
             swipeDisplayed = !swipeDisplayed;
         }
+
+        private void Button_Tapped_1(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
+        {
+            Appbar.IsOpen = false;
+        }
     }
 }
