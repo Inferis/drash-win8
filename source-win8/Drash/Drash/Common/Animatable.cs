@@ -65,8 +65,6 @@ namespace Drash.Common
 
         private static void Animate(object oldValue, object newValue, FrameworkElement target, Action<DependencyObject> action)
         {
-            Debug.WriteLine("{3}: {2} = {0} -> {1}", oldValue, newValue, target == null ? "?" : target.Name, Mode);
-
             if (Equals(oldValue, newValue) && Mode != AnimatableMode.Forced)
                 return;
 

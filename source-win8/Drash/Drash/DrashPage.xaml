@@ -17,6 +17,7 @@
 
         <common:PercentageConverter x:Key="EightyPercentConverter" Percentage="80" />
         <common:DrashStateToVisibilityConverter x:Key="DrashStateGoodConverter" VisibleForState="Good" />
+        <common:DrashStateToVisibilityConverter x:Key="DrashStateStartingConverter" VisibleForState="Starting" />
         <common:DrashStateToVisibilityConverter x:Key="DrashStateFindingLocationConverter" VisibleForState="FindingLocation" />
         <common:DrashStateToVisibilityConverter x:Key="DrashStateNoLocationConverter" VisibleForState="NoLocation" />
         <common:DrashStateToVisibilityConverter x:Key="DrashStateNoNetworkConverter" VisibleForState="NoNetwork" />
@@ -57,7 +58,13 @@
             </TransitionCollection>
         </Grid.ChildrenTransitions>
 
-        <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding State, Converter={StaticResource DrashStateFindingLocationConverter}}" x:Name="FindingLocation">
+        <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding State, Converter={StaticResource DrashStateFindingLocationConverter}}" x:Name="FindingLocationError">
+            <Grid.Transitions>
+                <TransitionCollection>
+                    <EntranceThemeTransition/>
+                </TransitionCollection>
+            </Grid.Transitions>
+            
             <Image Stretch="None" x:Name="NoLocationImage" Source="ms-appx:/Assets/nolocation.png" RenderTransformOrigin="0.5,0.5">
 
                 <Image.RenderTransform>
@@ -90,8 +97,42 @@
             <ProgressRing Width="300" Height="300" IsActive="true" Foreground="#ffeeeeee"  />
         </Grid>
 
-        <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding State, Converter={StaticResource DrashStateNoLocationConverter}}" x:Name="NoLocationError">
+        <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding State, Converter={StaticResource DrashStateNoLocationConverter}}"
+              x:Name="NoLocationError"
+              Tapped="NoLocationError_OnTapped">
+            <Grid.Transitions>
+                <TransitionCollection>
+                    <EntranceThemeTransition/>
+                </TransitionCollection>
+            </Grid.Transitions>
+            
             <Image Stretch="None" Source="ms-appx:/Assets/nolocation.png" RenderTransformOrigin="0.5,0.5">
+                <Image.RenderTransform>
+                    <CompositeTransform />
+                </Image.RenderTransform>
+            </Image>
+
+            <StackPanel>
+                <TextBlock Margin="0,250,0,0" Text="Location disabled." 
+                       Foreground="#333333"
+                       FontSize="30" FontFamily="Segoe UI Light" />
+                <TextBlock 
+                       Foreground="#666666"
+                       FontSize="20" FontFamily="Segoe UI Light">
+                    <Run Text="Enable location (Settings -> Permissions)," />
+                    <Run Text="then tap the icon to restart rain detection." />
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding State, Converter={StaticResource DrashStateStartingConverter}}">
+            <Grid.Transitions>
+                <TransitionCollection>
+                    <EntranceThemeTransition/>
+                </TransitionCollection>
+            </Grid.Transitions>
+
+            <Image Stretch="None" Source="ms-appx:/Assets/SplashScreen.png" RenderTransformOrigin="0.5,0.5">
                 <Image.RenderTransform>
                     <CompositeTransform />
                 </Image.RenderTransform>
@@ -110,7 +151,9 @@
             </Image.RenderTransform>
         </Image>
 
-        <Grid x:Name="pageRoot" Visibility="{Binding State, Converter={StaticResource DrashStateGoodConverter}}" Style="{StaticResource LayoutRootStyle}"  RenderTransformOrigin="0.5,1" Margin="0,0,0,40" Background="{StaticResource AppBarItemBackgroundThemeBrush}">
+        <Grid x:Name="pageRoot" Visibility="{Binding State, Converter={StaticResource DrashStateGoodConverter}}" Style="{StaticResource LayoutRootStyle}"  
+              RenderTransformOrigin="0.5,1" 
+              Margin="90,0,0,30" Background="{StaticResource AppBarItemBackgroundThemeBrush}">
             <Grid.RenderTransform>
                 <CompositeTransform />
             </Grid.RenderTransform>
@@ -204,7 +247,7 @@
             <Grid x:Name="GraphView"
                   Grid.Column="1"
                   Grid.Row="2"
-                  Margin="30"
+                  Margin="50,30,60,30"
                   Background="Black"
                   Tapped="OnGraphViewTapped"
                   >
@@ -230,8 +273,9 @@
                        UseLayoutRounding="True"
                            />
                 </StackPanel>
-                <Image Width="640" Height="240" 
-                       Stretch="None" x:Name="SwipeHelp" Source="ms-appx:/Assets/swipe.png" 
+                <Image MaxWidth="640" MaxHeight="240" 
+                       HorizontalAlignment="Stretch"
+                       Stretch="Uniform"  x:Name="SwipeHelp" Source="ms-appx:/Assets/swipe.png" 
                        Opacity="0" RenderTransformOrigin="0.5,0.5">
                     <Image.RenderTransform>
                         <CompositeTransform />
@@ -242,6 +286,7 @@
         </Grid>
 
         <VisualStateManager.VisualStateGroups>
+            <!--
             <VisualStateGroup x:Name="LogicalViewStates">
                 <VisualState x:Name="Good">
                     <Storyboard Duration="0:0:0.300">
@@ -298,6 +343,33 @@
                         <DoubleAnimation Duration="0:0:0.150" To="0" Storyboard.TargetName="pageRoot" Storyboard.TargetProperty="Opacity" />
                         <DoubleAnimation Duration="0:0:0.150" To="0" Storyboard.TargetName="NoNetworkError" Storyboard.TargetProperty="Opacity" />
                         <DoubleAnimation Duration="0:0:0.150" To="1" Storyboard.TargetName="NoLocationError" Storyboard.TargetProperty="Opacity" />
+                        <DoubleAnimation Duration="0:0:0.150" To="1" Storyboard.TargetName="NoLocationError" Storyboard.TargetProperty="Opacity" />
+                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NoLocationError" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleX)">
+                            <DiscreteDoubleKeyFrame KeyTime="0" Value="0.9"/>
+                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.150" Value="0.9"/>
+                            <EasingDoubleKeyFrame KeyTime="0:0:0.300" Value="1">
+                                <EasingDoubleKeyFrame.EasingFunction>
+                                    <ElasticEase EasingMode="EaseOut" Oscillations="3" />
+                                </EasingDoubleKeyFrame.EasingFunction>
+                            </EasingDoubleKeyFrame>
+                        </DoubleAnimationUsingKeyFrames>
+                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NoLocationError" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleY)">
+                            <DiscreteDoubleKeyFrame KeyTime="0" Value="0.9"/>
+                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.150" Value="0.9"/>
+                            <EasingDoubleKeyFrame KeyTime="0:0:0.300" Value="1">
+                                <EasingDoubleKeyFrame.EasingFunction>
+                                    <ElasticEase EasingMode="EaseOut" Oscillations="3" />
+                                </EasingDoubleKeyFrame.EasingFunction>
+                            </EasingDoubleKeyFrame>
+                        </DoubleAnimationUsingKeyFrames>
+                    </Storyboard>
+                </VisualState>
+
+                <VisualState x:Name="FindingLocation">
+                    <Storyboard Duration="0:0:0.300">
+                        <DoubleAnimation Duration="0:0:0.150" To="0" Storyboard.TargetName="pageRoot" Storyboard.TargetProperty="Opacity" />
+                        <DoubleAnimation Duration="0:0:0.150" To="0" Storyboard.TargetName="NoNetworkError" Storyboard.TargetProperty="Opacity" />
+                        <DoubleAnimation Duration="0:0:0.150" To="1" Storyboard.TargetName="NoLocationError" Storyboard.TargetProperty="Opacity" />
                         <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NoLocationError" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleX)">
                             <DiscreteDoubleKeyFrame KeyTime="0" Value="0.9"/>
                             <DiscreteDoubleKeyFrame KeyTime="0:0:0.150" Value="0.9"/>
@@ -320,6 +392,7 @@
                 </VisualState>
 
             </VisualStateGroup>
+            -->
 
             <VisualStateGroup x:Name="ApplicationViewStates">
                 <VisualState x:Name="FullScreenLandscape">
@@ -363,6 +436,9 @@
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="pageRoot" Storyboard.TargetProperty="MaxHeight">
                             <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="600"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="pageRoot" Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="0,0,0,30"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="DataView" Storyboard.TargetProperty="Margin">
                             <DiscreteObjectKeyFrame KeyTime="0:0:0.150" Value="30,0,30,30"/>

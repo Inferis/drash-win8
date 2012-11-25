@@ -41,7 +41,6 @@ namespace Drash.Models
         private Path graphView;
         private FrameworkElement graphContainer;
         private string entriesDescription;
-        private bool forced;
 
         public LayoutAwarePage View
         {
@@ -129,7 +128,7 @@ namespace Drash.Models
 
         public DrashState State
         {
-            get { return Model != null ? Model.State : DrashState.NoLocation; }
+            get { return Model != null ? Model.State : DrashState.Starting; }
         }
 
         #endregion
@@ -169,6 +168,14 @@ namespace Drash.Models
         {
             RefreshCommand = new ActionCommand(FetchRain);
 
+            RegisterLiveTile();
+        }
+
+        private void RegisterLiveTile()
+        {
+            var polledUri = new Uri("http://dra.sh/api/v1/tile.xml?zipcode=98052");
+            var recurrence = PeriodicUpdateRecurrence.HalfHour;
+            TileUpdateManager.CreateTileUpdaterForApplication().StartPeriodicUpdate(polledUri, recurrence);
         }
 
         public ViewModel(Model model)
@@ -191,32 +198,34 @@ namespace Drash.Models
 
         private void InitializeGeolocator()
         {
+            GoToState(DrashState.FindingLocation);
             geolocator = new Geolocator() { MovementThreshold = 500, DesiredAccuracy = PositionAccuracy.High };
             geolocator.PositionChanged += (s, a) => {
-                Debug.WriteLine("Position changed");
                 if (Model.Location != null && Model.Location.GetDistanceTo(a.Position.Coordinate) < 20)
                     return;
                 UpdateLocation(a.Position);
             };
             geolocator.StatusChanged += async (o, args) => {
-                Debug.WriteLine("status changed " + args.Status);
+                if (args.Status == PositionStatus.Disabled || args.Status == PositionStatus.NotAvailable || args.Status == PositionStatus.NoData) {
+                    noLocationData = true;
+                    UpdateLocation(null);
+                    geolocator = null;
+                    return;
+                }
+
                 noLocationData = false;
                 if (args.Status == PositionStatus.Ready) {
                     try {
-                        Debug.WriteLine("getting pos");
                         var pos = await geolocator.GetGeopositionAsync(TimeSpan.FromMinutes(30), TimeSpan.FromSeconds(5));
-                        Debug.WriteLine("got pos after status " + args.Status);
                         UpdateLocation(pos);
                     }
                     catch (Exception) {
                         Debug.WriteLine("status Failed");
                     }
                 }
-                else if (args.Status == PositionStatus.Disabled || args.Status == PositionStatus.NotAvailable || args.Status == PositionStatus.NoData) {
-                    noLocationData = true;
-                    UpdateLocation(null);
+                else {
+                    UpdateState();
                 }
-
             };
         }
 
@@ -225,6 +234,7 @@ namespace Drash.Models
             if (newLocation == null || newLocation.Coordinate == null) {
                 Model.LocationName = "";
                 Model.GoodLocationName = false;
+                Model.Location = null;
                 UpdateState();
                 return false;
             }
@@ -524,6 +534,12 @@ namespace Drash.Models
                 await Task.Delay(250);
                 Animatable.Mode = AnimatableMode.Enabled;
             }
+        }
+
+        public void RestartLocation()
+        {
+            if (geolocator == null)
+                InitializeGeolocator();
         }
     }
 

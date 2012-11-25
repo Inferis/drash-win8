@@ -7,6 +7,7 @@ using Windows.Devices.Input;
 using Windows.Foundation;
 using Windows.UI.Input;
 using Windows.UI.Xaml;
+using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Navigation;
 
 namespace Drash
@@ -159,6 +160,11 @@ namespace Drash
         private void Button_Tapped_1(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
             Appbar.IsOpen = false;
+        }
+
+        private void NoLocationError_OnTapped(object sender, TappedRoutedEventArgs e)
+        {
+            ((ViewModel) DataContext).RestartLocation();
         }
     }
 }
