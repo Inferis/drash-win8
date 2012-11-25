@@ -15,9 +15,10 @@
   </Resources>
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="Drash.App">
-      <VisualElements DisplayName="Drash" Logo="Assets\Logo.png" SmallLogo="Assets\SmallLogo.png" Description="Drash" ForegroundText="light" BackgroundColor="#464646">
-        <DefaultTile ShowName="allLogos" />
-        <SplashScreen Image="Assets\SplashScreen.png" />
+      <VisualElements DisplayName="Drash" Logo="Assets\Logo.png" SmallLogo="Assets\SmallLogo.png" Description="Drash" ForegroundText="light" BackgroundColor="#000000">
+        <LockScreen Notification="badge" BadgeLogo="Assets\Badge.png" />
+        <DefaultTile ShowName="allLogos" ShortName="Drash" />
+        <SplashScreen Image="Assets\SplashScreen.png" BackgroundColor="#ffffff" />
         <InitialRotationPreference>
           <Rotation Preference="portrait" />
           <Rotation Preference="landscape" />

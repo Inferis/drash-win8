@@ -108,6 +108,7 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="BackgroundTask.cs" />
     <Compile Include="Common\BindableBase.cs" />
     <Compile Include="Common\Animatable.cs" />
     <Compile Include="Common\BooleanNegationConverter.cs" />
@@ -154,6 +155,7 @@
     <None Include="Drash_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\Badge.png" />
     <Content Include="Assets\dial105.png" />
     <Content Include="Assets\dial120.png" />
     <Content Include="Assets\dial15.png" />
@@ -183,6 +185,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="Common\CustomStyles.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Page>
     <Page Include="Common\StandardStyles.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
