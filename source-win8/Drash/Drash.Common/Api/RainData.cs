@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Drash.Models.Api
+namespace Drash.Common.Api
 {
     public class RainData
     {
@@ -78,7 +78,7 @@ namespace Drash.Models.Api
                 var points = lines.Select(RainPoint.Parse).SkipWhile(p => p.Stamp.AddMinutes(5) < DateTime.Now).ToList();
 
                 var last = points.LastOrDefault() ?? new RainPoint(DateTime.Now, 0);
-                points = points.Concat(Enumerable.Range(0, 24 - points.Count).Select(x => last)).ToList();
+                points = points.Concat(Enumerable.Range(0, Math.Max(25 - points.Count, 0)).Select(x => last)).ToList();
 
                 return new RainData(points.ToList());
             });

@@ -1,4 +1,4 @@
-namespace Drash
+namespace Drash.Common
 {
     public enum DrashState
     {

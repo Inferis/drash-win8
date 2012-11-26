@@ -1,7 +1,7 @@
 using System;
 using System.Globalization;
 
-namespace Drash.Models.Api
+namespace Drash.Common.Api
 {
     public class RainPoint
     {

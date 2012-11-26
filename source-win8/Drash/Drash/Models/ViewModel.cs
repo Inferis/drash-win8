@@ -8,12 +8,11 @@ using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Drash.Common;
-using Drash.Models.Api;
+using Drash.Common.Api;
 using Windows.Devices.Geolocation;
 using Windows.Foundation;
 using Windows.UI;
 using Windows.UI.Core;
-using Windows.UI.Notifications;
 using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Media;
@@ -167,15 +166,10 @@ namespace Drash.Models
         public ViewModel()
         {
             RefreshCommand = new ActionCommand(FetchRain);
-
-            RegisterLiveTile();
         }
 
         private void RegisterLiveTile()
         {
-            var polledUri = new Uri("http://dra.sh/api/v1/tile.xml?zipcode=98052");
-            var recurrence = PeriodicUpdateRecurrence.HalfHour;
-            TileUpdateManager.CreateTileUpdaterForApplication().StartPeriodicUpdate(polledUri, recurrence);
         }
 
         public ViewModel(Model model)
@@ -300,6 +294,9 @@ namespace Drash.Models
                     var result = await wc.GetAsync(uri);
                     if (result.IsSuccessStatusCode) {
                         Model.Rain = await RainData.TryParseAsync(await result.Content.ReadAsStringAsync());
+                        if (Model.Rain != null) {
+                            DrashTile.Update(Model.Rain.ChanceForEntries(6), Model.LocationName);
+                        }
                     }
                     Model.RainWasUpdated = true;
                     firstFetch = false;

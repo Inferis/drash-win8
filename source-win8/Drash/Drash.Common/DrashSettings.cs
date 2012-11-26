@@ -1,6 +1,6 @@
 using System;
 
-namespace Drash
+namespace Drash.Common
 {
     internal class DrashSettings
     {

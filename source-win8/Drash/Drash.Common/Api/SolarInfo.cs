@@ -2,7 +2,7 @@
 
 // originally from here: https://gist.github.com/767532, but adapted
 
-namespace Drash.Models.Api
+namespace Drash.Common.Api
 {
     public class SolarInfo
     {

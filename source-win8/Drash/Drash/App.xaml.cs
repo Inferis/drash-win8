@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Linq;
 using Drash.Models;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
+using Windows.ApplicationModel.Background;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -66,6 +68,28 @@ namespace Drash
             }
             // Ensure the current window is active
             Window.Current.Activate();
+
+            RegisterBackgroundTask();
+        }
+
+        private void RegisterBackgroundTask()
+        {
+            var old = BackgroundTaskRegistration.AllTasks.Values.FirstOrDefault(x => x.Name == "drash_background");
+            if (old != null)
+                old.Unregister(true);
+
+            var registered = BackgroundTaskRegistration.AllTasks.Values.Any(x => x.Name == "Drash.Tasks.BackgroundTask");
+            if (registered)
+                return;
+
+            var builder = new BackgroundTaskBuilder {
+                Name = "Drash.Tasks.BackgroundTask",
+                TaskEntryPoint = "Drash.Tasks.BackgroundTask"
+            };
+            builder.SetTrigger(new TimeTrigger(15, false));
+            builder.AddCondition(new SystemCondition(SystemConditionType.InternetAvailable));
+            
+            builder.Register();
         }
 
         /// <summary>

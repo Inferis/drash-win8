@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
-using Drash.Models.Api;
+using Drash.Common;
+using Drash.Common.Api;
 using Windows.UI.Xaml.Media.Imaging;
 
 namespace Drash.Models

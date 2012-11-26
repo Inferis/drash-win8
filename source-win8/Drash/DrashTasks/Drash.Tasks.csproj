@@ -4,19 +4,18 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{45CD7A5E-EEA4-4809-863C-223748FE6382}</ProjectGuid>
-    <OutputType>AppContainerExe</OutputType>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{3938717C-8193-4EA7-A416-F3E663780CBD}</ProjectGuid>
+    <OutputType>winmdobj</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Drash</RootNamespace>
-    <AssemblyName>Drash</AssemblyName>
+    <RootNamespace>Drash.Tasks</RootNamespace>
+    <AssemblyName>Drash.Tasks</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{BC8A1FFA-BEE3-4634-8014-F334798102B3};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <PackageCertificateKeyFile>Drash_TemporaryKey.pfx</PackageCertificateKeyFile>
-    <ExpressionBlendVersion>5.0.30709.0</ExpressionBlendVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -26,7 +25,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -102,110 +100,20 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
-    <WCFMetadata Include="Service References\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="App.xaml.cs">
-      <DependentUpon>App.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Common\BindableBase.cs" />
-    <Compile Include="Common\Animatable.cs" />
-    <Compile Include="Common\BooleanNegationConverter.cs" />
-    <Compile Include="Common\BooleanToVisibilityConverter.cs" />
-    <Compile Include="Common\DrashStateToVisibilityConverter.cs" />
-    <Compile Include="Common\PercentageConverter.cs" />
-    <Compile Include="Common\LayoutAwarePage.cs" />
-    <Compile Include="Common\RichTextColumns.cs" />
-    <Compile Include="Common\SuspensionManager.cs" />
-    <Compile Include="DelayedAction.cs" />
-    <Compile Include="Extensions\ExpressionExtensions.cs" />
-    <Compile Include="Models\ActionCommand.cs" />
-    <Compile Include="Models\DesignTimeViewModel.cs" />
-    <Compile Include="DrashPage.xaml.cs">
-      <DependentUpon>DrashPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Extensions\FadeExtensions.cs" />
-    <Compile Include="Extensions\GeocoordinateExtensions.cs" />
-    <Compile Include="MessageBox.cs" />
-    <Compile Include="Models\Model.cs" />
-    <Compile Include="NotifyPropertyChangedBase.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SplitPage1.xaml.cs">
-      <DependentUpon>SplitPage1.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Extensions\StoryBoardExtensions.cs" />
-    <Compile Include="Models\ViewModel.cs" />
-    <Compile Include="StringFormatConverter.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <AppxManifest Include="Package.appxmanifest">
-      <SubType>Designer</SubType>
-    </AppxManifest>
-    <None Include="Common\ReadMe.txt" />
-    <None Include="Drash_TemporaryKey.pfx" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Assets\Badge.png" />
-    <Content Include="Assets\dial105.png" />
-    <Content Include="Assets\dial120.png" />
-    <Content Include="Assets\dial15.png" />
-    <Content Include="Assets\dial30.png" />
-    <Content Include="Assets\dial45.png" />
-    <Content Include="Assets\dial60.png" />
-    <Content Include="Assets\dial75.png" />
-    <Content Include="Assets\dial90.png" />
-    <Content Include="Assets\intensity0d.png" />
-    <Content Include="Assets\intensity0n.png" />
-    <Content Include="Assets\Logo.png" />
-    <Content Include="Assets\SmallLogo.png" />
-    <Content Include="Assets\SplashScreen.png" />
-    <Content Include="Assets\StoreLogo.png" />
-    <Content Include="Assets\intensity0.png" />
-    <Content Include="Assets\intensity1.png" />
-    <Content Include="Assets\intensity2.png" />
-    <Content Include="Assets\intensity3.png" />
-    <Content Include="Assets\intensity4.png" />
-    <Content Include="Assets\nolocation.png" />
-    <Content Include="Assets\nonetwork.png" />
-    <Content Include="Assets\Splash.jpg" />
-    <Content Include="Assets\swipe.png" />
-    <Content Include="Assets\WideLogo.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <ApplicationDefinition Include="App.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </ApplicationDefinition>
-    <Page Include="Common\CustomStyles.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Page>
-    <Page Include="Common\StandardStyles.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="DrashPage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="SplitPage1.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Drash.Common\Drash.Common.csproj">
       <Project>{62201bf1-e75c-4abb-9df1-b21335518a76}</Project>
       <Name>Drash.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DrashTasks\Drash.Tasks.csproj">
-      <Project>{3938717c-8193-4ea7-a416-f3e663780cbd}</Project>
-      <Name>Drash.Tasks</Name>
-    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BackgroundTask.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '11.0' ">
     <VisualStudioVersion>11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

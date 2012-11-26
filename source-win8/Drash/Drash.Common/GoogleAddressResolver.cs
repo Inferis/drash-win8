@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Windows.Devices.Geolocation;
 
-namespace Drash
+namespace Drash.Common
 {
     public class GoogleAddressResolver
     {
