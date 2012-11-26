@@ -5,6 +5,7 @@ using Drash.Common;
 using Drash.Models;
 using Windows.Devices.Input;
 using Windows.Foundation;
+using Windows.UI.ApplicationSettings;
 using Windows.UI.Input;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Input;
@@ -166,5 +167,8 @@ namespace Drash
         {
             ((ViewModel) DataContext).RestartLocation();
         }
+
+
+
     }
 }

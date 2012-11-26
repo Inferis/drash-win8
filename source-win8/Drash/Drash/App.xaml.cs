@@ -4,6 +4,8 @@ using Drash.Models;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.ApplicationModel.Background;
+using Windows.System;
+using Windows.UI.ApplicationSettings;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -70,6 +72,7 @@ namespace Drash
             Window.Current.Activate();
 
             RegisterBackgroundTask();
+            RegisterAppSettings();
         }
 
         private void RegisterBackgroundTask()
@@ -88,10 +91,18 @@ namespace Drash
             };
             builder.SetTrigger(new TimeTrigger(15, false));
             builder.AddCondition(new SystemCondition(SystemConditionType.InternetAvailable));
-            
+
             builder.Register();
         }
 
+        private void RegisterAppSettings()
+        {
+            SettingsPane.GetForCurrentView().CommandsRequested += (sender, args) => {
+                args.Request.ApplicationCommands.Add(new SettingsCommand("privacyPolicy", "Privacy Policy", command => {
+                    Launcher.LaunchUriAsync(new Uri("http://dra.sh/privacy-policy"));
+                }));
+            };
+        }
         /// <summary>
         /// Invoked when application execution is being suspended.  Application state is saved
         /// without knowing whether the application will be terminated or resumed with the contents
