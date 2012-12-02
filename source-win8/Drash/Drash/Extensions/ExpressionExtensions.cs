@@ -2,7 +2,7 @@
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace iPASoftware.iRAD.Basics.Extensions
+namespace Drash.Extensions
 {
     public static class ExpressionExtensions
     {
@@ -151,3 +151,4 @@ namespace iPASoftware.iRAD.Basics.Extensions
         }
     }
 }
+
