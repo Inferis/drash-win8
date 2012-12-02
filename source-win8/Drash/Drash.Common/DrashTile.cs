@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Windows.Data.Xml.Dom;
 using Windows.UI.Notifications;
 
 namespace Drash.Common
@@ -36,6 +37,16 @@ namespace Drash.Common
             }
             catch (Exception) {
             }
+
+            //try {
+            //    var xml = BadgeUpdateManager.GetTemplateContent(BadgeTemplateType.BadgeNumber);
+            //    var badge = (XmlElement) xml.SelectSingleNode("/badge");
+            //    badge.SetAttribute("value", string.Format("{0}", chance));
+            //    var notification = new BadgeNotification(xml);
+            //    BadgeUpdateManager.CreateBadgeUpdaterForApplication().Update(notification);
+            //}
+            //catch (Exception) {
+            //}
         }
     }
 }
