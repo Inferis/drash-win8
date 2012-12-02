@@ -12,8 +12,9 @@
     <DefaultLanguage>en-US</DefaultLanguage>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{BC8A1FFA-BEE3-4634-8014-F334798102B3};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <PackageCertificateKeyFile>Drash_TemporaryKey.pfx</PackageCertificateKeyFile>
+    <PackageCertificateKeyFile>Drash_StoreKey.pfx</PackageCertificateKeyFile>
     <ExpressionBlendVersion>5.0.30709.0</ExpressionBlendVersion>
+    <PackageCertificateThumbprint>4F107069FB9766A2905817FFBF5B00FC24EFE1B2</PackageCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -149,6 +150,7 @@
       <SubType>Designer</SubType>
     </AppxManifest>
     <None Include="Common\ReadMe.txt" />
+    <None Include="Drash_StoreKey.pfx" />
     <None Include="Drash_TemporaryKey.pfx" />
     <None Include="packages.config" />
   </ItemGroup>
@@ -178,6 +180,7 @@
     <Content Include="Assets\Splash.jpg" />
     <Content Include="Assets\swipe.png" />
     <Content Include="Assets\WideLogo.png" />
+    <None Include="Package.StoreAssociation.xml" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
