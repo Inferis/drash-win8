@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Linq;
+using Callisto.Controls;
 using Drash.Models;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.ApplicationModel.Background;
 using Windows.System;
+using Windows.UI;
 using Windows.UI.ApplicationSettings;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Media;
 
 // The Blank Application template is documented at http://go.microsoft.com/fwlink/?LinkId=234227
 
@@ -77,10 +80,6 @@ namespace Drash
 
         private void RegisterBackgroundTask()
         {
-            var old = BackgroundTaskRegistration.AllTasks.Values.FirstOrDefault(x => x.Name == "drash_background");
-            if (old != null)
-                old.Unregister(true);
-
             var registered = BackgroundTaskRegistration.AllTasks.Values.Any(x => x.Name == "Drash.Tasks.BackgroundTask");
             if (registered)
                 return;
@@ -97,9 +96,33 @@ namespace Drash
 
         private void RegisterAppSettings()
         {
+            var drashBlue = new SolidColorBrush(Color.FromArgb(0xcc, 0x1e, 0x4c, 0x67));
             SettingsPane.GetForCurrentView().CommandsRequested += (sender, args) => {
+                args.Request.ApplicationCommands.Add(new SettingsCommand("about", "About Drash", command => {
+                    new SettingsFlyout {
+                        FlyoutWidth = SettingsFlyout.SettingsFlyoutWidth.Narrow,
+                        Background = drashBlue,
+                        HeaderBrush = drashBlue,
+                        ContentForegroundBrush = new SolidColorBrush(Colors.White),
+                        ContentBackgroundBrush = drashBlue,
+                        HeaderText = "About Drash",
+                        Content = new AboutFlyout(),
+                        IsOpen = true
+                    };
+                }));
+
+                // privacy policy
                 args.Request.ApplicationCommands.Add(new SettingsCommand("privacyPolicy", "Privacy Policy", command => {
-                    Launcher.LaunchUriAsync(new Uri("http://dra.sh/privacy-policy"));
+                    new SettingsFlyout {
+                        FlyoutWidth = SettingsFlyout.SettingsFlyoutWidth.Narrow,
+                        Background = drashBlue,
+                        HeaderBrush = drashBlue,
+                        ContentForegroundBrush = new SolidColorBrush(Colors.White),
+                        ContentBackgroundBrush = drashBlue,
+                        HeaderText = "Privacy Policy",
+                        Content = new PrivacyPolicyFlyout(),
+                        IsOpen = true
+                    };
                 }));
             };
         }
