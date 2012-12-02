@@ -119,6 +119,7 @@
     <Compile Include="Common\SuspensionManager.cs" />
     <Compile Include="DelayedAction.cs" />
     <Compile Include="Extensions\ExpressionExtensions.cs" />
+    <Compile Include="Extensions\GeolocatorExtensions.cs" />
     <Compile Include="Models\ActionCommand.cs" />
     <Compile Include="Models\DesignTimeViewModel.cs" />
     <Compile Include="DrashPage.xaml.cs">

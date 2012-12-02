@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Drash.Common;
 using Drash.Common.Api;
+using Drash.Extensions;
 using Windows.Devices.Geolocation;
 using Windows.Foundation;
 using Windows.UI;
@@ -210,7 +211,7 @@ namespace Drash.Models
                 noLocationData = false;
                 if (args.Status == PositionStatus.Ready) {
                     try {
-                        var pos = await geolocator.GetGeopositionAsync(TimeSpan.FromMinutes(30), TimeSpan.FromSeconds(5));
+                        var pos = await geolocator.GetDrashGeopositionAsync();
                         UpdateLocation(pos);
                     }
                     catch (Exception) {
@@ -221,6 +222,9 @@ namespace Drash.Models
                     UpdateState();
                 }
             };
+
+            if (firstFetch)
+                geolocator.GetDrashGeopositionAsync();
         }
 
         private bool UpdateLocation(Geoposition newLocation)
@@ -268,7 +272,7 @@ namespace Drash.Models
             nextRainUpdate.Cancel();
             if (Model.Location == null) {
                 // no location, schedule new fetch
-                if (geolocator.LocationStatus != PositionStatus.Ready || !UpdateLocation(await geolocator.GetGeopositionAsync()))
+                if (geolocator.LocationStatus != PositionStatus.Ready || !UpdateLocation(await geolocator.GetDrashGeopositionAsync()))
                     nextRainUpdate.Run(FetchRain);
                 return;
             }
