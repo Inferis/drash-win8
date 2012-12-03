@@ -16,3 +16,4 @@ build.output
 # osx noise
 .DS_Store
 profile
+AppPackages
