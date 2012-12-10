@@ -228,7 +228,7 @@
                 </Image.Triggers>
             </Image>
 
-            <ProgressRing Width="400" Height="400" IsActive="true" Foreground="#ffeeeeee"  />
+            <ProgressRing Width="300" Height="300" IsActive="true" Foreground="#ffeeeeee"  />
         </Grid>
 
         <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding State, Converter={StaticResource DrashStateNoLocationConverter}}"
