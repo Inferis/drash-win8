@@ -75,7 +75,7 @@
                 <RowDefinition Height="0" x:Name="BottomRow"/>
             </Grid.RowDefinitions>
 
-            <Grid x:Name="titlePanel" Grid.ColumnSpan="2" Margin="20,0,0,0">
+            <Grid x:Name="titlePanel" Grid.ColumnSpan="2" Margin="0">
                 <TextBlock x:Name="pageTitle" 
                         Text="{Binding Location}" Foreground="#991e4c67"
                         Style="{StaticResource PageHeaderTextStyle}" 
@@ -89,7 +89,7 @@
             <Grid x:Name="DataView"
                   Grid.Column="0"
                   Grid.Row="2"
-                  Margin="30">
+                  Margin="0,30,30,30">
                 <Grid.ChildrenTransitions>
                     <TransitionCollection>
                         <EntranceThemeTransition/>
@@ -248,10 +248,10 @@
 
             <StackPanel>
                 <TextBlock Margin="0,250,0,0" Text="Location disabled." 
-                       Foreground="#333333"
+                       Foreground="#333333" TextAlignment="Center"
                        FontSize="30" FontFamily="Segoe UI Light" />
                 <TextBlock 
-                       Foreground="#666666"
+                       Foreground="#666666" TextAlignment="Center"
                        FontSize="20" FontFamily="Segoe UI Light">
                     <Run Text="Enable location (Settings -> Permissions)," />
                     <Run Text="then tap the icon to restart rain detection." />
@@ -304,6 +304,9 @@
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="titlePanel" Storyboard.TargetProperty="(Grid.ColumnSpan)">
                             <DiscreteObjectKeyFrame KeyTime="0" Value="1"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="titlePanel" Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="20,0,0,0"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PrimaryColumn" Storyboard.TargetProperty="Width">
                             <DiscreteObjectKeyFrame KeyTime="0:0:0"  Value="320"/>
