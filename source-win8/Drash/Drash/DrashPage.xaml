@@ -199,7 +199,7 @@
                 </TransitionCollection>
             </Grid.Transitions>
 
-            <Image Stretch="None" x:Name="NoLocationImage" Source="ms-appx:/Assets/nolocation.png" RenderTransformOrigin="0.5,0.5">
+            <Image Stretch="None" x:Name="NoLocationImage" Source="ms-appx:/Assets/searching.png" RenderTransformOrigin="0.5,0.5">
 
                 <Image.RenderTransform>
                     <CompositeTransform />
@@ -228,7 +228,7 @@
                 </Image.Triggers>
             </Image>
 
-            <ProgressRing Width="300" Height="300" IsActive="true" Foreground="#ffeeeeee"  />
+            <ProgressRing Width="400" Height="400" IsActive="true" Foreground="#ffeeeeee"  />
         </Grid>
 
         <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding State, Converter={StaticResource DrashStateNoLocationConverter}}"

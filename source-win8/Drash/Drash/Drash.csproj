@@ -169,6 +169,7 @@
     <Content Include="Assets\intensity0d.png" />
     <Content Include="Assets\intensity0n.png" />
     <Content Include="Assets\Logo.png" />
+    <Content Include="Assets\searching.png" />
     <Content Include="Assets\SmallLogo.png" />
     <Content Include="Assets\SplashScreen.png" />
     <Content Include="Assets\StoreLogo.png" />
