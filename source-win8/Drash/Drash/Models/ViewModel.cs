@@ -537,8 +537,9 @@ namespace Drash.Models
             }
         }
 
-        public void RestartLocation()
+        public async void RestartLocation()
         {
+            await Task.Delay(500);
             if (geolocator == null)
                 InitializeGeolocator();
         }
