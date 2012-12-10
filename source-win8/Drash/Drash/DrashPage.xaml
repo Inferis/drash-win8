@@ -120,7 +120,7 @@
                 <Grid Background="Black"
                       Grid.Column="0" Grid.Row="1"
                       MinHeight="100"
-                      Height="{Binding Width, RelativeSource={RelativeSource Self}}"
+                      common:SquaredSize.Tracked="Width"
                       Margin="0,5,5,0">
                     <TextBlock common:Animatable.Text="{Binding Precipitation}"
                                x:Name="Precipitation"
@@ -139,7 +139,7 @@
                       Grid.Column="1" Grid.Row="1"
                       Margin="5,5,0,0"
                       MinHeight="100"
-                      Height="{Binding Width, RelativeSource={RelativeSource Self}}"
+                      common:SquaredSize.Tracked="Width"
                       x:Name="IntensityView">
 
                     <Image common:Animatable.Source="{Binding IntensityImage}"
